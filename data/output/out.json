@@ -1,0 +1,1325 @@
+{
+    "estado": "OPTIMAL",
+    "mensaje": "Se encontró la solución óptima del horario.",
+    "estadisticas": {
+        "tiempo_segundos": 5.5359097,
+        "ramas_exploradas": 3380,
+        "conflictos": 0
+    },
+    "asignaciones": [
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_1",
+            "profesor_id": "PROF_11",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_2",
+            "profesor_id": "PROF_1",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_3",
+            "profesor_id": "PROF_10",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_4",
+            "profesor_id": "PROF_1",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 2,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_5",
+            "profesor_id": "PROF_1",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_6",
+            "profesor_id": "PROF_12",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_7",
+            "profesor_id": "PROF_13",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 3,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_9",
+            "profesor_id": "PROF_3",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_10",
+            "profesor_id": "PROF_16",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_11",
+            "profesor_id": "PROF_3",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_12",
+            "profesor_id": "PROF_4",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_15",
+            "profesor_id": "PROF_5",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_16",
+            "profesor_id": "PROF_20",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_17",
+            "profesor_id": "PROF_23",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_1",
+            "curso_id": "CUR_18",
+            "profesor_id": "PROF_8",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_1",
+            "profesor_id": "PROF_9",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_2",
+            "profesor_id": "PROF_9",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_3",
+            "profesor_id": "PROF_1",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_4",
+            "profesor_id": "PROF_10",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 2,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_5",
+            "profesor_id": "PROF_11",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_6",
+            "profesor_id": "PROF_2",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_7",
+            "profesor_id": "PROF_13",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_9",
+            "profesor_id": "PROF_14",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_10",
+            "profesor_id": "PROF_16",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_11",
+            "profesor_id": "PROF_15",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_12",
+            "profesor_id": "PROF_19",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_15",
+            "profesor_id": "PROF_18",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_16",
+            "profesor_id": "PROF_21",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_17",
+            "profesor_id": "PROF_23",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_2",
+            "curso_id": "CUR_18",
+            "profesor_id": "PROF_8",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_1",
+            "profesor_id": "PROF_11",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_2",
+            "profesor_id": "PROF_9",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_3",
+            "profesor_id": "PROF_10",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_4",
+            "profesor_id": "PROF_1",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_5",
+            "profesor_id": "PROF_1",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_6",
+            "profesor_id": "PROF_12",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_7",
+            "profesor_id": "PROF_13",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_9",
+            "profesor_id": "PROF_3",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_10",
+            "profesor_id": "PROF_15",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_11",
+            "profesor_id": "PROF_3",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_12",
+            "profesor_id": "PROF_4",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_15",
+            "profesor_id": "PROF_18",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_16",
+            "profesor_id": "PROF_20",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_17",
+            "profesor_id": "PROF_22",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_3",
+            "curso_id": "CUR_18",
+            "profesor_id": "PROF_25",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 5,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_1",
+            "profesor_id": "PROF_9",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_2",
+            "profesor_id": "PROF_1",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_3",
+            "profesor_id": "PROF_10",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_4",
+            "profesor_id": "PROF_1",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_5",
+            "profesor_id": "PROF_1",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_6",
+            "profesor_id": "PROF_12",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_7",
+            "profesor_id": "PROF_12",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_9",
+            "profesor_id": "PROF_14",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_10",
+            "profesor_id": "PROF_3",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_11",
+            "profesor_id": "PROF_15",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_12",
+            "profesor_id": "PROF_17",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_15",
+            "profesor_id": "PROF_5",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_16",
+            "profesor_id": "PROF_6",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_17",
+            "profesor_id": "PROF_22",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_4",
+            "curso_id": "CUR_18",
+            "profesor_id": "PROF_24",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 2,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_1",
+            "profesor_id": "PROF_9",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_2",
+            "profesor_id": "PROF_9",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_3",
+            "profesor_id": "PROF_1",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_4",
+            "profesor_id": "PROF_1",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_5",
+            "profesor_id": "PROF_1",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_6",
+            "profesor_id": "PROF_2",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_7",
+            "profesor_id": "PROF_12",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_9",
+            "profesor_id": "PROF_14",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_10",
+            "profesor_id": "PROF_3",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_11",
+            "profesor_id": "PROF_15",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_12",
+            "profesor_id": "PROF_4",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_15",
+            "profesor_id": "PROF_5",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_16",
+            "profesor_id": "PROF_20",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_17",
+            "profesor_id": "PROF_23",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_5",
+            "curso_id": "CUR_18",
+            "profesor_id": "PROF_25",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_1",
+            "profesor_id": "PROF_11",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_2",
+            "profesor_id": "PROF_9",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_3",
+            "profesor_id": "PROF_10",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_4",
+            "profesor_id": "PROF_10",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_5",
+            "profesor_id": "PROF_11",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_6",
+            "profesor_id": "PROF_12",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_7",
+            "profesor_id": "PROF_13",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_9",
+            "profesor_id": "PROF_3",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_10",
+            "profesor_id": "PROF_16",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_11",
+            "profesor_id": "PROF_15",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_12",
+            "profesor_id": "PROF_19",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_15",
+            "profesor_id": "PROF_5",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_16",
+            "profesor_id": "PROF_21",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_17",
+            "profesor_id": "PROF_22",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_6",
+            "curso_id": "CUR_18",
+            "profesor_id": "PROF_8",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_1",
+            "profesor_id": "PROF_11",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_3",
+            "profesor_id": "PROF_1",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_4",
+            "profesor_id": "PROF_1",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_5",
+            "profesor_id": "PROF_11",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_6",
+            "profesor_id": "PROF_2",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_7",
+            "profesor_id": "PROF_12",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 3,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_8",
+            "profesor_id": "PROF_16",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_9",
+            "profesor_id": "PROF_14",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_10",
+            "profesor_id": "PROF_3",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_11",
+            "profesor_id": "PROF_15",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_12",
+            "profesor_id": "PROF_4",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_13",
+            "profesor_id": "PROF_4",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_16",
+            "profesor_id": "PROF_6",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_17",
+            "profesor_id": "PROF_23",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_7",
+            "curso_id": "CUR_18",
+            "profesor_id": "PROF_8",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_1",
+            "profesor_id": "PROF_11",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_3",
+            "profesor_id": "PROF_10",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_4",
+            "profesor_id": "PROF_1",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_5",
+            "profesor_id": "PROF_1",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_6",
+            "profesor_id": "PROF_2",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_7",
+            "profesor_id": "PROF_12",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_8",
+            "profesor_id": "PROF_16",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_9",
+            "profesor_id": "PROF_14",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_10",
+            "profesor_id": "PROF_16",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_11",
+            "profesor_id": "PROF_15",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_12",
+            "profesor_id": "PROF_17",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_13",
+            "profesor_id": "PROF_4",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_16",
+            "profesor_id": "PROF_6",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_17",
+            "profesor_id": "PROF_7",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_8",
+            "curso_id": "CUR_18",
+            "profesor_id": "PROF_8",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_1",
+            "profesor_id": "PROF_9",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_3",
+            "profesor_id": "PROF_1",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_4",
+            "profesor_id": "PROF_1",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 3,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_5",
+            "profesor_id": "PROF_11",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_6",
+            "profesor_id": "PROF_2",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_7",
+            "profesor_id": "PROF_13",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_8",
+            "profesor_id": "PROF_16",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_9",
+            "profesor_id": "PROF_14",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_10",
+            "profesor_id": "PROF_16",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_11",
+            "profesor_id": "PROF_3",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_12",
+            "profesor_id": "PROF_19",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_13",
+            "profesor_id": "PROF_17",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_9",
+            "curso_id": "CUR_18",
+            "profesor_id": "PROF_8",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_1",
+            "profesor_id": "PROF_11",
+            "dia": "Martes",
+            "turno": "Tarde",
+            "slot_inicio": 1,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_3",
+            "profesor_id": "PROF_10",
+            "dia": "Miercoles",
+            "turno": "Mañana",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_4",
+            "profesor_id": "PROF_1",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 2,
+            "horas": 1
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_5",
+            "profesor_id": "PROF_11",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 3,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_6",
+            "profesor_id": "PROF_13",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_7",
+            "profesor_id": "PROF_2",
+            "dia": "Lunes",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_8",
+            "profesor_id": "PROF_14",
+            "dia": "Viernes",
+            "turno": "Tarde",
+            "slot_inicio": 4,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_9",
+            "profesor_id": "PROF_3",
+            "dia": "Jueves",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_10",
+            "profesor_id": "PROF_16",
+            "dia": "Miercoles",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_11",
+            "profesor_id": "PROF_15",
+            "dia": "Martes",
+            "turno": "Mañana",
+            "slot_inicio": 2,
+            "horas": 3
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_12",
+            "profesor_id": "PROF_4",
+            "dia": "Viernes",
+            "turno": "Mañana",
+            "slot_inicio": 3,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_13",
+            "profesor_id": "PROF_4",
+            "dia": "Lunes",
+            "turno": "Tarde",
+            "slot_inicio": 0,
+            "horas": 2
+        },
+        {
+            "seccion_id": "SEC_10",
+            "curso_id": "CUR_18",
+            "profesor_id": "PROF_25",
+            "dia": "Jueves",
+            "turno": "Mañana",
+            "slot_inicio": 1,
+            "horas": 1
+        }
+    ]
+}
