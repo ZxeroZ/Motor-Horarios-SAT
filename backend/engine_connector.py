@@ -1,5 +1,5 @@
 from sqlmodel import Session, select
-from backend.models import Sede, Dia, Area, Curso, Grado, Seccion, PlanEstudio, Profesor, ProfesorCurso
+from backend.models import Sedes, Dias, Areas, Cursos, Grado, Seccion, PlanEstudio, Profesores, ProfesorCurso
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
 from engine.solver import resolver_modelo
@@ -17,28 +17,28 @@ def build_json_from_db(session: Session) -> dict:
     }
     
     # Configuracion
-    sedes = session.exec(select(Sede)).all()
-    dias = session.exec(select(Dia).order_by(Dia.orden)).all()
+    sedes = session.exec(select(Sedes)).all()
+    dias = session.exec(select(Dias).order_by(Dias.orden)).all()
     
     nombres_dias = [d.nombre_dia for d in dias]
     datos["configuracion"] = {
         "sedes": [s.nombre_sede for s in sedes],
-        "dias": nombres_dias,
+        "dias": nombres_dias if nombres_dias else ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes"],
         "turnos": ["Mañana", "Tarde"],
         "slots_por_turno": 6
     }
     
     # Categorias (Áreas)
-    areas = session.exec(select(Area)).all()
+    areas = session.exec(select(Areas)).all()
     for a in areas:
         datos["categorias"].append({
             "id": f"CAT_{a.id_area}",
-            "nombre": a.nombre_area,
+            "nombre": a.nombre,
             "max_horas_dia": a.max_horas_dia
         })
         
     # Cursos
-    cursos = session.exec(select(Curso)).all()
+    cursos = session.exec(select(Cursos)).all()
     for c in cursos:
         datos["cursos"].append({
             "id": f"CUR_{c.id_curso}",
@@ -52,7 +52,7 @@ def build_json_from_db(session: Session) -> dict:
         planes = session.exec(select(PlanEstudio).where(PlanEstudio.id_grado == g.id_grado)).all()
         datos["grados"].append({
             "id": f"GRA_{g.id_grado}",
-            "nombre": g.nombre_grado or str(g.numero),
+            "nombre": str(g.numero),
             "cursos_requeridos": [
                 {
                     "curso_id": f"CUR_{p.id_curso}",
@@ -66,22 +66,22 @@ def build_json_from_db(session: Session) -> dict:
     for s in secciones:
         datos["secciones"].append({
             "id": f"SEC_{s.id_seccion}",
-            "nombre": f"{s.grado.numero}° {s.letra}",
+            "nombre": f"{s.grado.numero if s.grado else ''}° {s.nombre}".strip(),
             "grado": f"GRA_{s.id_grado}",
             "sede": s.sede.nombre_sede if s.sede else "Sede A",
-            "disponibilidad": {d: ["Mañana", "Tarde"] for d in nombres_dias}
+            "disponibilidad": {d: ["Mañana", "Tarde"] for d in datos["configuracion"]["dias"]}
         })
         
     # Profesores
-    profesores = session.exec(select(Profesor)).all()
+    profesores = session.exec(select(Profesores)).all()
     for p in profesores:
-        pcs = session.exec(select(ProfesorCurso).where(ProfesorCurso.id_profesor == p.id_profesor)).all()
+        pcs = session.exec(select(ProfesorCurso).where(ProfesorCurso.id_profesor == p.id_profesores)).all()
         datos["profesores"].append({
-            "id": f"PROF_{p.id_profesor}",
+            "id": f"PROF_{p.id_profesores}",
             "nombre": p.nombre_profesor,
             "cursos_habilitados": [f"CUR_{pc.id_curso}" for pc in pcs],
             "max_horas_dia": p.max_horas_dia,
-            "disponibilidad": {d: ["Mañana", "Tarde"] for d in nombres_dias}
+            "disponibilidad": {d: ["Mañana", "Tarde"] for d in datos["configuracion"]["dias"]}
         })
         
     return datos

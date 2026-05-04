@@ -2,7 +2,14 @@ import { useState, useMemo, useEffect } from 'react';
 import './index.css';
 
 function App() {
+  // --- Estado: Autenticación ---
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [loginError, setLoginError] = useState("");
+
   const [activeTab, setActiveTab] = useState("horarios");
+  const [activeAdminTab, setActiveAdminTab] = useState("materias"); // sub-tab
 
   // --- Estado: Horarios ---
   const [loading, setLoading] = useState(false);
@@ -10,54 +17,80 @@ function App() {
   const [error, setError] = useState(null);
   const [selectedSeccion, setSelectedSeccion] = useState("");
 
-  // --- Estado: Administración (CRUD) ---
+  // --- Estado: Data de BD ---
+  const [colegios, setColegios] = useState([]);
+  const [sedes, setSedes] = useState([]);
+  const [grados, setGrados] = useState([]);
   const [areas, setAreas] = useState([]);
   const [cursos, setCursos] = useState([]);
-  const [formArea, setFormArea] = useState({ nombre_area: "", max_horas_dia: 4 });
+  const [profesores, setProfesores] = useState([]);
+  const [secciones, setSecciones] = useState([]);
+  const [planes, setPlanes] = useState([]);
+  const [profesorCursos, setProfesorCursos] = useState([]);
+
+  // --- Estado: Formularios ---
+  const [formSede, setFormSede] = useState({ nombre_sede: "", id_colegio: "" });
+  const [formGrado, setFormGrado] = useState({ numero: "" });
+  const [formArea, setFormArea] = useState({ nombre: "", max_horas_dia: 4 });
   const [formCurso, setFormCurso] = useState({ nombre_curso: "", id_area: "" });
+  const [formProf, setFormProf] = useState({ nombre_profesor: "", id_sede: "", max_horas_dia: 6 });
+  const [formProfCurso, setFormProfCurso] = useState({ id_profesor: "", id_curso: "" });
+  const [formSeccion, setFormSeccion] = useState({ nombre: "", id_grado: "", id_sede: "" });
+  const [formPlan, setFormPlan] = useState({ id_grado: "", id_curso: "", horas_semanales: 1 });
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError("");
+    try {
+      const res = await fetch("http://localhost:8000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginForm)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIsAuthenticated(true);
+        setUser(data.user);
+      } else {
+        setLoginError(data.detail || "Error al iniciar sesión");
+      }
+    } catch (err) {
+      setLoginError("Error de conexión con el servidor");
+    }
+  };
 
   const loadAdminData = async () => {
     try {
-      const resA = await fetch('http://localhost:8000/api/areas');
-      const dataA = await resA.json();
-      setAreas(dataA);
-
-      const resC = await fetch('http://localhost:8000/api/cursos');
-      const dataC = await resC.json();
-      setCursos(dataC);
+      const endpoints = ["colegio", "sedes", "grados", "areas", "cursos", "profesores", "secciones", "planes", "profesor-curso"];
+      const responses = await Promise.all(endpoints.map(ep => fetch(`http://localhost:8000/api/${ep}`)));
+      const data = await Promise.all(responses.map(r => r.json()));
+      
+      setColegios(data[0]);
+      setSedes(data[1]);
+      setGrados(data[2]);
+      setAreas(data[3]);
+      setCursos(data[4]);
+      setProfesores(data[5]);
+      setSecciones(data[6]);
+      setPlanes(data[7]);
+      setProfesorCursos(data[8]);
     } catch (e) {
       console.error("Error al cargar data de admin", e);
     }
   };
 
   useEffect(() => {
-    if (activeTab === "admin") loadAdminData();
-  }, [activeTab]);
+    if (isAuthenticated && activeTab === "admin") loadAdminData();
+  }, [activeTab, isAuthenticated]);
 
-  const handleCreateArea = async (e) => {
-    e.preventDefault();
-    if (!formArea.nombre_area) return;
-    await fetch('http://localhost:8000/api/areas', {
+  // --- Manejadores de Creación ---
+  const handleCreate = async (endpoint, payload, resetFn) => {
+    await fetch(`http://localhost:8000/api/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formArea)
+      body: JSON.stringify(payload)
     });
-    setFormArea({ nombre_area: "", max_horas_dia: 4 });
-    loadAdminData();
-  };
-
-  const handleCreateCurso = async (e) => {
-    e.preventDefault();
-    if (!formCurso.nombre_curso || !formCurso.id_area) return;
-    await fetch('http://localhost:8000/api/cursos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nombre_curso: formCurso.nombre_curso,
-        id_area: parseInt(formCurso.id_area)
-      })
-    });
-    setFormCurso({ ...formCurso, nombre_curso: "" });
+    resetFn();
     loadAdminData();
   };
 
@@ -82,15 +115,7 @@ function App() {
     setLoading(false);
   };
 
-  const handleDownload = () => {
-    const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(JSON.stringify(result, null, 2))}`;
-    const link = document.createElement("a");
-    link.href = jsonString;
-    link.download = "horarios_optimizados.json";
-    link.click();
-  };
-
-  const secciones = useMemo(() => {
+  const seccionesOptions = useMemo(() => {
     if (!result?.asignaciones) return [];
     return Array.from(new Set(result.asignaciones.map(a => a.seccion_id))).sort();
   }, [result]);
@@ -126,123 +151,97 @@ function App() {
     return { mat, exactDias, MAT_SLOTS };
   }, [result, selectedSeccion]);
 
+  if (!isAuthenticated) {
+    return (
+      <div className="login-container">
+        <div className="login-card">
+          <h2>Timetable Engine</h2>
+          <p>Ingresa tus credenciales para acceder</p>
+          <form className="login-form" onSubmit={handleLogin}>
+            <input type="email" placeholder="Correo electrónico" value={loginForm.email} onChange={e => setLoginForm({...loginForm, email: e.target.value})} required />
+            <input type="password" placeholder="Contraseña" value={loginForm.password} onChange={e => setLoginForm({...loginForm, password: e.target.value})} required />
+            {loginError && <div style={{color: 'var(--danger)', fontSize: '0.9rem'}}>{loginError}</div>}
+            <button type="submit" className="btn-primary">Iniciar Sesión</button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
       <header className="hero">
-        <h1>Centro de Mando: Horarios</h1>
-        <p>Motor de Optimización CP-SAT Integrado</p>
+        <h1>¡Hola, {user?.nombre}! 👋</h1>
+        <p>Centro de Control - Algoritmo CP-SAT</p>
         
         <div className="tabs">
-          <button className={`tab-btn ${activeTab === 'horarios' ? 'active' : ''}`} onClick={() => setActiveTab('horarios')}>
-            📅 Vista de Horarios
-          </button>
-          <button className={`tab-btn ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>
-            ⚙️ Configuración Académica
-          </button>
+          <button className={`tab-btn ${activeTab === 'horarios' ? 'active' : ''}`} onClick={() => setActiveTab('horarios')}>Vista de Horarios</button>
+          <button className={`tab-btn ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>Configuración Académica</button>
+          <button className="tab-btn" onClick={() => setIsAuthenticated(false)}>Cerrar Sesión</button>
         </div>
       </header>
       
-      <main className="dashboard">
+      <main>
         {/* --- PESTAÑA: HORARIOS --- */}
         {activeTab === 'horarios' && (
           <div className="tab-pane">
             <div className="trigger-section">
               <button className={`btn-generate ${loading ? 'loading' : ''}`} onClick={handleGenerate} disabled={loading}>
-                {loading ? 'Calculando Restricciones...' : '🚀 Generar Horario Óptimo'}
+                {loading ? 'Calculando Restricciones...' : 'Generar Horario Óptimo'}
               </button>
-              {result && (
-                <button className="btn-export" onClick={handleDownload}>
-                  💾 Exportar JSON
-                </button>
-              )}
             </div>
-
             {error && (
-                <div className="error-panel">
+                <div style={{color: 'var(--danger)', background: '#fee2e2', padding: '1rem', borderRadius: '16px'}}>
                   <h3>Se encontraron errores de validación:</h3>
                   <pre>{error}</pre>
                 </div>
             )}
-
-            {result && (
-              <div className="results-container">
-                <aside className="audit-panel">
-                  <h3>Auditoría Matemática</h3>
-                  <p className="audit-desc">Estado devuelto por la IA: <span className="badge-optimal">{result.estado}</span></p>
-                  
-                  <ul className="check-list">
-                    <li><span className="check">✅</span> <strong>Cero Colisiones:</strong> Ningún profesor agendado a 2 lugares a la vez.</li>
-                    <li><span className="check">✅</span> <strong>Disponibilidad Exacta:</strong> Se cruzaron matrices de días viables.</li>
-                    <li><span className="check">✅</span> <strong>Límites Pedagógicos:</strong> Se respetó tope mensual de carga por Área.</li>
-                    <li><span className="check">✅</span> <strong>Plan de Estudios:</strong> El 100% de la cuota semanal posicionada.</li>
-                  </ul>
-
-                  <div className="audit-stats">
-                    <div>⏱️ Tiempo: {(result.estadisticas?.tiempo_segundos || 0).toFixed(2)}s</div>
-                    <div>🌿 Ramas Vistas: {result.estadisticas?.ramas_exploradas || 0}</div>
-                  </div>
-                </aside>
-
-                <section className="calendar-panel">
-                  <div className="calendar-header">
-                    <h2>Visualizador de Malla</h2>
-                    <select 
-                      className="section-selector" 
-                      value={selectedSeccion} 
-                      onChange={(e) => setSelectedSeccion(e.target.value)}
-                    >
-                      {secciones.map(sec => <option key={sec} value={sec}>Sección {sec.replace("SEC_", "")}</option>)}
-                    </select>
-                  </div>
-
-                  {matrixData && (
-                    <div className="grid-responsive">
-                      <table className="calendar-grid">
-                        <thead>
-                          <tr>
-                            <th className="slot-col">Hora</th>
-                            {matrixData.exactDias.map(d => <th key={d}>{d}</th>)}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {matrixData.MAT_SLOTS.map(slot => {
-                            const shift = slot > 6 ? "Tarde" : "Mañana";
-                            const localSlot = slot > 6 ? slot - 6 : slot;
-                            return (
-                            <tr key={slot}>
-                              <td className="slot-label">
-                                Bloque {localSlot}<br/>
-                                <small style={{opacity: 0.6}}>{shift}</small>
-                              </td>
-                              {matrixData.exactDias.map(dia => {
-                                const clase = matrixData.mat[slot][dia];
-                                const colorClass = clase ? `course-c${(clase.curso_id.charCodeAt(clase.curso_id.length-1) % 6) + 1}` : "";
-                                return (
-                                  <td key={`${slot}-${dia}`} className={clase ? "filled-cell" : "empty-cell"}>
-                                    {clase ? (
-                                      <div className={`class-card ${colorClass}`} title={`Calculado dinámicamente para cumplir topes de Área de ${clase.curso_id}`}>
-                                        {clase.is_start ? (
-                                            <>
-                                                <span className="c-name">{clase.curso_id.replace("CUR_", "ID ")}</span>
-                                                <span className="c-prof">{clase.profesor_id.replace("PROF_", "Prof ")}</span>
-                                            </>
-                                        ) : (
-                                            <span className="c-continue">⬇️</span>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <span className="empty-text">- Libre -</span>
-                                    )}
-                                  </td>
-                                )
-                              })}
-                            </tr>
-                          )})}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </section>
+            {result && result.asignaciones && result.asignaciones.length === 0 && (
+                <div style={{color: 'var(--text-main)', background: '#fffbeb', border: '1px solid #fde68a', padding: '1rem', borderRadius: '16px', textAlign: 'center', marginTop: '1rem'}}>
+                  <h3>¡Horario Vacío!</h3>
+                  <p>El motor calculó el horario con éxito, pero no programó ninguna clase. Esto significa que <b>no has registrado ninguna Malla Curricular (Plan de Estudio)</b> para las Secciones/Grados actuales. Ve a Configuración Académica {'>'} Malla Curricular y asigna horas a tus cursos.</p>
+                </div>
+            )}
+            {result && matrixData && result.asignaciones.length > 0 && (
+              <div style={{background: 'var(--bg-panel)', padding: '2rem', borderRadius: '24px', boxShadow: 'var(--shadow-sm)'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem'}}>
+                  <h2 style={{color: 'var(--accent)'}}>Malla Curricular</h2>
+                  <select style={{padding: '0.5rem', borderRadius: '12px', border: '1px solid #cbd5e1'}} value={selectedSeccion} onChange={(e) => setSelectedSeccion(e.target.value)}>
+                    {seccionesOptions.map(sec => <option key={sec} value={sec}>Sección {sec.replace("SEC_", "")}</option>)}
+                  </select>
+                </div>
+                <table className="calendar-grid">
+                  <thead>
+                    <tr><th>Hora</th>{matrixData.exactDias.map(d => <th key={d}>{d}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {matrixData.MAT_SLOTS.map(slot => {
+                      const shift = slot > 6 ? "Tarde" : "Mañana";
+                      const localSlot = slot > 6 ? slot - 6 : slot;
+                      return (
+                      <tr key={slot}>
+                        <td style={{background: 'var(--bg-panel-light)', borderRadius: '12px', textAlign: 'center'}}>
+                          Bloque {localSlot}<br/><small style={{color: 'var(--text-muted)'}}>{shift}</small>
+                        </td>
+                        {matrixData.exactDias.map(dia => {
+                          const clase = matrixData.mat[slot][dia];
+                          const colorClass = clase ? `course-c${(clase.curso_id.charCodeAt(clase.curso_id.length-1) % 6) + 1}` : "";
+                          return (
+                            <td key={`${slot}-${dia}`} className={clase ? "filled-cell" : ""}>
+                              {clase ? (
+                                <div className={`class-card ${colorClass}`}>
+                                  {clase.is_start ? (
+                                      <><strong style={{fontSize:'1.1rem'}}>{clase.curso_id.replace("CUR_", "ID ")}</strong><span style={{fontSize:'0.9rem', opacity: 0.9}}>{clase.profesor_id.replace("PROF_", "Prof ")}</span></>
+                                  ) : (<span style={{fontSize: '1.5rem'}}>↓</span>)}
+                                </div>
+                              ) : <span className="empty-text">Libre</span>}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    )})}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
@@ -251,58 +250,190 @@ function App() {
         {/* --- PESTAÑA: ADMINISTRACIÓN --- */}
         {activeTab === 'admin' && (
           <div className="admin-pane">
+            
+            <div style={{display: 'flex', gap: '1rem', marginBottom: '2rem', justifyContent: 'center'}}>
+              <button className={`tab-btn ${activeAdminTab === 'infra' ? 'active' : ''}`} onClick={() => setActiveAdminTab('infra')}>Infraestructura</button>
+              <button className={`tab-btn ${activeAdminTab === 'jerarquia' ? 'active' : ''}`} onClick={() => setActiveAdminTab('jerarquia')}>Jerarquía</button>
+              <button className={`tab-btn ${activeAdminTab === 'materias' ? 'active' : ''}`} onClick={() => setActiveAdminTab('materias')}>Materias & Profes</button>
+              <button className={`tab-btn ${activeAdminTab === 'malla' ? 'active' : ''}`} onClick={() => setActiveAdminTab('malla')}>Malla Curricular</button>
+            </div>
+
             <div className="admin-grid">
               
-              {/* Formulario Areas */}
-              <div className="admin-card">
-                <h3>Administrar Áreas / Categorías</h3>
-                <form onSubmit={handleCreateArea} className="admin-form">
-                  <input type="text" placeholder="Nombre de Área (Ej. Matemáticas)" value={formArea.nombre_area} onChange={e => setFormArea({...formArea, nombre_area: e.target.value})} />
-                  <input type="number" placeholder="Max hs diarias" value={formArea.max_horas_dia} onChange={e => setFormArea({...formArea, max_horas_dia: e.target.value})} />
-                  <button type="submit" className="btn-save">Agregar Área</button>
-                </form>
+              {/* --- SUBTAB: INFRAESTRUCTURA --- */}
+              {activeAdminTab === 'infra' && (
+                <>
+                  <div className="admin-card">
+                    <h3>Sedes Físicas</h3>
+                    <form className="admin-form" onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('sedes', { nombre_sede: formSede.nombre_sede, id_colegio: parseInt(formSede.id_colegio) }, () => setFormSede({ nombre_sede: "", id_colegio: "" }))
+                    }}>
+                      <select value={formSede.id_colegio} onChange={e => setFormSede({...formSede, id_colegio: e.target.value})} required>
+                        <option value="">-- Seleccionar Colegio --</option>
+                        {colegios.map(c => <option key={c.id_colegio} value={c.id_colegio}>{c.nombre_colegio}</option>)}
+                      </select>
+                      <input type="text" placeholder="Nombre de Sede" value={formSede.nombre_sede} onChange={e => setFormSede({...formSede, nombre_sede: e.target.value})} required />
+                      <button type="submit" className="btn-save">Registrar Sede</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID</th><th>Sede</th><th>Colegio ID</th></tr></thead>
+                      <tbody>{sedes.map(s => <tr key={s.id_sede}><td>{s.id_sede}</td><td>{s.nombre_sede}</td><td>{s.id_colegio}</td></tr>)}</tbody>
+                    </table>
+                  </div>
+                </>
+              )}
 
-                <table className="admin-table">
-                  <thead><tr><th>ID</th><th>Nombre</th><th>Tope Horas</th></tr></thead>
-                  <tbody>
-                    {areas.map(a => (
-                      <tr key={a.id_area}>
-                        <td>{a.id_area}</td>
-                        <td>{a.nombre_area}</td>
-                        <td>{a.max_horas_dia}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {/* --- SUBTAB: JERARQUÍA --- */}
+              {activeAdminTab === 'jerarquia' && (
+                <>
+                  <div className="admin-card">
+                    <h3>Grados</h3>
+                    <form className="admin-form" onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('grados', { numero: parseInt(formGrado.numero) }, () => setFormGrado({ numero: "" }))
+                    }}>
+                      <input type="number" placeholder="Número de Grado (Ej. 1)" value={formGrado.numero} onChange={e => setFormGrado({numero: e.target.value})} required />
+                      <button type="submit" className="btn-save">Registrar Grado</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID</th><th>Grado N°</th></tr></thead>
+                      <tbody>{grados.map(g => <tr key={g.id_grado}><td>{g.id_grado}</td><td>{g.numero}°</td></tr>)}</tbody>
+                    </table>
+                  </div>
 
-              {/* Formulario Cursos */}
-              <div className="admin-card">
-                <h3>Administrar Cursos Mínimos</h3>
-                <form onSubmit={handleCreateCurso} className="admin-form">
-                  <input type="text" placeholder="Nombre de Curso (Ej. Álgebra)" value={formCurso.nombre_curso} onChange={e => setFormCurso({...formCurso, nombre_curso: e.target.value})} />
-                  <select value={formCurso.id_area} onChange={e => setFormCurso({...formCurso, id_area: e.target.value})}>
-                    <option value="">-- Seleccionar Área Padre --</option>
-                    {areas.map(a => (
-                      <option key={a.id_area} value={a.id_area}>{a.nombre_area}</option>
-                    ))}
-                  </select>
-                  <button type="submit" className="btn-save">Agregar Curso</button>
-                </form>
+                  <div className="admin-card">
+                    <h3>Secciones</h3>
+                    <form className="admin-form" onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('secciones', { nombre: formSeccion.nombre, id_grado: parseInt(formSeccion.id_grado), id_sede: parseInt(formSeccion.id_sede) }, () => setFormSeccion({ nombre: "", id_grado: "", id_sede: "" }))
+                    }}>
+                      <select value={formSeccion.id_sede} onChange={e => setFormSeccion({...formSeccion, id_sede: e.target.value})} required>
+                        <option value="">-- Sede --</option>
+                        {sedes.map(s => <option key={s.id_sede} value={s.id_sede}>{s.nombre_sede}</option>)}
+                      </select>
+                      <select value={formSeccion.id_grado} onChange={e => setFormSeccion({...formSeccion, id_grado: e.target.value})} required>
+                        <option value="">-- Grado --</option>
+                        {grados.map(g => <option key={g.id_grado} value={g.id_grado}>{g.numero}°</option>)}
+                      </select>
+                      <input type="text" placeholder="Sección (Ej. A)" value={formSeccion.nombre} onChange={e => setFormSeccion({...formSeccion, nombre: e.target.value})} required />
+                      <button type="submit" className="btn-save">Registrar Sección</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID</th><th>Sección</th><th>Grado</th></tr></thead>
+                      <tbody>{secciones.map(s => <tr key={s.id_seccion}><td>{s.id_seccion}</td><td>{s.nombre}</td><td>ID {s.id_grado}</td></tr>)}</tbody>
+                    </table>
+                  </div>
+                </>
+              )}
 
-                <table className="admin-table">
-                  <thead><tr><th>ID</th><th>Curso</th><th>ID Área Padre</th></tr></thead>
-                  <tbody>
-                    {cursos.map(c => (
-                      <tr key={c.id_curso}>
-                        <td>{c.id_curso}</td>
-                        <td>{c.nombre_curso}</td>
-                        <td>{c.id_area}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {/* --- SUBTAB: MATERIAS Y PROFESORES --- */}
+              {activeAdminTab === 'materias' && (
+                <>
+                  <div className="admin-card">
+                    <h3>Áreas (Categorías)</h3>
+                    <form className="admin-form" onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('areas', { nombre: formArea.nombre, max_horas_dia: parseInt(formArea.max_horas_dia) }, () => setFormArea({ nombre: "", max_horas_dia: 4 }))
+                    }}>
+                      <input type="text" placeholder="Nombre (Ej. Ciencias)" value={formArea.nombre} onChange={e => setFormArea({...formArea, nombre: e.target.value})} required />
+                      <input type="number" placeholder="Max hs diarias" value={formArea.max_horas_dia} onChange={e => setFormArea({...formArea, max_horas_dia: e.target.value})} required />
+                      <button type="submit" className="btn-save">Guardar Área</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID</th><th>Nombre</th></tr></thead>
+                      <tbody>{areas.map(a => <tr key={a.id_area}><td>{a.id_area}</td><td>{a.nombre}</td></tr>)}</tbody>
+                    </table>
+                  </div>
+
+                  <div className="admin-card">
+                    <h3>Cursos</h3>
+                    <form className="admin-form" onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('cursos', { nombre_curso: formCurso.nombre_curso, id_area: parseInt(formCurso.id_area) }, () => setFormCurso({ ...formCurso, nombre_curso: "" }))
+                    }}>
+                      <select value={formCurso.id_area} onChange={e => setFormCurso({...formCurso, id_area: e.target.value})} required>
+                        <option value="">-- Área --</option>
+                        {areas.map(a => <option key={a.id_area} value={a.id_area}>{a.nombre}</option>)}
+                      </select>
+                      <input type="text" placeholder="Curso" value={formCurso.nombre_curso} onChange={e => setFormCurso({...formCurso, nombre_curso: e.target.value})} required />
+                      <button type="submit" className="btn-save">Guardar Curso</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID</th><th>Curso</th><th>Área ID</th></tr></thead>
+                      <tbody>{cursos.map(c => <tr key={c.id_curso}><td>{c.id_curso}</td><td>{c.nombre_curso}</td><td>{c.id_area}</td></tr>)}</tbody>
+                    </table>
+                  </div>
+
+                  <div className="admin-card" style={{gridColumn: '1 / -1'}}>
+                    <h3>Profesores</h3>
+                    <form className="admin-form" style={{flexDirection: 'row', gap: '1rem'}} onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('profesores', { nombre_profesor: formProf.nombre_profesor, id_sede: parseInt(formProf.id_sede), max_horas_dia: parseInt(formProf.max_horas_dia) }, () => setFormProf({ ...formProf, nombre_profesor: "" }))
+                    }}>
+                      <select style={{flex: 1}} value={formProf.id_sede} onChange={e => setFormProf({...formProf, id_sede: e.target.value})} required>
+                        <option value="">-- Sede --</option>
+                        {sedes.map(s => <option key={s.id_sede} value={s.id_sede}>{s.nombre_sede}</option>)}
+                      </select>
+                      <input style={{flex: 2}} type="text" placeholder="Nombre de Profesor" value={formProf.nombre_profesor} onChange={e => setFormProf({...formProf, nombre_profesor: e.target.value})} required />
+                      <input style={{flex: 1}} type="number" placeholder="Hs Max" value={formProf.max_horas_dia} onChange={e => setFormProf({...formProf, max_horas_dia: e.target.value})} required />
+                      <button type="submit" className="btn-save">Añadir</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID</th><th>Nombre</th><th>Hs Max</th><th>Sede ID</th></tr></thead>
+                      <tbody>{profesores.map(p => <tr key={p.id_profesores}><td>{p.id_profesores}</td><td>{p.nombre_profesor}</td><td>{p.max_horas_dia}</td><td>{p.id_sede}</td></tr>)}</tbody>
+                    </table>
+                  </div>
+
+                  <div className="admin-card" style={{gridColumn: '1 / -1'}}>
+                    <h3>Habilitar Curso a Profesor</h3>
+                    <form className="admin-form" style={{flexDirection: 'row', gap: '1rem'}} onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('profesor-curso', { id_profesor: parseInt(formProfCurso.id_profesor), id_curso: parseInt(formProfCurso.id_curso) }, () => setFormProfCurso({ ...formProfCurso, id_curso: "" }))
+                    }}>
+                      <select style={{flex: 1}} value={formProfCurso.id_profesor} onChange={e => setFormProfCurso({...formProfCurso, id_profesor: e.target.value})} required>
+                        <option value="">-- Seleccionar Profesor --</option>
+                        {profesores.map(p => <option key={p.id_profesores} value={p.id_profesores}>{p.nombre_profesor}</option>)}
+                      </select>
+                      <select style={{flex: 1}} value={formProfCurso.id_curso} onChange={e => setFormProfCurso({...formProfCurso, id_curso: e.target.value})} required>
+                        <option value="">-- Seleccionar Curso --</option>
+                        {cursos.map(c => <option key={c.id_curso} value={c.id_curso}>{c.nombre_curso}</option>)}
+                      </select>
+                      <button type="submit" className="btn-save">Vincular</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID Vínculo</th><th>ID Profesor</th><th>ID Curso</th></tr></thead>
+                      <tbody>{profesorCursos.map(pc => <tr key={pc.id_profesor_curso}><td>{pc.id_profesor_curso}</td><td>{pc.id_profesor}</td><td>{pc.id_curso}</td></tr>)}</tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+
+              {/* --- SUBTAB: MALLA CURRICULAR --- */}
+              {activeAdminTab === 'malla' && (
+                <div className="admin-card" style={{gridColumn: '1 / -1'}}>
+                  <h3>Planes de Estudio (Malla)</h3>
+                  <form className="admin-form" style={{flexDirection: 'row', gap: '1rem'}} onSubmit={(e) => {
+                    e.preventDefault();
+                    handleCreate('planes', { id_grado: parseInt(formPlan.id_grado), id_curso: parseInt(formPlan.id_curso), horas_semanales: parseInt(formPlan.horas_semanales) }, () => setFormPlan({ ...formPlan, id_curso: "", horas_semanales: 1 }))
+                  }}>
+                    <select style={{flex: 1}} value={formPlan.id_grado} onChange={e => setFormPlan({...formPlan, id_grado: e.target.value})} required>
+                      <option value="">-- Grado --</option>
+                      {grados.map(g => <option key={g.id_grado} value={g.id_grado}>{g.numero}°</option>)}
+                    </select>
+                    <select style={{flex: 2}} value={formPlan.id_curso} onChange={e => setFormPlan({...formPlan, id_curso: e.target.value})} required>
+                      <option value="">-- Curso --</option>
+                      {cursos.map(c => <option key={c.id_curso} value={c.id_curso}>{c.nombre_curso}</option>)}
+                    </select>
+                    <input style={{flex: 1}} type="number" placeholder="Hrs Semanales" value={formPlan.horas_semanales} onChange={e => setFormPlan({...formPlan, horas_semanales: e.target.value})} required />
+                    <button type="submit" className="btn-save">Añadir a Malla</button>
+                  </form>
+                  <table className="admin-table">
+                    <thead><tr><th>ID</th><th>Grado ID</th><th>Curso ID</th><th>Horas Semanales</th></tr></thead>
+                    <tbody>{planes.map(p => <tr key={p.id_plan}><td>{p.id_plan}</td><td>{p.id_grado}</td><td>{p.id_curso}</td><td>{p.horas_semanales}</td></tr>)}</tbody>
+                  </table>
+                </div>
+              )}
 
             </div>
           </div>
