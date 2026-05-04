@@ -18,86 +18,14 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
-from datetime import time
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
-    # Seeder Administrativo y de Infraestructura Base
     with Session(engine) as session:
-        # 1. Admin
         admin = session.exec(select(Usuario).where(Usuario.email == "admin@colegio.com")).first()
         if not admin:
             session.add(Usuario(email="admin@colegio.com", nombre="Administrador", password="123456"))
-            
-        # 2. Colegio y Sede
-        colegio = session.exec(select(Colegio)).first()
-        if not colegio:
-            colegio = Colegio(nombre_colegio="Colegio Central")
-            session.add(colegio)
             session.commit()
-            session.refresh(colegio)
-            
-        sede = session.exec(select(Sedes)).first()
-        if not sede:
-            session.add(Sedes(id_colegio=colegio.id_colegio, nombre_sede="Sede Principal"))
-            session.commit()
-            
-        # 3. Días
-        if not session.exec(select(Dias)).first():
-            for i, nd in enumerate(["Lunes", "Martes", "Miercoles", "Jueves", "Viernes"]):
-                session.add(Dias(nombre_dia=nd, orden=i+1))
-                
-        # 4. Turnos y Bloques
-        if not session.exec(select(Turno)).first():
-            tm = Turno(nombre="Mañana")
-            tt = Turno(nombre="Tarde")
-            session.add(tm)
-            session.add(tt)
-            session.commit()
-            for i in range(1, 7):
-                session.add(Bloque(id_turno=tm.id_turno, numero_bloque=i, hora_inicio=time(8,0), hora_final=time(9,0)))
-                session.add(Bloque(id_turno=tt.id_turno, numero_bloque=i, hora_inicio=time(14,0), hora_final=time(15,0)))
-                
-        # 5. Data Académica de Prueba (Para Evitar Errores de Motor Vacío)
-        if not session.exec(select(Grado)).first():
-            # Grado
-            grado = Grado(numero=1)
-            session.add(grado)
-            session.commit()
-            session.refresh(grado)
-            
-            # Area y Curso
-            area = Areas(nombre="Ciencias Exactas", max_horas_dia=4)
-            session.add(area)
-            session.commit()
-            session.refresh(area)
-            
-            curso = Cursos(id_area=area.id_area, nombre_curso="Matemáticas")
-            session.add(curso)
-            session.commit()
-            session.refresh(curso)
-            
-            # Profesor
-            sede = session.exec(select(Sedes)).first()
-            prof = Profesores(id_sede=sede.id_sede, nombre_profesor="Profesor Turing", max_horas_dia=6)
-            session.add(prof)
-            session.commit()
-            session.refresh(prof)
-            
-            # Enlazar Profesor con Curso
-            session.add(ProfesorCurso(id_profesor=prof.id_profesores, id_curso=curso.id_curso))
-            
-            # Seccion
-            seccion = Seccion(id_sede=sede.id_sede, id_grado=grado.id_grado, nombre="A")
-            session.add(seccion)
-            
-            # Plan de Estudio (Regla de horas)
-            session.add(PlanEstudio(id_grado=grado.id_grado, id_curso=curso.id_curso, horas_semanales=5))
-            
-            session.commit()
-
-        session.commit()
     yield
 
 app = FastAPI(
