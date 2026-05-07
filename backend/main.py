@@ -85,6 +85,26 @@ def create_grado(grado: Grado, session: Session = Depends(get_session)):
     session.commit()
     return grado
 
+# --- Endpoints: Grado-Día Config ---
+@app.get("/api/grado-dia-config", response_model=List[GradoDiaConfig])
+def get_grado_dia_config(session: Session = Depends(get_session)):
+    return session.exec(select(GradoDiaConfig)).all()
+
+@app.post("/api/grado-dia-config", response_model=GradoDiaConfig)
+def create_grado_dia_config(config: GradoDiaConfig, session: Session = Depends(get_session)):
+    session.add(config)
+    session.commit()
+    session.refresh(config)
+    return config
+
+@app.delete("/api/grado-dia-config/{id_config}")
+def delete_grado_dia_config(id_config: int, session: Session = Depends(get_session)):
+    db = session.get(GradoDiaConfig, id_config)
+    if not db: raise HTTPException(status_code=404, detail="Config no encontrada")
+    session.delete(db)
+    session.commit()
+    return {"message": "Config borrada"}
+
 @app.get("/api/dias", response_model=List[Dias])
 def get_dias(session: Session = Depends(get_session)):
     return session.exec(select(Dias).order_by(Dias.orden)).all()
@@ -281,6 +301,86 @@ def delete_plan(id_plan: int, session: Session = Depends(get_session)):
     session.delete(db_plan)
     session.commit()
     return {"message": "Plan de Estudio borrado"}
+
+# --- Endpoints: Sección-Turno ---
+@app.get("/api/seccion-turno", response_model=List[SeccionTurno])
+def get_seccion_turno(session: Session = Depends(get_session)):
+    return session.exec(select(SeccionTurno)).all()
+
+@app.post("/api/seccion-turno", response_model=SeccionTurno)
+def create_seccion_turno(st: SeccionTurno, session: Session = Depends(get_session)):
+    session.add(st)
+    session.commit()
+    session.refresh(st)
+    return st
+
+@app.delete("/api/seccion-turno/{id_seccion_turno}")
+def delete_seccion_turno(id_seccion_turno: int, session: Session = Depends(get_session)):
+    db = session.get(SeccionTurno, id_seccion_turno)
+    if not db: raise HTTPException(status_code=404)
+    session.delete(db)
+    session.commit()
+    return {"message": "Borrado"}
+
+# --- Endpoints: Restricciones ---
+@app.get("/api/restricciones", response_model=List[Restricciones])
+def get_restricciones(session: Session = Depends(get_session)):
+    return session.exec(select(Restricciones)).all()
+
+@app.post("/api/restricciones", response_model=Restricciones)
+def create_restriccion(r: Restricciones, session: Session = Depends(get_session)):
+    session.add(r)
+    session.commit()
+    session.refresh(r)
+    return r
+
+@app.delete("/api/restricciones/{id_restricciones}")
+def delete_restriccion(id_restricciones: int, session: Session = Depends(get_session)):
+    db = session.get(Restricciones, id_restricciones)
+    if not db: raise HTTPException(status_code=404)
+    session.delete(db)
+    session.commit()
+    return {"message": "Borrado"}
+
+# --- Endpoints: Carga Académica ---
+@app.get("/api/carga-academica", response_model=List[CargaAcademica])
+def get_carga_academica(session: Session = Depends(get_session)):
+    return session.exec(select(CargaAcademica)).all()
+
+@app.post("/api/carga-academica", response_model=CargaAcademica)
+def create_carga_academica(ca: CargaAcademica, session: Session = Depends(get_session)):
+    session.add(ca)
+    session.commit()
+    session.refresh(ca)
+    return ca
+
+@app.delete("/api/carga-academica/{id_carga}")
+def delete_carga_academica(id_carga: int, session: Session = Depends(get_session)):
+    db = session.get(CargaAcademica, id_carga)
+    if not db: raise HTTPException(status_code=404)
+    session.delete(db)
+    session.commit()
+    return {"message": "Borrado"}
+
+# --- Endpoints: Horario Final ---
+@app.get("/api/horario-final", response_model=List[HorarioFinal])
+def get_horario_final(session: Session = Depends(get_session)):
+    return session.exec(select(HorarioFinal)).all()
+
+@app.post("/api/horario-final", response_model=HorarioFinal)
+def create_horario_final(hf: HorarioFinal, session: Session = Depends(get_session)):
+    session.add(hf)
+    session.commit()
+    session.refresh(hf)
+    return hf
+
+@app.delete("/api/horario-final/{id_horario_final}")
+def delete_horario_final(id_horario_final: int, session: Session = Depends(get_session)):
+    db = session.get(HorarioFinal, id_horario_final)
+    if not db: raise HTTPException(status_code=404)
+    session.delete(db)
+    session.commit()
+    return {"message": "Borrado"}
 
 # --- Endpoints del Motor ---
 from backend.engine_connector import generar_horario_engine
