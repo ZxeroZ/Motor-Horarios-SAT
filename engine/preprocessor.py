@@ -13,7 +13,14 @@ def preprocesar(datos: dict) -> dict:
 
     # Mapeos básicos para acceso O(1)
     profesores_dict = {p["id"]: p for p in profesores_lista}
-    secciones_dict = {s["id"]: s for s in secciones_lista}
+    
+    secciones_dict = {}
+    for s in secciones_lista:
+        s_copia = dict(s)
+        grado_id = s_copia.get("grado")
+        # Inyectar horario_plantilla directo en la sección desde su grado
+        s_copia["horario_plantilla"] = grados.get(grado_id, {}).get("horario_plantilla", {})
+        secciones_dict[s_copia["id"]] = s_copia
 
     # 1. Profesores requeridos/habilitados por curso
     # curso_id -> lista de profesor_id

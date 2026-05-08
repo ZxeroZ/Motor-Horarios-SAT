@@ -47,26 +47,15 @@ def validar_categorias(categorias: list[dict]) -> list[str]:
 def validar_configuracion(configuracion: dict) -> list[str]:
     errores = []
  
-    for campo in ["sedes", "dias", "turnos", "slots_por_turno"]:
+    for campo in ["sedes", "turnos"]:
         if campo not in configuracion:
             errores.append(f"[configuracion] Falta el campo obligatorio: '{campo}'")
  
     if "sedes" in configuracion and len(configuracion["sedes"]) == 0:
         errores.append("[configuracion] 'sedes' no puede estar vacío")
  
-    if "dias" in configuracion and len(configuracion["dias"]) == 0:
-        errores.append("[configuracion] 'dias' no puede estar vacío")
- 
     if "turnos" in configuracion and len(configuracion["turnos"]) == 0:
         errores.append("[configuracion] 'turnos' no puede estar vacío")
- 
-    if "slots_por_turno" in configuracion:
-        slots = configuracion["slots_por_turno"]
-        if not isinstance(slots, int) or slots < 1:
-            errores.append(
-                f"[configuracion] 'slots_por_turno' debe ser un entero mayor a 0, "
-                f"se recibió: {slots}"
-            )
  
     return errores
  
@@ -125,6 +114,16 @@ def validar_grados(grados: list[dict], ids_cursos: set[str]) -> list[str]:
  
         if "nombre" not in grado:
             errores.append(f"[grados][{gid}] Falta el campo 'nombre'")
+            
+        if "horario_plantilla" not in grado:
+            errores.append(f"[grados][{gid}] Falta el campo 'horario_plantilla'")
+        else:
+            plantilla = grado["horario_plantilla"]
+            if len(plantilla) == 0:
+                errores.append(f"[grados][{gid}] 'horario_plantilla' no puede estar vacío")
+            for dia, slots in plantilla.items():
+                if not isinstance(slots, int) or slots < 1:
+                    errores.append(f"[grados][{gid}] los slots para '{dia}' deben ser mayores a 0")
  
         if "cursos_requeridos" not in grado:
             errores.append(f"[grados][{gid}] Falta el campo 'cursos_requeridos'")
@@ -375,9 +374,8 @@ def validar_todo(datos: dict) -> list[str]:
     if errores:
         return errores
  
-    dias_validos   = configuracion["dias"]
-    turnos_validos = configuracion["turnos"]
-    sedes_validas  = configuracion["sedes"]
+    turnos_validos = configuracion.get("turnos", [])
+    sedes_validas  = configuracion.get("sedes", [])
  
     errores += validar_categorias(categorias)
     ids_categorias = {c["id"] for c in categorias if "id" in c}
@@ -387,6 +385,12 @@ def validar_todo(datos: dict) -> list[str]:
     
     errores += validar_grados(grados, ids_cursos)
     ids_grados = {g["id"] for g in grados if "id" in g}
+    
+    dias_validos_set = set()
+    for g in grados:
+        if "horario_plantilla" in g:
+            dias_validos_set.update(g["horario_plantilla"].keys())
+    dias_validos = list(dias_validos_set)
  
     errores += validar_profesores(profesores, ids_cursos, dias_validos, turnos_validos)
     errores += validar_secciones(

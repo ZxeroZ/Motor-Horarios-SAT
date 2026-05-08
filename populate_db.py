@@ -1,88 +1,205 @@
-import random
+"""
+Poblar la BD con los MISMOS datos del datos.json que el motor resuelve exitosamente.
+"""
 from sqlmodel import Session, select
 from backend.database import engine, create_db_and_tables
 from backend.models import (
     Colegio, Sedes, Grado, Dias, Turno, Bloque, Areas, 
-    Cursos, Profesores, ProfesorCurso, Seccion, PlanEstudio
+    Cursos, Profesores, ProfesorCurso, Seccion, PlanEstudio,
+    GradoDiaConfig, SeccionTurno, Usuario
 )
+from datetime import time as pytime
 
 def poblar_bd():
     create_db_and_tables()
-    with Session(engine) as session:
-        # Check si ya hay secciones para no duplicar data tontamente
-        if len(session.exec(select(Seccion)).all()) > 2:
-            print("La BD ya tiene datos académicos. Borra la DB si quieres empezar de 0.")
+    with Session(engine) as s:
+        if s.exec(select(Cursos)).first():
+            print("La BD ya tiene datos. Borra database.db primero.")
             return
 
-        sede = session.exec(select(Sedes)).first()
-        if not sede:
-            # Crear infraestructura básica si uvicorn no lo hizo a tiempo
-            colegio = Colegio(nombre_colegio="Colegio Central")
-            session.add(colegio)
-            session.commit()
-            session.refresh(colegio)
-            sede = Sedes(id_colegio=colegio.id_colegio, nombre_sede="Sede Principal")
-            session.add(sede)
-            session.commit()
-            session.refresh(sede)
+        print("=== Poblando BD con datos del JSON de referencia ===")
+
+        # --- Admin ---
+        s.add(Usuario(email="admin@colegio.com", nombre="Administrador", password="123456"))
+
+        # --- Colegio ---
+        col = Colegio(nombre_colegio="Colegio Central")
+        s.add(col)
+        s.commit()
+        s.refresh(col)
+
+        # --- Sedes ---
+        sede_a = Sedes(id_colegio=col.id_colegio, nombre_sede="Sede A")
+        sede_b = Sedes(id_colegio=col.id_colegio, nombre_sede="Sede B")
+        s.add_all([sede_a, sede_b])
+        s.commit()
+        s.refresh(sede_a)
+        s.refresh(sede_b)
+
+        # --- Días ---
+        dias_nombres = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes"]
+        dias = []
+        for i, nombre in enumerate(dias_nombres):
+            d = Dias(nombre_dia=nombre, orden=i+1)
+            s.add(d)
+            dias.append(d)
+        s.commit()
+        for d in dias:
+            s.refresh(d)
+
+        # --- Turnos ---
+        t_man = Turno(nombre="Mañana")
+        t_tar = Turno(nombre="Tarde")
+        s.add_all([t_man, t_tar])
+        s.commit()
+        s.refresh(t_man)
+        s.refresh(t_tar)
+
+        # --- Bloques (6 por turno) ---
+        for i in range(1, 7):
+            s.add(Bloque(id_turno=t_man.id_turno, numero_bloque=i, hora_inicio=pytime(7+i,0), hora_final=pytime(8+i,0)))
+            s.add(Bloque(id_turno=t_tar.id_turno, numero_bloque=i, hora_inicio=pytime(13+i,0), hora_final=pytime(14+i,0)))
+        s.commit()
+
+        # --- Áreas (Categorías) ---
+        areas_data = [
+            ("Matemática", 4), ("Comunicación", 4), ("Ciencia y Tecnología", 4),
+            ("Ciencias Sociales", 4), ("Idiomas", 4), ("Educación Física", 4), ("Tutoría", 4)
+        ]
+        areas = {}
+        for nombre, max_h in areas_data:
+            a = Areas(nombre=nombre, max_horas_dia=max_h)
+            s.add(a)
+            areas[nombre] = a
+        s.commit()
+        for a in areas.values():
+            s.refresh(a)
+
+        # --- Cursos (18 cursos del JSON) ---
+        cursos_data = [
+            ("Álgebra", "Matemática"), ("Aritmética", "Matemática"), ("Geometría", "Matemática"),
+            ("Trigonometría", "Matemática"), ("Razonamiento Matemático", "Matemática"),
+            ("Literatura", "Comunicación"), ("Razonamiento Verbal", "Comunicación"),
+            ("Anatomía", "Ciencia y Tecnología"), ("Biología", "Ciencia y Tecnología"),
+            ("Química", "Ciencia y Tecnología"), ("Física Elemental", "Ciencia y Tecnología"),
+            ("Historia y Geografía", "Ciencias Sociales"), ("Economía", "Ciencias Sociales"),
+            ("Filosofía", "Ciencias Sociales"), ("DPCC", "Ciencias Sociales"),
+            ("Inglés", "Idiomas"), ("Educación Física", "Educación Física"), ("Tutoría", "Tutoría")
+        ]
+        cursos = {}
+        for nombre, area_nombre in cursos_data:
+            c = Cursos(id_area=areas[area_nombre].id_area, nombre_curso=nombre)
+            s.add(c)
+            cursos[nombre] = c
+        s.commit()
+        for c in cursos.values():
+            s.refresh(c)
+
+        # --- Grados (5 grados) ---
+        # Plan de estudio por grado: [("nombre_curso", horas_semanales), ...]
+        grados_plan = {
+            1: [("Álgebra",3),("Aritmética",2),("Geometría",2),("Trigonometría",1),("Razonamiento Matemático",2),
+                ("Literatura",2),("Razonamiento Verbal",3),("Biología",2),("Química",2),("Física Elemental",2),
+                ("Historia y Geografía",2),("DPCC",2),("Inglés",2),("Educación Física",2),("Tutoría",1)],
+            2: [("Álgebra",3),("Aritmética",2),("Geometría",2),("Trigonometría",1),("Razonamiento Matemático",2),
+                ("Literatura",2),("Razonamiento Verbal",3),("Biología",2),("Química",2),("Física Elemental",2),
+                ("Historia y Geografía",2),("DPCC",2),("Inglés",2),("Educación Física",2),("Tutoría",1)],
+            3: [("Álgebra",3),("Aritmética",2),("Geometría",2),("Trigonometría",1),("Razonamiento Matemático",2),
+                ("Literatura",2),("Razonamiento Verbal",3),("Biología",2),("Química",2),("Física Elemental",2),
+                ("Historia y Geografía",2),("DPCC",2),("Inglés",2),("Educación Física",2),("Tutoría",1)],
+            4: [("Álgebra",3),("Geometría",2),("Trigonometría",1),("Razonamiento Matemático",3),
+                ("Literatura",2),("Razonamiento Verbal",3),("Anatomía",2),("Biología",2),("Química",2),
+                ("Física Elemental",2),("Historia y Geografía",2),("Economía",2),("Inglés",1),
+                ("Educación Física",2),("Tutoría",1)],
+            5: [("Álgebra",3),("Geometría",2),("Trigonometría",1),("Razonamiento Matemático",3),
+                ("Literatura",2),("Razonamiento Verbal",3),("Anatomía",2),("Biología",3),("Química",3),
+                ("Física Elemental",3),("Historia y Geografía",2),("Economía",2),("Tutoría",1)]
+        }
+
+        grados = {}
+        for num, plan in grados_plan.items():
+            g = Grado(numero=num)
+            s.add(g)
+            s.commit()
+            s.refresh(g)
+            grados[num] = g
             
-        print("Poblando Base de Datos con esteroides...")
-
-        # 1. Grados
-        g1 = Grado(numero=1)
-        g2 = Grado(numero=2)
-        session.add_all([g1, g2])
-        session.commit()
-
-        # 2. Secciones (1A, 1B, 2A)
-        sec1A = Seccion(id_grado=g1.id_grado, id_sede=sede.id_sede, nombre="A")
-        sec1B = Seccion(id_grado=g1.id_grado, id_sede=sede.id_sede, nombre="B")
-        sec2A = Seccion(id_grado=g2.id_grado, id_sede=sede.id_sede, nombre="A")
-        session.add_all([sec1A, sec1B, sec2A])
+            # Plan de Estudio
+            for curso_nombre, horas in plan:
+                s.add(PlanEstudio(id_grado=g.id_grado, id_curso=cursos[curso_nombre].id_curso, horas_semanales=horas))
+            
+            # GradoDiaConfig: 6 bloques cada día
+            for dia in dias:
+                s.add(GradoDiaConfig(id_grado=g.id_grado, id_dia=dia.id_dia, bloques_dia=6))
         
-        # 3. Áreas
-        a_ciencias = Areas(nombre="Ciencias", max_horas_dia=4)
-        a_letras = Areas(nombre="Letras", max_horas_dia=4)
-        session.add_all([a_ciencias, a_letras])
-        session.commit()
+        s.commit()
 
-        # 4. Cursos
-        c_mate = Cursos(id_area=a_ciencias.id_area, nombre_curso="Matemáticas")
-        c_fisica = Cursos(id_area=a_ciencias.id_area, nombre_curso="Física")
-        c_comu = Cursos(id_area=a_letras.id_area, nombre_curso="Comunicación")
-        c_historia = Cursos(id_area=a_letras.id_area, nombre_curso="Historia")
-        session.add_all([c_mate, c_fisica, c_comu, c_historia])
-        session.commit()
+        # --- Profesores (25 del JSON) ---
+        profes_data = [
+            ("Juan Perez", ["Aritmética","Geometría","Trigonometría","Razonamiento Matemático"]),
+            ("Maria Lopez", ["Literatura","Razonamiento Verbal"]),
+            ("Carlos Rios", ["Anatomía","Biología","Química","Física Elemental"]),
+            ("Ana Torres", ["Historia y Geografía","Economía"]),
+            ("Luis Mendoza", ["Filosofía","DPCC"]),
+            ("Sofia Vargas", ["Inglés"]),
+            ("Roberto Chavez", ["Educación Física"]),
+            ("Carmen Diaz", ["Tutoría"]),
+            ("Jorge Ramirez", ["Álgebra","Aritmética"]),
+            ("Patricia Flores", ["Geometría","Trigonometría"]),
+            ("Andres Castillo", ["Razonamiento Matemático","Álgebra"]),
+            ("Valeria Gutierrez", ["Literatura","Razonamiento Verbal"]),
+            ("Ricardo Morales", ["Literatura","Razonamiento Verbal"]),
+            ("Claudia Herrera", ["Anatomía","Biología"]),
+            ("Miguel Sanchez", ["Química","Física Elemental"]),
+            ("Daniela Vega", ["Anatomía","Química"]),
+            ("Fernando Paredes", ["Historia y Geografía","Economía"]),
+            ("Gabriela Quispe", ["Filosofía","DPCC"]),
+            ("Eduardo Mamani", ["Historia y Geografía","Filosofía"]),
+            ("Lucia Condori", ["Inglés"]),
+            ("Kevin Soto", ["Inglés"]),
+            ("Diana Pinto", ["Educación Física"]),
+            ("Hector Medina", ["Educación Física"]),
+            ("Silvia Ramos", ["Tutoría"]),
+            ("Oscar Huanca", ["Tutoría"]),
+        ]
+        
+        profesores = {}
+        for nombre, cursos_lista in profes_data:
+            p = Profesores(id_sede=sede_a.id_sede, nombre_profesor=nombre, max_horas_dia=6)
+            s.add(p)
+            s.commit()
+            s.refresh(p)
+            profesores[nombre] = p
+            for curso_nombre in cursos_lista:
+                s.add(ProfesorCurso(id_profesor=p.id_profesores, id_curso=cursos[curso_nombre].id_curso))
+        s.commit()
 
-        # 5. Profesores (Con suficientes horas para cubrir todo)
-        p_alan = Profesores(id_sede=sede.id_sede, nombre_profesor="Alan Turing", max_horas_dia=8)
-        p_isaac = Profesores(id_sede=sede.id_sede, nombre_profesor="Isaac Newton", max_horas_dia=6)
-        p_marie = Profesores(id_sede=sede.id_sede, nombre_profesor="Marie Curie", max_horas_dia=8)
-        session.add_all([p_alan, p_isaac, p_marie])
-        session.commit()
-
-        # 6. ProfesorCurso (Quien dicta que)
-        session.add(ProfesorCurso(id_profesor=p_alan.id_profesores, id_curso=c_mate.id_curso))
-        session.add(ProfesorCurso(id_profesor=p_isaac.id_profesores, id_curso=c_fisica.id_curso))
-        session.add(ProfesorCurso(id_profesor=p_isaac.id_profesores, id_curso=c_mate.id_curso)) # Isaac dicta mate y fisica
-        session.add(ProfesorCurso(id_profesor=p_marie.id_profesores, id_curso=c_comu.id_curso))
-        session.add(ProfesorCurso(id_profesor=p_marie.id_profesores, id_curso=c_historia.id_curso))
+        # --- Secciones (14 del JSON) ---
+        # (nombre, grado_num, sede, turno_disponible)
+        secciones_data = [
+            ("1° A", 1, sede_a, t_man), ("1° B", 1, sede_a, t_man),
+            ("2° A", 2, sede_a, t_man), ("2° B", 2, sede_a, t_man),
+            ("3°",   3, sede_a, t_man),
+            ("4°",   4, sede_a, t_tar),
+            ("5° A", 5, sede_a, t_tar), ("5° B", 5, sede_a, t_tar),
+            ("1° A", 1, sede_b, t_man), ("1° B", 1, sede_b, t_man),
+            ("2°",   2, sede_b, t_man),
+            ("3°",   3, sede_b, t_man),
+            ("4°",   4, sede_b, t_man),
+            ("5°",   5, sede_b, t_man),
+        ]
         
-        # 7. Plan de Estudio (Malla)
-        # 1ro Secundaria (Total 20 horas)
-        session.add(PlanEstudio(id_grado=g1.id_grado, id_curso=c_mate.id_curso, horas_semanales=6))
-        session.add(PlanEstudio(id_grado=g1.id_grado, id_curso=c_fisica.id_curso, horas_semanales=4))
-        session.add(PlanEstudio(id_grado=g1.id_grado, id_curso=c_comu.id_curso, horas_semanales=6))
-        session.add(PlanEstudio(id_grado=g1.id_grado, id_curso=c_historia.id_curso, horas_semanales=4))
+        for nombre, grado_num, sede, turno in secciones_data:
+            sec = Seccion(id_sede=sede.id_sede, id_grado=grados[grado_num].id_grado, nombre=nombre)
+            s.add(sec)
+            s.commit()
+            s.refresh(sec)
+            # SeccionTurno: disponibilidad por día
+            for dia in dias:
+                s.add(SeccionTurno(id_seccion=sec.id_seccion, id_turno=turno.id_turno, id_dia=dia.id_dia))
         
-        # 2do Secundaria (Total 20 horas)
-        session.add(PlanEstudio(id_grado=g2.id_grado, id_curso=c_mate.id_curso, horas_semanales=8))
-        session.add(PlanEstudio(id_grado=g2.id_grado, id_curso=c_fisica.id_curso, horas_semanales=6))
-        session.add(PlanEstudio(id_grado=g2.id_grado, id_curso=c_comu.id_curso, horas_semanales=4))
-        session.add(PlanEstudio(id_grado=g2.id_grado, id_curso=c_historia.id_curso, horas_semanales=2))
-        
-        session.commit()
-        print("¡Base de Datos Poblada con Éxito!")
+        s.commit()
+        print("=== ¡BD Poblada Exitosamente con datos de referencia! ===")
 
 if __name__ == "__main__":
     poblar_bd()

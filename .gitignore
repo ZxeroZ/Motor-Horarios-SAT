@@ -1,24 +1,18 @@
-# Python
+# Entornos Virtuales
+.venv/
 venv/
 env/
+ENV/
+
+# Archivos y carpetas generados por Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+
+# Herramientas de Test (pytest, etc.)
 .pytest_cache/
+.coverage
+htmlcov/
 
-# Database Local
-backend/database.db
-
-# Frontend (Node / React)
-frontend/node_modules/
-frontend/dist/
-frontend/.eslintcache
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.env
-
-# System Files
-.DS_Store
-Thumbs.db
+# Salidas de resultados (opcional, si no deseas versionar los json generados temporalmente)
+# data/output/*.json

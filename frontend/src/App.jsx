@@ -80,7 +80,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (isAuthenticated && activeTab === "admin") loadAdminData();
+    if (isAuthenticated) loadAdminData();
   }, [activeTab, isAuthenticated]);
 
   // --- Manejadores de Creación ---
@@ -115,41 +115,77 @@ function App() {
     setLoading(false);
   };
 
+  // --- Lookups para nombres ---
+  const cursoNombre = useMemo(() => {
+    const m = {};
+    cursos.forEach(c => { m[`CUR_${c.id_curso}`] = c.nombre_curso; });
+    return m;
+  }, [cursos]);
+
+  const profNombre = useMemo(() => {
+    const m = {};
+    profesores.forEach(p => { m[`PROF_${p.id_profesores}`] = p.nombre_profesor; });
+    return m;
+  }, [profesores]);
+
+  const seccionInfo = useMemo(() => {
+    const m = {};
+    secciones.forEach(sec => {
+      const grado = grados.find(g => g.id_grado === sec.id_grado);
+      const sede = sedes.find(s => s.id_sede === sec.id_sede);
+      m[`SEC_${sec.id_seccion}`] = `${sec.nombre} (${sede?.nombre_sede || ''})`;
+    });
+    return m;
+  }, [secciones, grados, sedes]);
+
   const seccionesOptions = useMemo(() => {
     if (!result?.asignaciones) return [];
-    return Array.from(new Set(result.asignaciones.map(a => a.seccion_id))).sort();
+    return Array.from(new Set(result.asignaciones.map(a => a.seccion_id)))
+      .sort((a, b) => parseInt(a.replace("SEC_", "")) - parseInt(b.replace("SEC_", "")));
   }, [result]);
 
   const matrixData = useMemo(() => {
     if (!result?.asignaciones || !selectedSeccion) return null;
     
     const ordenDias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
-    const exactDiasRaw = Array.from(new Set(result.asignaciones.map(a => a.dia)));
-    const exactDias = exactDiasRaw.sort((a, b) => ordenDias.indexOf(a) - ordenDias.indexOf(b));
-    const MAT_SLOTS = [1,2,3,4,5,6,7,8,9,10,11,12];
+    const secAsig = result.asignaciones.filter(a => a.seccion_id === selectedSeccion);
+    const exactDias = Array.from(new Set(secAsig.map(a => a.dia)))
+      .sort((a, b) => ordenDias.indexOf(a) - ordenDias.indexOf(b));
+    
+    // Detectar turno de esta sección
+    const turnosUsados = new Set(secAsig.map(a => a.turno));
+    const SLOTS = turnosUsados.has("Mañana") && turnosUsados.has("Tarde")
+      ? [1,2,3,4,5,6,7,8,9,10,11,12]
+      : turnosUsados.has("Tarde") ? [7,8,9,10,11,12] : [1,2,3,4,5,6];
     
     const mat = {};
-    MAT_SLOTS.forEach(slot => {
+    SLOTS.forEach(slot => {
       mat[slot] = {};
       exactDias.forEach(dia => { mat[slot][dia] = null; });
     });
 
-    result.asignaciones
-      .filter(a => a.seccion_id === selectedSeccion)
-      .forEach(a => {
-        const start = a.slot_inicio !== undefined ? a.slot_inicio + 1 : 1;
-        const dur = a.horas || 1;
-        for (let i = 0; i < dur; i++) {
-           const currSlot = start + i;
-           const absoluteSlot = a.turno === "Tarde" ? currSlot + 6 : currSlot;
-           if (mat[absoluteSlot] && mat[absoluteSlot][a.dia] !== undefined) {
-             mat[absoluteSlot][a.dia] = { ...a, is_start: i === 0 };
-           }
+    secAsig.forEach(a => {
+      const start = (a.slot_inicio !== undefined ? a.slot_inicio + 1 : 1);
+      const dur = a.horas || 1;
+      for (let i = 0; i < dur; i++) {
+        const currSlot = start + i;
+        const absSlot = a.turno === "Tarde" ? currSlot + 6 : currSlot;
+        if (mat[absSlot] && mat[absSlot][a.dia] !== undefined) {
+          mat[absSlot][a.dia] = { ...a, is_start: i === 0 };
         }
-      });
+      }
+    });
     
-    return { mat, exactDias, MAT_SLOTS };
+    return { mat, exactDias, SLOTS, turnosUsados };
   }, [result, selectedSeccion]);
+
+  // Color estable por curso_id
+  const getCourseColor = (cursoId) => {
+    const num = parseInt(cursoId.replace("CUR_", "")) || 0;
+    return `course-c${num % 18}`;
+  };
+
+  /* ====== RENDER ====== */
 
   if (!isAuthenticated) {
     return (
@@ -199,42 +235,49 @@ function App() {
             {result && result.asignaciones && result.asignaciones.length === 0 && (
                 <div style={{color: 'var(--text-main)', background: '#fffbeb', border: '1px solid #fde68a', padding: '1rem', borderRadius: '16px', textAlign: 'center', marginTop: '1rem'}}>
                   <h3>¡Horario Vacío!</h3>
-                  <p>El motor calculó el horario con éxito, pero no programó ninguna clase. Esto significa que <b>no has registrado ninguna Malla Curricular (Plan de Estudio)</b> para las Secciones/Grados actuales. Ve a Configuración Académica {'>'} Malla Curricular y asigna horas a tus cursos.</p>
+                  <p>El motor calculó el horario con éxito, pero no programó ninguna clase.</p>
                 </div>
             )}
             {result && matrixData && result.asignaciones.length > 0 && (
               <div style={{background: 'var(--bg-panel)', padding: '2rem', borderRadius: '24px', boxShadow: 'var(--shadow-sm)'}}>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem'}}>
-                  <h2 style={{color: 'var(--accent)'}}>Malla Curricular</h2>
-                  <select style={{padding: '0.5rem', borderRadius: '12px', border: '1px solid #cbd5e1'}} value={selectedSeccion} onChange={(e) => setSelectedSeccion(e.target.value)}>
-                    {seccionesOptions.map(sec => <option key={sec} value={sec}>Sección {sec.replace("SEC_", "")}</option>)}
+                <div className="schedule-header">
+                  <h2>📅 Malla Horaria</h2>
+                  <select className="schedule-select" value={selectedSeccion} onChange={(e) => setSelectedSeccion(e.target.value)}>
+                    {seccionesOptions.map(sec => (
+                      <option key={sec} value={sec}>{seccionInfo[sec] || sec}</option>
+                    ))}
                   </select>
+                </div>
+                <div className="schedule-stats">
+                  <span>📊 Estado: <b>{result.estado}</b></span>
+                  <span>⏱ {result.estadisticas?.tiempo_segundos?.toFixed(2)}s</span>
+                  <span>🔀 Turno: <b>{Array.from(matrixData.turnosUsados).join(" + ")}</b></span>
+                  <span>📝 {result.asignaciones.filter(a => a.seccion_id === selectedSeccion).length} clases</span>
                 </div>
                 <table className="calendar-grid">
                   <thead>
                     <tr><th>Hora</th>{matrixData.exactDias.map(d => <th key={d}>{d}</th>)}</tr>
                   </thead>
                   <tbody>
-                    {matrixData.MAT_SLOTS.map(slot => {
+                    {matrixData.SLOTS.map(slot => {
                       const shift = slot > 6 ? "Tarde" : "Mañana";
                       const localSlot = slot > 6 ? slot - 6 : slot;
                       return (
                       <tr key={slot}>
-                        <td style={{background: 'var(--bg-panel-light)', borderRadius: '12px', textAlign: 'center'}}>
+                        <td style={{background: 'var(--bg-panel-light)', borderRadius: '12px', textAlign: 'center', minWidth: '80px'}}>
                           Bloque {localSlot}<br/><small style={{color: 'var(--text-muted)'}}>{shift}</small>
                         </td>
                         {matrixData.exactDias.map(dia => {
                           const clase = matrixData.mat[slot][dia];
-                          const colorClass = clase ? `course-c${(clase.curso_id.charCodeAt(clase.curso_id.length-1) % 6) + 1}` : "";
                           return (
                             <td key={`${slot}-${dia}`} className={clase ? "filled-cell" : ""}>
                               {clase ? (
-                                <div className={`class-card ${colorClass}`}>
+                                <div className={`class-card ${getCourseColor(clase.curso_id)}`}>
                                   {clase.is_start ? (
-                                      <><strong style={{fontSize:'1.1rem'}}>{clase.curso_id.replace("CUR_", "ID ")}</strong><span style={{fontSize:'0.9rem', opacity: 0.9}}>{clase.profesor_id.replace("PROF_", "Prof ")}</span></>
-                                  ) : (<span style={{fontSize: '1.5rem'}}>↓</span>)}
+                                      <><strong style={{fontSize:'0.95rem'}}>{cursoNombre[clase.curso_id] || clase.curso_id}</strong><span style={{fontSize:'0.8rem', opacity: 0.85, marginTop: '2px'}}>{profNombre[clase.profesor_id] || clase.profesor_id}</span></>
+                                  ) : (<span style={{fontSize: '0.8rem', opacity: 0.7}}>↓ continúa</span>)}
                                 </div>
-                              ) : <span className="empty-text">Libre</span>}
+                              ) : <span className="empty-text">—</span>}
                             </td>
                           )
                         })}

@@ -13,6 +13,7 @@ from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
 from engine.solver import resolver_modelo
 from engine.exporter import exportar_resultados
+from engine.metrics import exportar_metricas
  
  
 def main():
@@ -73,7 +74,12 @@ def main():
     
     ruta_salida = "data/output/horario_result.json"
     print(f"\nExportando resultados a: {ruta_salida}")
-    exportar_resultados(dict_resultado, ruta_salida)
+    asignaciones_planas = exportar_resultados(dict_resultado, ruta_salida)
+    
+    if asignaciones_planas:
+        ruta_metricas = "data/output/metrics.json"
+        print(f"Exportando analítica y métricas a: {ruta_metricas}")
+        exportar_metricas(asignaciones_planas, ruta_metricas)
     
     print("\n--- ¡Motor de Búsqueda Finalizado con Éxito! ---")
  

@@ -1,0 +1,1569 @@
+{
+  "configuracion": {
+    "sedes": [
+      "Sede A",
+      "Sede B"
+    ],
+    "dias": [
+      "Lunes",
+      "Martes",
+      "Miercoles",
+      "Jueves",
+      "Viernes"
+    ],
+    "turnos": [
+      "Mañana",
+      "Tarde"
+    ],
+    "slots_por_turno": 6
+  },
+  "categorias": [
+    {
+      "id": "CAT_MAT",
+      "nombre": "Matemática",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_COM",
+      "nombre": "Comunicación",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_CYT",
+      "nombre": "Ciencia y Tecnología",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_CSS",
+      "nombre": "Ciencias Sociales",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_IDI",
+      "nombre": "Idiomas",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_EFI",
+      "nombre": "Educación Física",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_TUT",
+      "nombre": "Tutoría",
+      "max_horas_dia": 4
+    }
+  ],
+  "cursos": [
+    {
+      "id": "ALG1",
+      "nombre": "Álgebra",
+      "categoria_id": "CAT_MAT"
+    },
+    {
+      "id": "ARI1",
+      "nombre": "Aritmética",
+      "categoria_id": "CAT_MAT"
+    },
+    {
+      "id": "GEO1",
+      "nombre": "Geometría",
+      "categoria_id": "CAT_MAT"
+    },
+    {
+      "id": "TRI1",
+      "nombre": "Trigonometría",
+      "categoria_id": "CAT_MAT"
+    },
+    {
+      "id": "RM1",
+      "nombre": "Razonamiento Matemático",
+      "categoria_id": "CAT_MAT"
+    },
+    {
+      "id": "LIT1",
+      "nombre": "Literatura",
+      "categoria_id": "CAT_COM"
+    },
+    {
+      "id": "RV1",
+      "nombre": "Razonamiento Verbal",
+      "categoria_id": "CAT_COM"
+    },
+    {
+      "id": "ANA1",
+      "nombre": "Anatomía",
+      "categoria_id": "CAT_CYT"
+    },
+    {
+      "id": "BIO1",
+      "nombre": "Biología",
+      "categoria_id": "CAT_CYT"
+    },
+    {
+      "id": "QUI1",
+      "nombre": "Química",
+      "categoria_id": "CAT_CYT"
+    },
+    {
+      "id": "FE1",
+      "nombre": "Física Elemental",
+      "categoria_id": "CAT_CYT"
+    },
+    {
+      "id": "HGE1",
+      "nombre": "Historia y Geografía",
+      "categoria_id": "CAT_CSS"
+    },
+    {
+      "id": "ECO1",
+      "nombre": "Economía",
+      "categoria_id": "CAT_CSS"
+    },
+    {
+      "id": "FIL1",
+      "nombre": "Filosofía",
+      "categoria_id": "CAT_CSS"
+    },
+    {
+      "id": "DPC1",
+      "nombre": "Desarrollo Personal, Ciudadana y Cívica (DPCC)",
+      "categoria_id": "CAT_CSS"
+    },
+    {
+      "id": "ING1",
+      "nombre": "Inglés",
+      "categoria_id": "CAT_IDI"
+    },
+    {
+      "id": "EFI1",
+      "nombre": "Educación Física",
+      "categoria_id": "CAT_EFI"
+    },
+    {
+      "id": "TUT1",
+      "nombre": "Tutoría",
+      "categoria_id": "CAT_TUT"
+    }
+  ],
+  "grados": [
+    {
+      "id": "GRADO_1",
+      "nombre": "1°",
+      "cursos_requeridos": [
+        {
+          "curso_id": "ALG1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "ARI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "GEO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TRI1",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "RM1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "LIT1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "RV1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "BIO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "QUI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "FE1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "HGE1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "DPC1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "ING1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "EFI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TUT1",
+          "horas_semanales": 1
+        }
+      ]
+    },
+    {
+      "id": "GRADO_2",
+      "nombre": "2°",
+      "cursos_requeridos": [
+        {
+          "curso_id": "ALG1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "ARI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "GEO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TRI1",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "RM1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "LIT1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "RV1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "BIO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "QUI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "FE1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "HGE1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "DPC1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "ING1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "EFI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TUT1",
+          "horas_semanales": 1
+        }
+      ]
+    },
+    {
+      "id": "GRADO_3",
+      "nombre": "3°",
+      "cursos_requeridos": [
+        {
+          "curso_id": "ALG1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "ARI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "GEO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TRI1",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "RM1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "LIT1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "RV1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "BIO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "QUI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "FE1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "HGE1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "DPC1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "ING1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "EFI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TUT1",
+          "horas_semanales": 1
+        }
+      ]
+    },
+    {
+      "id": "GRADO_4",
+      "nombre": "4°",
+      "cursos_requeridos": [
+        {
+          "curso_id": "ALG1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "GEO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TRI1",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "RM1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "LIT1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "RV1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "ANA1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "BIO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "QUI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "FE1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "HGE1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "ECO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "ING1",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "EFI1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TUT1",
+          "horas_semanales": 1
+        }
+      ]
+    },
+    {
+      "id": "GRADO_5",
+      "nombre": "5°",
+      "cursos_requeridos": [
+        {
+          "curso_id": "ALG1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "GEO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TRI1",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "RM1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "LIT1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "RV1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "ANA1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "BIO1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "QUI1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "FE1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "HGE1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "ECO1",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TUT1",
+          "horas_semanales": 1
+        }
+      ]
+    }
+  ],
+  "profesores": [
+    {
+      "id": "P001",
+      "nombre": "Juan Perez",
+      "cursos_habilitados": [
+        "ARI1",
+        "GEO1",
+        "TRI1",
+        "RM1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P002",
+      "nombre": "Maria Lopez",
+      "cursos_habilitados": [
+        "LIT1",
+        "RV1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P003",
+      "nombre": "Carlos Rios",
+      "cursos_habilitados": [
+        "ANA1",
+        "BIO1",
+        "QUI1",
+        "FE1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P004",
+      "nombre": "Ana Torres",
+      "cursos_habilitados": [
+        "HGE1",
+        "ECO1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P005",
+      "nombre": "Luis Mendoza",
+      "cursos_habilitados": [
+        "FIL1",
+        "DPC1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P006",
+      "nombre": "Sofia Vargas",
+      "cursos_habilitados": [
+        "ING1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P007",
+      "nombre": "Roberto Chavez",
+      "cursos_habilitados": [
+        "EFI1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P008",
+      "nombre": "Carmen Diaz",
+      "cursos_habilitados": [
+        "TUT1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P009",
+      "nombre": "Jorge Ramirez",
+      "cursos_habilitados": [
+        "ALG1",
+        "ARI1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P010",
+      "nombre": "Patricia Flores",
+      "cursos_habilitados": [
+        "GEO1",
+        "TRI1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P011",
+      "nombre": "Andres Castillo",
+      "cursos_habilitados": [
+        "RM1",
+        "ALG1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P012",
+      "nombre": "Valeria Gutierrez",
+      "cursos_habilitados": [
+        "LIT1",
+        "RV1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P013",
+      "nombre": "Ricardo Morales",
+      "cursos_habilitados": [
+        "LIT1",
+        "RV1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P014",
+      "nombre": "Claudia Herrera",
+      "cursos_habilitados": [
+        "ANA1",
+        "BIO1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P015",
+      "nombre": "Miguel Sanchez",
+      "cursos_habilitados": [
+        "QUI1",
+        "FE1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P016",
+      "nombre": "Daniela Vega",
+      "cursos_habilitados": [
+        "ANA1",
+        "QUI1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P017",
+      "nombre": "Fernando Paredes",
+      "cursos_habilitados": [
+        "HGE1",
+        "ECO1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P018",
+      "nombre": "Gabriela Quispe",
+      "cursos_habilitados": [
+        "FIL1",
+        "DPC1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P019",
+      "nombre": "Eduardo Mamani",
+      "cursos_habilitados": [
+        "HGE1",
+        "FIL1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P020",
+      "nombre": "Lucia Condori",
+      "cursos_habilitados": [
+        "ING1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P021",
+      "nombre": "Kevin Soto",
+      "cursos_habilitados": [
+        "ING1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P022",
+      "nombre": "Diana Pinto",
+      "cursos_habilitados": [
+        "EFI1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P023",
+      "nombre": "Hector Medina",
+      "cursos_habilitados": [
+        "EFI1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P024",
+      "nombre": "Silvia Ramos",
+      "cursos_habilitados": [
+        "TUT1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "P025",
+      "nombre": "Oscar Huanca",
+      "cursos_habilitados": [
+        "TUT1"
+      ],
+      "max_horas_dia": 6,
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Martes": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Jueves": [
+          "Mañana",
+          "Tarde"
+        ],
+        "Viernes": [
+          "Mañana",
+          "Tarde"
+        ]
+      }
+    }
+  ],
+  "secciones": [
+    {
+      "id": "A_1A",
+      "nombre": "1° A",
+      "grado": "GRADO_1",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "A_1B",
+      "nombre": "1° B",
+      "grado": "GRADO_1",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "A_2A",
+      "nombre": "2° A",
+      "grado": "GRADO_2",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "A_2B",
+      "nombre": "2° B",
+      "grado": "GRADO_2",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "A_3",
+      "nombre": "3°",
+      "grado": "GRADO_3",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "A_4",
+      "nombre": "4°",
+      "grado": "GRADO_4",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Tarde"
+        ],
+        "Martes": [
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Tarde"
+        ],
+        "Jueves": [
+          "Tarde"
+        ],
+        "Viernes": [
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "A_5A",
+      "nombre": "5° A",
+      "grado": "GRADO_5",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Tarde"
+        ],
+        "Martes": [
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Tarde"
+        ],
+        "Jueves": [
+          "Tarde"
+        ],
+        "Viernes": [
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "A_5B",
+      "nombre": "5° B",
+      "grado": "GRADO_5",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Tarde"
+        ],
+        "Martes": [
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Tarde"
+        ],
+        "Jueves": [
+          "Tarde"
+        ],
+        "Viernes": [
+          "Tarde"
+        ]
+      }
+    },
+    {
+      "id": "B_1A",
+      "nombre": "1° A",
+      "grado": "GRADO_1",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "B_1B",
+      "nombre": "1° B",
+      "grado": "GRADO_1",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "B_2",
+      "nombre": "2°",
+      "grado": "GRADO_2",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "B_3",
+      "nombre": "3°",
+      "grado": "GRADO_3",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "B_4",
+      "nombre": "4°",
+      "grado": "GRADO_4",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "B_5",
+      "nombre": "5°",
+      "grado": "GRADO_5",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    }
+  ]
+}

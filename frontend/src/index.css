@@ -294,13 +294,61 @@ body {
   font-size: 0.9rem;
 }
 
-/* Colores Material You dinamicos */
-.course-c1 { background: #3b82f6; }
-.course-c2 { background: #ef4444; }
-.course-c3 { background: #10b981; }
-.course-c4 { background: #f97316; }
-.course-c5 { background: #8b5cf6; }
-.course-c6 { background: #ec4899; }
+/* Colores Material You - 18 cursos */
+.course-c0  { background: #3b82f6; }
+.course-c1  { background: #ef4444; }
+.course-c2  { background: #10b981; }
+.course-c3  { background: #f97316; }
+.course-c4  { background: #8b5cf6; }
+.course-c5  { background: #ec4899; }
+.course-c6  { background: #06b6d4; }
+.course-c7  { background: #84cc16; }
+.course-c8  { background: #e11d48; }
+.course-c9  { background: #7c3aed; }
+.course-c10 { background: #0891b2; }
+.course-c11 { background: #ca8a04; }
+.course-c12 { background: #059669; }
+.course-c13 { background: #dc2626; }
+.course-c14 { background: #4f46e5; }
+.course-c15 { background: #0d9488; }
+.course-c16 { background: #d97706; }
+.course-c17 { background: #9333ea; }
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.schedule-header h2 { margin: 0; color: var(--accent); }
+
+.schedule-select {
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--bg-panel-light);
+  color: var(--text-main);
+  min-width: 200px;
+}
+
+.schedule-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.schedule-stats span { 
+  background: var(--bg-panel-light);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+}
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(10px); }

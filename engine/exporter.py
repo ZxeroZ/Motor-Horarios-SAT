@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import collections
 
-def exportar_resultados(resultados_solver: dict, ruta_salida: str) -> None:
+def exportar_resultados(resultados_solver: dict, ruta_salida: str) -> list:
     """
     Toma los resultados puros de los bloques Z del solver y los desempaqueta para
     serializarlos en formato plano a un archivo JSON (manteniendo la misma estructura
@@ -83,3 +83,5 @@ def exportar_resultados(resultados_solver: dict, ruta_salida: str) -> None:
     
     with open(ruta, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
+        
+    return asignaciones_planas
