@@ -389,3 +389,50 @@ from backend.engine_connector import generar_horario_engine
 def desencadenar_motor(session: Session = Depends(get_session)):
     resultado = generar_horario_engine(session)
     return resultado
+
+@app.get("/api/cargar-horario")
+def cargar_horario_guardado(session: Session = Depends(get_session)):
+    """Lee horario_final de la BD y lo devuelve en formato del motor."""
+    rows = session.exec(select(HorarioFinal)).all()
+    if not rows:
+        return {"status": "empty", "resultado": None}
+    
+    # Lookups inversos
+    dias_db = {d.id_dia: d.nombre_dia for d in session.exec(select(Dias)).all()}
+    from backend.models import Bloque
+    bloques_db = {}
+    turnos_db = {t.id_turno: t.nombre for t in session.exec(select(Turno)).all()}
+    for b in session.exec(select(Bloque)).all():
+        bloques_db[b.id_bloque] = (b.id_turno, b.numero_bloque)
+    
+    # Agrupar slots en bloques contiguos: (seccion, curso, profesor, dia, turno) -> slots
+    from collections import defaultdict
+    grupos = defaultdict(list)
+    for r in rows:
+        turno_id, num_bloque = bloques_db.get(r.id_bloque, (1, 1))
+        turno_nombre = turnos_db.get(turno_id, "Mañana")
+        key = (r.id_seccion, r.id_curso, r.id_profesor, r.id_dia, turno_nombre)
+        grupos[key].append(num_bloque)
+    
+    asignaciones = []
+    for (sec, cur, prof, dia_id, turno), slots in grupos.items():
+        slots.sort()
+        asignaciones.append({
+            "seccion_id": f"SEC_{sec}",
+            "curso_id": f"CUR_{cur}",
+            "profesor_id": f"PROF_{prof}",
+            "dia": dias_db.get(dia_id, ""),
+            "turno": turno,
+            "slot_inicio": slots[0] - 1,
+            "horas": len(slots)
+        })
+    
+    return {
+        "status": "success",
+        "resultado": {
+            "estado": "GUARDADO",
+            "mensaje": "Horario cargado desde la base de datos.",
+            "estadisticas": {"tiempo_segundos": 0, "ramas_exploradas": 0, "conflictos": 0},
+            "asignaciones": asignaciones
+        }
+    }

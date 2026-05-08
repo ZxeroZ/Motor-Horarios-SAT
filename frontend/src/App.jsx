@@ -83,6 +83,20 @@ function App() {
     if (isAuthenticated) loadAdminData();
   }, [activeTab, isAuthenticated]);
 
+  // Cargar horario guardado al iniciar
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetch("http://localhost:8000/api/cargar-horario")
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === "success" && data.resultado?.asignaciones?.length > 0) {
+          setResult(data.resultado);
+          setSelectedSeccion(data.resultado.asignaciones[0].seccion_id);
+        }
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
+
   // --- Manejadores de Creación ---
   const handleCreate = async (endpoint, payload, resetFn) => {
     await fetch(`http://localhost:8000/api/${endpoint}`, {
