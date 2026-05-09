@@ -10,6 +10,7 @@ def preprocesar(datos: dict) -> dict:
     profesores_lista = datos.get("profesores", [])
     secciones_lista = datos.get("secciones", [])
     configuracion = datos.get("configuracion", {})
+    tutorias = datos.get("tutorias", {})
 
     # Mapeos básicos para acceso O(1)
     profesores_dict = {p["id"]: p for p in profesores_lista}
@@ -71,4 +72,5 @@ def preprocesar(datos: dict) -> dict:
         "requerimientos_seccion": requerimientos_seccion,
         "disp_seccion": disp_seccion,
         "disp_profesor": disp_profesor,
+        "tutorias": tutorias,
     }

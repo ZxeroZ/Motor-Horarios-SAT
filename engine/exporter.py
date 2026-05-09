@@ -16,7 +16,8 @@ def exportar_resultados(resultados_solver: dict, ruta_salida: str) -> list:
         "Martes": 2,
         "Miercoles": 3,
         "Jueves": 4,
-        "Viernes": 5
+        "Viernes": 5,
+        "Sábado": 6
     }
 
     # Desempaquetamos los bloques en slots individuales lineales (0-indexed base)

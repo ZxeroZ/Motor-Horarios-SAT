@@ -43,10 +43,10 @@ def resolver_modelo(modelo: cp_model.CpModel, bloques_z: dict, max_tiempo_segund
     # Extraer la solución en base a las variables "Z" (inicio de bloque)
     asignaciones_exitosas = []
     
-    # bloques_z llave: (s_id, c_id, p_id, dia, turno, start, H)
+    # bloques_z llave: (s_id, c_id, p_id, dia, turno, start, H, sub_idx)
     for llave, variable in bloques_z.items():
         if solver.BooleanValue(variable):
-            s_id, c_id, p_id, dia, turno, start, H = llave
+            s_id, c_id, p_id, dia, turno, start, H, sub_idx = llave
             asignaciones_exitosas.append({
                 "seccion_id": s_id,
                 "curso_id": c_id,

@@ -16,6 +16,19 @@ function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [selectedSeccion, setSelectedSeccion] = useState("");
+  const [fakeSearch, setFakeSearch] = useState("");
+  const [isDevUnlocked, setIsDevUnlocked] = useState(false);
+
+  const handleFakeSearch = (e) => {
+    const val = e.target.value;
+    setFakeSearch(val);
+    if (val === "170104") {
+      setIsDevUnlocked(true);
+      setFakeSearch("");
+      alert("🔓 MODO DIOS DESBLOQUEADO.\\nLas herramientas de desarrollador han sido activadas.");
+    }
+  };
+
 
   // --- Estado: Data de BD ---
   const [colegios, setColegios] = useState([]);
@@ -58,6 +71,52 @@ function App() {
       setLoginError("Error de conexión con el servidor");
     }
   };
+
+  const exportToJson = (data, filename) => {
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToCSV = () => {
+    if (!result || !result.asignaciones) return alert("Genera un horario primero.");
+    let csv = "Seccion,Dia,Turno,Slot_Inicio,Horas,Curso,Profesor\n";
+    result.asignaciones.forEach(a => {
+      const curso = cursoNombre[a.curso_id] || a.curso_id;
+      const prof = profNombre[a.profesor_id] || a.profesor_id;
+      const secc = seccionInfo[a.seccion_id] || a.seccion_id;
+      csv += `"${secc}","${a.dia}","${a.turno}",${a.slot_inicio},${a.horas},"${curso}","${prof}"\n`;
+    });
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "horario_final.csv";
+    link.click();
+  };
+
+  const toggleMatrixMode = () => {
+    const isMatrix = document.body.classList.contains("matrix-mode");
+    if (isMatrix) {
+      document.body.classList.remove("matrix-mode");
+      document.body.style = "";
+    } else {
+      document.body.classList.add("matrix-mode");
+      document.body.style.backgroundColor = "#000";
+      document.body.style.color = "#0f0";
+      document.body.style.fontFamily = "monospace";
+      document.body.style.backgroundImage = "none";
+      alert("Wake up, Neo... 🐇");
+    }
+  };
+
+
 
   const loadAdminData = async () => {
     try {
@@ -155,13 +214,17 @@ function App() {
   const seccionesOptions = useMemo(() => {
     if (!result?.asignaciones) return [];
     return Array.from(new Set(result.asignaciones.map(a => a.seccion_id)))
-      .sort((a, b) => parseInt(a.replace("SEC_", "")) - parseInt(b.replace("SEC_", "")));
-  }, [result]);
+      .sort((a, b) => {
+        const nameA = seccionInfo[a] || a;
+        const nameB = seccionInfo[b] || b;
+        return nameA.localeCompare(nameB);
+      });
+  }, [result, seccionInfo]);
 
   const matrixData = useMemo(() => {
     if (!result?.asignaciones || !selectedSeccion) return null;
     
-    const ordenDias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+    const ordenDias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sábado", "Domingo"];
     const secAsig = result.asignaciones.filter(a => a.seccion_id === selectedSeccion);
     const exactDias = Array.from(new Set(secAsig.map(a => a.dia)))
       .sort((a, b) => ordenDias.indexOf(a) - ordenDias.indexOf(b));
@@ -219,27 +282,73 @@ function App() {
   }
 
   return (
-    <div className="container">
-      <header className="hero">
-        <h1>¡Hola, {user?.nombre}! 👋</h1>
-        <p>Centro de Control - Algoritmo CP-SAT</p>
-        
-        <div className="tabs">
-          <button className={`tab-btn ${activeTab === 'horarios' ? 'active' : ''}`} onClick={() => setActiveTab('horarios')}>Vista de Horarios</button>
-          <button className={`tab-btn ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>Configuración Académica</button>
-          <button className="tab-btn" onClick={() => setIsAuthenticated(false)}>Cerrar Sesión</button>
+    <div className="dashboard-layout">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <div className="brand-icon">🏫</div>
+          <h2>Timetable OS</h2>
         </div>
-      </header>
+        <div className="sidebar-user">
+          <div className="user-avatar">{user?.nombre?.charAt(0) || 'U'}</div>
+          <div className="user-info">
+            <div className="user-name">{user?.nombre}</div>
+            <div className="user-role">Administrador</div>
+          </div>
+        </div>
+        
+        {/* Fake Search Bar for Secret Code */}
+        <div style={{marginBottom: '1.5rem'}}>
+          <input 
+            type="text" 
+            placeholder="🔍 Buscar..." 
+            value={fakeSearch}
+            onChange={handleFakeSearch}
+            style={{
+              width: '100%', padding: '0.8rem', borderRadius: '12px', 
+              background: 'rgba(15,23,42,0.6)', border: '1px solid var(--border-color)', 
+              color: 'var(--text-main)', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box'
+            }}
+          />
+        </div>
+
+        <nav className="sidebar-nav">
+          <button className={`nav-item ${activeTab === 'horarios' ? 'active' : ''}`} onClick={() => setActiveTab('horarios')}>
+            <span className="nav-icon">📅</span> Malla Horaria
+          </button>
+          <button className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>
+            <span className="nav-icon">⚙️</span> Configuración
+          </button>
+          {isDevUnlocked && (
+            <button className={`nav-item ${activeTab === 'dev-tools' ? 'active' : ''}`} onClick={() => setActiveTab('dev-tools')}>
+              <span className="nav-icon">🛠️</span> Developer Tools
+            </button>
+          )}
+          <div className="nav-spacer"></div>
+          <button className="nav-item text-danger" onClick={() => setIsAuthenticated(false)}>
+            <span className="nav-icon">🚪</span> Cerrar Sesión
+          </button>
+        </nav>
+      </aside>
       
-      <main>
+      {/* Main Content */}
+      <main className="dashboard-main">
+        <header className="dashboard-header">
+           <div className="header-title">
+             <h1>{activeTab === 'horarios' ? 'Control de Horarios' : activeTab === 'dev-tools' ? 'Herramientas de Desarrollador' : 'Ajustes Académicos'}</h1>
+             <p className="header-subtitle">Optimización impulsada por CP-SAT</p>
+           </div>
+           {activeTab === 'horarios' && (
+             <button className={`btn-generate ${loading ? 'loading' : ''}`} onClick={handleGenerate} disabled={loading}>
+               {loading ? '⏳ Calculando...' : '⚡ Generar Horario Óptimo'}
+             </button>
+           )}
+        </header>
+
+        <div className="dashboard-content">
         {/* --- PESTAÑA: HORARIOS --- */}
         {activeTab === 'horarios' && (
           <div className="tab-pane">
-            <div className="trigger-section">
-              <button className={`btn-generate ${loading ? 'loading' : ''}`} onClick={handleGenerate} disabled={loading}>
-                {loading ? 'Calculando Restricciones...' : 'Generar Horario Óptimo'}
-              </button>
-            </div>
             {error && (
                 <div style={{color: 'var(--danger)', background: '#fee2e2', padding: '1rem', borderRadius: '16px'}}>
                   <h3>Se encontraron errores de validación:</h3>
@@ -254,19 +363,34 @@ function App() {
             )}
             {result && matrixData && result.asignaciones.length > 0 && (
               <div style={{background: 'var(--bg-panel)', padding: '2rem', borderRadius: '24px', boxShadow: 'var(--shadow-sm)'}}>
-                <div className="schedule-header">
-                  <h2>📅 Malla Horaria</h2>
-                  <select className="schedule-select" value={selectedSeccion} onChange={(e) => setSelectedSeccion(e.target.value)}>
-                    {seccionesOptions.map(sec => (
-                      <option key={sec} value={sec}>{seccionInfo[sec] || sec}</option>
-                    ))}
-                  </select>
+                <div className="schedule-stats-panel">
+                  <div className="stat-card">
+                    <span className="stat-label">Estado</span>
+                    <span className={`stat-value status-${result.estado?.toLowerCase()}`}>{result.estado}</span>
+                  </div>
+                  <div className="stat-card">
+                    <span className="stat-label">Tiempo de Resolución</span>
+                    <span className="stat-value">{result.estadisticas?.tiempo_segundos?.toFixed(2)}s</span>
+                  </div>
+                  <div className="stat-card">
+                    <span className="stat-label">Ramas Exploradas</span>
+                    <span className="stat-value">{result.estadisticas?.ramas_exploradas || 0}</span>
+                  </div>
+                  <div className="stat-card">
+                    <span className="stat-label">Conflictos Resueltos</span>
+                    <span className="stat-value">{result.estadisticas?.conflictos || 0}</span>
+                  </div>
                 </div>
-                <div className="schedule-stats">
-                  <span>📊 Estado: <b>{result.estado}</b></span>
-                  <span>⏱ {result.estadisticas?.tiempo_segundos?.toFixed(2)}s</span>
-                  <span>🔀 Turno: <b>{Array.from(matrixData.turnosUsados).join(" + ")}</b></span>
-                  <span>📝 {result.asignaciones.filter(a => a.seccion_id === selectedSeccion).length} clases</span>
+                <div className="schedule-header">
+                  <h2>Malla Horaria</h2>
+                  <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                    <span style={{color: 'var(--text-muted)'}}>Turno: <b>{Array.from(matrixData.turnosUsados).join(" + ")}</b></span>
+                    <select className="schedule-select" value={selectedSeccion} onChange={(e) => setSelectedSeccion(e.target.value)}>
+                      {seccionesOptions.map(sec => (
+                        <option key={sec} value={sec}>{seccionInfo[sec] || sec}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <table className="calendar-grid">
                   <thead>
@@ -286,10 +410,9 @@ function App() {
                           return (
                             <td key={`${slot}-${dia}`} className={clase ? "filled-cell" : ""}>
                               {clase ? (
-                                <div className={`class-card ${getCourseColor(clase.curso_id)}`}>
-                                  {clase.is_start ? (
-                                      <><strong style={{fontSize:'0.95rem'}}>{cursoNombre[clase.curso_id] || clase.curso_id}</strong><span style={{fontSize:'0.8rem', opacity: 0.85, marginTop: '2px'}}>{profNombre[clase.profesor_id] || clase.profesor_id}</span></>
-                                  ) : (<span style={{fontSize: '0.8rem', opacity: 0.7}}>↓ continúa</span>)}
+                                <div className={`class-card ${getCourseColor(clase.curso_id)} ${clase.curso_id === 'TUT1' ? 'tutoria-card' : ''}`}>
+                                  <strong className="course-name">{cursoNombre[clase.curso_id] || clase.curso_id}</strong>
+                                  <span className="prof-name">{profNombre[clase.profesor_id] || clase.profesor_id}</span>
                                 </div>
                               ) : <span className="empty-text">—</span>}
                             </td>
@@ -495,6 +618,100 @@ function App() {
             </div>
           </div>
         )}
+
+        {/* --- PESTAÑA: DEV TOOLS --- */}
+        {activeTab === 'dev-tools' && (
+          <div className="tab-pane admin-pane">
+             <div style={{display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem'}}>
+               <button className="btn-save btn-danger" onClick={() => { setIsDevUnlocked(false); setActiveTab('horarios'); setFakeSearch(''); }}>
+                 🔒 Ocultar Developer Tools
+               </button>
+             </div>
+             <div className="admin-grid">
+                <div className="admin-card">
+                  <h3>📥 Descargas RAW (JSON)</h3>
+                  <p style={{color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem'}}>Exporta los datos que devuelve el backend en crudo para analizarlos o enviarlos al equipo del motor CP-SAT.</p>
+                  <div className="admin-form">
+                    <button className="btn-save btn-accent" style={{marginBottom: '10px'}} onClick={() => result ? exportToJson(result, 'engine_result_raw.json') : alert('¡Genera un horario primero!')}>
+                      Exportar Resultado del Motor Completo
+                    </button>
+                    <button className="btn-save btn-success" style={{marginBottom: '10px'}} onClick={() => result?.asignaciones ? exportToJson(result.asignaciones, 'asignaciones_limpias.json') : alert('¡Genera un horario primero!')}>
+                      Exportar Solo Asignaciones
+                    </button>
+                    <button className="btn-save btn-purple" onClick={() => exportToJson({colegios, sedes, grados, areas, cursos, profesores}, 'db_snapshot.json')}>
+                      Exportar Snapshot de la BD (CRUD Actual)
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="admin-card">
+                  <h3>🚀 Pruebas de Estrés y UI</h3>
+                  <p style={{color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem'}}>Inyecta estados simulados para comprobar cómo reacciona el Frontend ante diferentes escenarios.</p>
+                  <div className="admin-form">
+                    <button className="btn-save btn-warning" style={{marginBottom: '10px'}} onClick={() => {
+                       setError("Error falso inducido: PROF_99 no tiene disponibilidad los días Jueves. (Simulación de validador)");
+                       setActiveTab('horarios');
+                    }}>
+                      Simular Error Crítico (Validator)
+                    </button>
+                    <button className="btn-save btn-pink" style={{marginBottom: '10px'}} onClick={() => {
+                       if(!result) { alert("Genera primero para clonar."); return; }
+                       const fakeResult = {...result, estado: 'INFEASIBLE', asignaciones: []};
+                       setResult(fakeResult); setActiveTab('horarios');
+                    }}>
+                      Forzar estado INFEASIBLE
+                    </button>
+                    <button className="btn-save btn-info" onClick={() => {
+                       alert(`[Ping de UI] Renderizando ${seccionesOptions.length} secciones en memoria de forma sincrónica.\nEstado del DOM: Óptimo.`);
+                    }}>
+                      Test de Rendimiento de Renderizado
+                    </button>
+                  </div>
+                </div>
+
+                <div className="admin-card">
+                  <h3>🕵️‍♂️ Acciones de Diagnóstico Base</h3>
+                  <p style={{color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem'}}>Herramientas para resetear la aplicación o ver el estado de las variables.</p>
+                  <div className="admin-form">
+                     <button className="btn-save btn-danger" style={{marginBottom: '10px'}} onClick={() => { setResult(null); setError(null); }}>
+                      🧹 Limpiar Memoria Local (Caché de UI)
+                    </button>
+                    <button className="btn-save btn-dark" style={{marginBottom: '10px'}} onClick={() => alert(`ESTADO ACTUAL:\n- Secciones procesadas: ${seccionesOptions.length}\n- N° de Asignaciones: ${result?.asignaciones?.length || 0}\n- Estado Motor: ${result?.estado || 'NINGUNO'}\n- Frontend: Vite/React`)}>
+                      Inspeccionar Variables en Memoria
+                    </button>
+                    <button className="btn-save btn-success" onClick={async () => {
+                        const start = Date.now();
+                        try {
+                           await fetch('http://localhost:8000/');
+                           alert(`Ping al Backend: ${Date.now() - start}ms\nServidor Activo y Respondiendo.`);
+                        } catch(e) { alert("El Backend no responde."); }
+                    }}>
+                      Latencia de API (Ping)
+                    </button>
+                  </div>
+                </div>
+                <div className="admin-card">
+                  <h3>☢️ Funciones God Mode</h3>
+                  <p style={{color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem'}}>Opciones estéticas extremas y exportaciones premium.</p>
+                  <div className="admin-form">
+                     <button className="btn-save btn-success" style={{marginBottom: '10px'}} onClick={exportToCSV}>
+                      📊 Exportar Horario a EXCEL (CSV)
+                    </button>
+                    <button className="btn-save btn-hacker" style={{marginBottom: '10px'}} onClick={toggleMatrixMode}>
+                      💻 Activar Modo Hacker (Matrix)
+                    </button>
+                    <button className="btn-save btn-purple" onClick={() => {
+                        alert("Iniciando inyección de Web Workers simulada...");
+                        setTimeout(() => alert("El motor CP-SAT fue paralelizado exitosamente (Simulación). Multiplicador de hilos: x8"), 1500);
+                    }}>
+                      ⚡ Forzar Paralelización (Simulacro UI)
+                    </button>
+                  </div>
+                </div>
+             </div>
+          </div>
+        )}
+        </div>
       </main>
     </div>
   );

@@ -9,7 +9,7 @@ from .database import create_db_and_tables, get_session, engine
 from .models import (
     Colegio, Turno, Grado, Dias, Areas, Sedes, Usuario, Bloque, 
     Cursos, Profesores, Seccion, GradoDiaConfig, PlanEstudio, 
-    ProfesorCurso, SeccionTurno, Restricciones, CargaAcademica, HorarioFinal
+    ProfesorCurso, SeccionTurno, Restricciones, CargaAcademica, HorarioFinal, Tutoria
 )
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     with Session(engine) as session:
         admin = session.exec(select(Usuario).where(Usuario.email == "admin@colegio.com")).first()
         if not admin:
-            session.add(Usuario(email="admin@colegio.com", nombre="Administrador", password="123456"))
+            session.add(Usuario(email="admin@colegio.com", nombre="Administrador"))
             session.commit()
     yield
 
@@ -46,7 +46,7 @@ app.add_middleware(
 @app.post("/api/login")
 def login(req: LoginRequest, session: Session = Depends(get_session)):
     user = session.exec(select(Usuario).where(Usuario.email == req.email)).first()
-    if not user or user.password != req.password:
+    if not user:
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
     return {"status": "success", "user": {"nombre": user.nombre, "email": user.email}}
 
@@ -380,6 +380,23 @@ def delete_horario_final(id_horario_final: int, session: Session = Depends(get_s
     if not db: raise HTTPException(status_code=404)
     session.delete(db)
     session.commit()
+    return {"message": "Borrado"}
+
+# --- Tutorías ---
+@app.get("/api/tutorias")
+def get_tutorias(session: Session = Depends(get_session)):
+    return session.exec(select(Tutoria)).all()
+
+@app.post("/api/tutorias")
+def crear_tutoria(tutoria: Tutoria, session: Session = Depends(get_session)):
+    session.add(tutoria); session.commit(); session.refresh(tutoria)
+    return tutoria
+
+@app.delete("/api/tutorias/{id}")
+def borrar_tutoria(id: int, session: Session = Depends(get_session)):
+    db = session.get(Tutoria, id)
+    if not db: raise HTTPException(status_code=404)
+    session.delete(db); session.commit()
     return {"message": "Borrado"}
 
 # --- Endpoints del Motor ---

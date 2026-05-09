@@ -196,10 +196,6 @@ def validar_profesores(
             errores.append(f"[profesores][{pid}] Falta el campo 'cursos_habilitados'")
         else:
             habilitados = profesor["cursos_habilitados"]
-            if len(habilitados) == 0:
-                errores.append(
-                    f"[profesores][{pid}] 'cursos_habilitados' no puede estar vacío"
-                )
             for curso_id in habilitados:
                 if curso_id not in ids_cursos:
                     errores.append(
@@ -314,11 +310,30 @@ def validar_secciones(
     return errores
  
  
+def validar_tutorias(tutorias: dict, ids_secciones: set[str], ids_profesores: set[str]) -> list[str]:
+    errores = []
+    
+    conteo_tutor = {}
+    for sid, pid in tutorias.items():
+        if sid not in ids_secciones:
+            errores.append(f"[tutorias] La sección '{sid}' no existe en la lista de secciones")
+        if pid not in ids_profesores:
+            errores.append(f"[tutorias] El profesor '{pid}' asignado a la sección '{sid}' no existe")
+            continue
+            
+        conteo_tutor[pid] = conteo_tutor.get(pid, 0) + 1
+        if conteo_tutor[pid] > 2:
+            errores.append(f"[tutorias] El profesor '{pid}' excede el límite de 2 tutorías asignadas")
+            
+    return errores
+ 
+ 
 def validar_cobertura(
     secciones: list[dict],
     profesores: list[dict],
     cursos: list[dict],
     grados: list[dict],
+    tutorias: dict,
 ) -> list[str]:
     """
     Verifica que cada curso requerido por cada sección tenga al menos
@@ -340,6 +355,15 @@ def validar_cobertura(
             curso_id = req.get("curso_id")
             if curso_id not in mapa_cursos:
                 continue  # Ya reportado en validar_grados
+                
+            if curso_id == "TUT1":
+                if not tutorias.get(sid):
+                    errores.append(
+                        f"[cobertura][{sid}] El curso de tutoría (TUT1) no tiene un "
+                        f"tutor pre-asignado en el segmento 'tutorias'"
+                    )
+                continue
+                
             profesores_aptos = [
                 p for p in profesores
                 if curso_id in p.get("cursos_habilitados", [])
@@ -365,6 +389,7 @@ def validar_todo(datos: dict) -> list[str]:
     profesores    = datos.get("profesores", [])
     secciones     = datos.get("secciones", [])
     grados        = datos.get("grados", [])
+    tutorias      = datos.get("tutorias", {})
  
     errores = []
     errores += validar_configuracion(configuracion)
@@ -396,7 +421,12 @@ def validar_todo(datos: dict) -> list[str]:
     errores += validar_secciones(
         secciones, ids_grados, sedes_validas, dias_validos, turnos_validos
     )
-    errores += validar_cobertura(secciones, profesores, cursos, grados)
+    
+    ids_secciones = {s["id"] for s in secciones if "id" in s}
+    ids_profesores = {p["id"] for p in profesores if "id" in p}
+    errores += validar_tutorias(tutorias, ids_secciones, ids_profesores)
+    
+    errores += validar_cobertura(secciones, profesores, cursos, grados, tutorias)
  
     return errores
  

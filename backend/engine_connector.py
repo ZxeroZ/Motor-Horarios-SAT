@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 from backend.models import (
     Sedes, Dias, Areas, Cursos, Grado, Seccion, PlanEstudio, 
-    Profesores, ProfesorCurso, GradoDiaConfig, SeccionTurno, Turno
+    Profesores, ProfesorCurso, GradoDiaConfig, SeccionTurno, Turno, Tutoria
 )
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
@@ -16,7 +16,8 @@ def build_json_from_db(session: Session) -> dict:
         "cursos": [],
         "grados": [],
         "secciones": [],
-        "profesores": []
+        "profesores": [],
+        "tutorias": {}
     }
     
     # --- Configuracion ---
@@ -43,9 +44,14 @@ def build_json_from_db(session: Session) -> dict:
         
     # --- Cursos ---
     cursos = session.exec(select(Cursos)).all()
+    tutoria_id_bd = None
     for c in cursos:
+        # El motor hardcodea TUT1 como ID de Tutoría
+        cid = "TUT1" if "Tutoría" in c.nombre_curso else f"CUR_{c.id_curso}"
+        if cid == "TUT1": tutoria_id_bd = c.id_curso
+        
         datos["cursos"].append({
-            "id": f"CUR_{c.id_curso}",
+            "id": cid,
             "nombre": c.nombre_curso,
             "categoria_id": f"CAT_{c.id_area}"
         })
@@ -57,7 +63,6 @@ def build_json_from_db(session: Session) -> dict:
             select(PlanEstudio).where(PlanEstudio.id_grado == g.id_grado)
         ).all()
         
-        # Construir horario_plantilla desde GradoDiaConfig
         configs = session.exec(
             select(GradoDiaConfig).where(GradoDiaConfig.id_grado == g.id_grado)
         ).all()
@@ -69,7 +74,6 @@ def build_json_from_db(session: Session) -> dict:
                 if dia_obj:
                     horario_plantilla[dia_obj.nombre_dia] = cfg.bloques_dia
         else:
-            # Fallback: todos los dias con 6 bloques
             horario_plantilla = {d: 6 for d in nombres_dias}
         
         datos["grados"].append({
@@ -77,7 +81,7 @@ def build_json_from_db(session: Session) -> dict:
             "nombre": f"{g.numero}°",
             "cursos_requeridos": [
                 {
-                    "curso_id": f"CUR_{p.id_curso}",
+                    "curso_id": "TUT1" if p.id_curso == tutoria_id_bd else f"CUR_{p.id_curso}",
                     "horas_semanales": p.horas_semanales
                 } for p in planes
             ],
@@ -87,7 +91,6 @@ def build_json_from_db(session: Session) -> dict:
     # --- Secciones ---
     secciones = session.exec(select(Seccion)).all()
     for s in secciones:
-        # Construir disponibilidad desde SeccionTurno
         sec_turnos = session.exec(
             select(SeccionTurno).where(SeccionTurno.id_seccion == s.id_seccion)
         ).all()
@@ -104,7 +107,6 @@ def build_json_from_db(session: Session) -> dict:
                     if turno_obj.nombre not in disponibilidad[dia_nombre]:
                         disponibilidad[dia_nombre].append(turno_obj.nombre)
         else:
-            # Fallback: todos los dias, ambos turnos
             disponibilidad = {d: list(nombres_turnos) for d in nombres_dias}
         
         sede_nombre = "Sede A"
@@ -130,31 +132,32 @@ def build_json_from_db(session: Session) -> dict:
         datos["profesores"].append({
             "id": f"PROF_{p.id_profesores}",
             "nombre": p.nombre_profesor,
-            "cursos_habilitados": [f"CUR_{pc.id_curso}" for pc in pcs],
-            "max_horas_dia": p.max_horas_dia,
+            "cursos_habilitados": ["TUT1" if pc.id_curso == tutoria_id_bd else f"CUR_{pc.id_curso}" for pc in pcs],
+            "max_horas_dia": 6,
             "disponibilidad": {d: list(nombres_turnos) for d in nombres_dias}
         })
+    
+    # --- Tutorías ---
+    tutorias_db = session.exec(select(Tutoria)).all()
+    for t in tutorias_db:
+        datos["tutorias"][f"SEC_{t.id_seccion}"] = f"PROF_{t.id_profesor}"
         
     return datos
 
 def generar_horario_engine(session: Session) -> dict:
     """Proceso completo: Extrae DB -> Valida -> Preprocesa -> Construye Modelo -> Resuelve -> Guarda."""
     try:
-        # 1. Construir Diccionario desde la BD
         datos = build_json_from_db(session)
         
-        # 2. Validar
         errores = validar_todo(datos)
         if errores:
             return {"status": "error", "errores": errores}
             
-        # 3. Flujo Motor
         datos_procesados = preprocesar(datos)
         modelo, variables_x = construir_modelo(datos_procesados)
         dict_resultado = resolver_modelo(modelo, variables_x)
         
-        # 4. Guardar en BD si fue exitoso
-        if dict_resultado.get("estado") == "OPTIMAL" and dict_resultado.get("asignaciones"):
+        if dict_resultado.get("estado") in ("OPTIMAL", "FEASIBLE") and dict_resultado.get("asignaciones"):
             _guardar_horario(session, dict_resultado["asignaciones"])
         
         return {
@@ -171,13 +174,11 @@ def _guardar_horario(session: Session, asignaciones: list):
     """Persiste las asignaciones del motor en la tabla horario_final."""
     from backend.models import HorarioFinal, Bloque
     
-    # Borrar horario anterior
     old = session.exec(select(HorarioFinal)).all()
     for o in old:
         session.delete(o)
     session.commit()
     
-    # Lookups: nombre_dia -> id_dia, (id_turno, numero_bloque) -> id_bloque
     dias_db = session.exec(select(Dias)).all()
     dia_map = {d.nombre_dia: d.id_dia for d in dias_db}
     
@@ -189,10 +190,18 @@ def _guardar_horario(session: Session, asignaciones: list):
     for b in bloques_db:
         bloque_map[(b.id_turno, b.numero_bloque)] = b.id_bloque
     
-    # Insertar cada slot individual
     for asig in asignaciones:
         sec_id = int(asig["seccion_id"].replace("SEC_", ""))
-        cur_id = int(asig["curso_id"].replace("CUR_", ""))
+        
+        # Inversa del TUT1:
+        if asig["curso_id"] == "TUT1":
+            from backend.models import Cursos
+            tut_curso = session.exec(select(Cursos).where(Cursos.nombre_curso.like("%Tutoría%"))).first()
+            cur_id = tut_curso.id_curso if tut_curso else 18
+
+        else:
+            cur_id = int(asig["curso_id"].replace("CUR_", ""))
+            
         prof_id = int(asig["profesor_id"].replace("PROF_", ""))
         id_dia = dia_map.get(asig["dia"])
         id_turno = turno_map.get(asig.get("turno", "Mañana"))
@@ -201,7 +210,7 @@ def _guardar_horario(session: Session, asignaciones: list):
         horas = asig.get("horas", 1)
         
         for i in range(horas):
-            num_bloque = slot_inicio + i + 1  # motor usa 0-based, bloques 1-based
+            num_bloque = slot_inicio + i + 1
             id_bloque = bloque_map.get((id_turno, num_bloque))
             
             session.add(HorarioFinal(
@@ -213,4 +222,3 @@ def _guardar_horario(session: Session, asignaciones: list):
             ))
     
     session.commit()
-

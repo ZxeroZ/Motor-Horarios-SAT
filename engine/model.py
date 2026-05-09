@@ -1,6 +1,17 @@
 from ortools.sat.python import cp_model
 import collections
 
+def get_configs(H: int) -> list[list[int]]:
+    if H == 1:
+        return [[1]]
+    if H == 2:
+        return [[2], [1, 1]]
+    if H == 3:
+        return [[3], [2, 1]]
+    if H == 4:
+        return [[4], [2, 2]]
+    return [[H]]
+
 def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
     """
     Construye el modelo CP-SAT usando Bloques de Variables contiguas.
@@ -17,11 +28,15 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
     disp_seccion = datos_procesados["disp_seccion"]
     disp_profesor = datos_procesados["disp_profesor"]
     secciones_dict = datos_procesados["secciones"]
+    tutorias_dict = datos_procesados.get("tutorias", {})
     
     turnos = config["turnos"]
 
     # Diccionario para almacenar las variables maestras de bloque
     bloques_z = {}
+    
+    # Lista para almacenar recompensas de la función objetivo
+    objetivo_recompensas = []
     
     # Agrupadores
     cobertura_curso = collections.defaultdict(list)          
@@ -43,43 +58,81 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
             cat_id = cursos[c_id]["categoria_id"]
             H = horas
             
-            for p_id in profesores_por_curso.get(c_id, []):
+            if c_id == "TUT1":
+                tutor_asignado = tutorias_dict.get(s_id)
+                posibles_profesores = [tutor_asignado] if tutor_asignado else []
+            else:
+                posibles_profesores = profesores_por_curso.get(c_id, [])
+            
+            configs = get_configs(H)
+            all_cfg_p_vars = []
+            v_dict = {}
+            
+            for p_id in posibles_profesores:
+                for cfg_idx, blocks in enumerate(configs):
+                    v = model.NewBoolVar(f"cfg_{s_id}_{c_id}_{p_id}_{cfg_idx}")
+                    all_cfg_p_vars.append(v)
+                    v_dict[(p_id, cfg_idx)] = v
+                    
+                    if len(blocks) == 1:
+                        objetivo_recompensas.append((v, 100))
+                    else:
+                        objetivo_recompensas.append((v, 10))
+            
+            # 1. Cobertura Estricta Relaxed
+            # model.AddExactlyOne(all_cfg_p_vars)
+            
+            cobertura_var = model.NewBoolVar(f"cobertura_{s_id}_{c_id}")
+            model.Add(sum(all_cfg_p_vars) == cobertura_var)
+            objetivo_recompensas.append((cobertura_var, 10000))
+            
+            for p_id in posibles_profesores:
                 p_disp = disp_profesor.get(p_id, set())
                 
-                for dia in dias_seccion:
-                    slots_del_dia = horario_plantilla.get(dia, 0)
-                    for turno in turnos:
-                        if (dia, turno) in s_disp and (dia, turno) in p_disp:
-                            # Iteramos los slots de 'Inicio' en el que el bloque de tamaño H cabe
-                            for start in range(slots_del_dia - H + 1):
-                                variable_name = f"z_{s_id}_{c_id}_{p_id}_{dia}_{turno}_{start}_H{H}"
-                                var = model.NewBoolVar(variable_name)
-                                
-                                # Registramos la tupla decodificadora
-                                bloques_z[(s_id, c_id, p_id, dia, turno, start, H)] = var
-                                
-                                cobertura_curso[(s_id, c_id)].append(var)
-                                
-                                # El bloque ocupa simultáneamente H slots, los sumamos al conflicto
-                                for k in range(H):
-                                    slot_ocupado = start + k
-                                    unicidad_seccion[(s_id, dia, turno, slot_ocupado)].append(var)
-                                    unicidad_profesor[(p_id, dia, turno, slot_ocupado)].append(var)
-                                    if sede_id:
-                                        presencia_profesor_sede[(p_id, dia, turno, slot_ocupado, sede_id)].append(var)
-                                
-                                # Para los topes diarios, ponderamos por la duración del bloque en horas
-                                limite_dia_profesor[(p_id, dia)].append((var, H))
-                                limite_dia_categoria_sec[(s_id, dia, cat_id)].append((var, H))
+                for cfg_idx, blocks in enumerate(configs):
+                    v = v_dict[(p_id, cfg_idx)]
+                    z_vars_by_day = collections.defaultdict(list)
+                    
+                    for sub_idx, sub_H in enumerate(blocks):
+                        z_vars_sub = []
+                        for dia in dias_seccion:
+                            slots_del_dia = horario_plantilla.get(dia, 0)
+                            for turno in turnos:
+                                if (dia, turno) in s_disp and (dia, turno) in p_disp:
+                                    # Iteramos los slots de 'Inicio' en el que el sub-bloque cabe
+                                    for start in range(slots_del_dia - sub_H + 1):
+                                        variable_name = f"z_{s_id}_{c_id}_{p_id}_{dia}_{turno}_{start}_H{sub_H}_cfg{cfg_idx}_sub{sub_idx}"
+                                        var = model.NewBoolVar(variable_name)
+                                        
+                                        # Registramos la tupla decodificadora para exporter/solver
+                                        bloques_z[(s_id, c_id, p_id, dia, turno, start, sub_H, sub_idx)] = var
+                                        
+                                        z_vars_sub.append(var)
+                                        z_vars_by_day[dia].append(var)
+                                        
+                                        # El bloque ocupa simultáneamente sub_H slots, los sumamos al conflicto
+                                        for k in range(sub_H):
+                                            slot_ocupado = start + k
+                                            unicidad_seccion[(s_id, dia, turno, slot_ocupado)].append(var)
+                                            unicidad_profesor[(p_id, dia, turno, slot_ocupado)].append(var)
+                                            if sede_id:
+                                                presencia_profesor_sede[(p_id, dia, turno, slot_ocupado, sede_id)].append(var)
+                                        
+                                        # Para los topes diarios, ponderamos por la duración
+                                        limite_dia_profesor[(p_id, dia)].append((var, sub_H))
+                                        limite_dia_categoria_sec[(s_id, dia, cat_id)].append((var, sub_H))
+                        
+                        # Cada sub-bloque debe ser asignado exactamente una vez si V es elegido (1)
+                        model.Add(sum(z_vars_sub) == v)
+                    
+                    # 2. Fragmentación Días Diferentes: Si hay múltiples sub-bloques,
+                    #    la suma de asignaciones de toda la configuración en UN DIA no puede ser mayor a V
+                    if len(blocks) > 1:
+                        for dia, vars_dia in z_vars_by_day.items():
+                            model.Add(sum(vars_dia) <= v)
 
     # 2. DECLARACIÓN DE RESTRICCIONES (CONSTRAINTS)
     
-    # [A] Cobertura estricta: Elegir exactamente un bloque-maestro
-    # Esto asignará el curso completo, de la duración esperada, con UN PROFESOR en UN DIA CONSECUTIVAMENTE.
-    for (s_id, c_id), vars_list in cobertura_curso.items():
-        # model.AddExactlyOne exige que matemáticamente una de estas variables sea 1, el resto 0.
-        model.AddExactlyOne(vars_list)
-        
     # [B] Conflicto Sección por Slot Puntual
     for vars_list in unicidad_seccion.values():
         model.AddAtMostOne(vars_list)
@@ -128,5 +181,9 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
                                     
                                     if vars_sede1_k and vars_sede2_k_plus_1:
                                         model.Add(sum(vars_sede1_k) + sum(vars_sede2_k_plus_1) <= 1)
+                                        
+    # 3. FUNCIÓN OBJETIVO
+    # Maximizar las recompensas: +10000 por cobertura, +100 por no fragmentar, +10 por fragmentar.
+    model.Maximize(sum(var * recompensa for var, recompensa in objetivo_recompensas))
         
     return model, bloques_z
