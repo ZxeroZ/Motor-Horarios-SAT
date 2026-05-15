@@ -79,7 +79,7 @@ def main():
     if asignaciones_planas:
         ruta_metricas = "data/output/metrics.json"
         print(f"Exportando analítica y métricas a: {ruta_metricas}")
-        exportar_metricas(asignaciones_planas, ruta_metricas)
+        exportar_metricas(asignaciones_planas, datos_procesados, ruta_metricas)
     
     print("\n--- ¡Motor de Búsqueda Finalizado con Éxito! ---")
  

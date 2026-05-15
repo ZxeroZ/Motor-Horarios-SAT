@@ -433,7 +433,7 @@
         "Miercoles": 6,
         "Jueves": 6,
         "Viernes": 6,
-        "Sábado": 6
+        "Sábado": 3
       }
     },
     {
@@ -507,7 +507,7 @@
         "Miercoles": 6,
         "Jueves": 6,
         "Viernes": 6,
-        "Sábado": 6
+        "Sábado": 3
       }
     }
   ],
@@ -523,26 +523,95 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -554,26 +623,106 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Sábado": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -587,26 +736,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -618,26 +837,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -649,29 +938,106 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Sábado": [
-          "Mañana"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Sábado": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -682,29 +1048,106 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Sábado": [
-          "Mañana"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Sábado": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -715,26 +1158,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -746,29 +1259,106 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Sábado": [
-          "Mañana"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Sábado": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -780,26 +1370,106 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Sábado": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -811,26 +1481,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -842,26 +1582,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -873,26 +1683,106 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Sábado": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -904,26 +1794,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -935,26 +1895,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -966,26 +1996,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -997,26 +2097,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -1028,26 +2198,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -1059,26 +2299,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -1090,26 +2400,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -1120,26 +2500,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -1150,26 +2600,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -1180,26 +2700,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -1210,26 +2800,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -1240,26 +2900,96 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     },
     {
@@ -1271,29 +3001,106 @@
       ],
       "max_horas_dia": 6,
       "disponibilidad": {
-        "Lunes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Martes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Miercoles": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Jueves": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Viernes": [
-          "Mañana",
-          "Tarde"
-        ],
-        "Sábado": [
-          "Mañana"
-        ]
+        "Lunes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Martes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Miercoles": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Jueves": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Viernes": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "Tarde": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        },
+        "Sábado": {
+          "Mañana": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
       }
     }
   ],
@@ -1638,18 +3445,18 @@
   ],
   "tutorias": {
     "A_1A": "P001",
-    "A_1B": "P001",
-    "A_2A": "P002",
-    "A_2B": "P002",
-    "A_3": "P003",
-    "A_4": "P003",
-    "A_5A": "P004",
-    "A_5B": "P004",
-    "B_1A": "P005",
-    "B_1B": "P005",
-    "B_2": "P006",
-    "B_3": "P007",
-    "B_4": "P008",
-    "B_5": "P009"
+    "A_1B": "P002",
+    "A_2A": "P003",
+    "A_2B": "P004",
+    "A_3": "P005",
+    "A_4": "P006",
+    "A_5A": "P007",
+    "A_5B": "P008",
+    "B_1A": "P009",
+    "B_1B": "P010",
+    "B_2": "P011",
+    "B_3": "P012",
+    "B_4": "P013",
+    "B_5": "P014"
   }
 }

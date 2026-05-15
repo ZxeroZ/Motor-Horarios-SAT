@@ -12,6 +12,10 @@ def preprocesar(datos: dict) -> dict:
     configuracion = datos.get("configuracion", {})
     tutorias = datos.get("tutorias", {})
 
+    # Lookup maps para resolver IDs a nombres (nuevo formato de disponibilidad)
+    dia_id_to_nombre = configuracion.get("dia_id_to_nombre", {})
+    turno_id_to_nombre = configuracion.get("turno_id_to_nombre", {})
+
     # Mapeos básicos para acceso O(1)
     profesores_dict = {p["id"]: p for p in profesores_lista}
     
@@ -19,12 +23,10 @@ def preprocesar(datos: dict) -> dict:
     for s in secciones_lista:
         s_copia = dict(s)
         grado_id = s_copia.get("grado")
-        # Inyectar horario_plantilla directo en la sección desde su grado
         s_copia["horario_plantilla"] = grados.get(grado_id, {}).get("horario_plantilla", {})
         secciones_dict[s_copia["id"]] = s_copia
 
     # 1. Profesores requeridos/habilitados por curso
-    # curso_id -> lista de profesor_id
     profesores_por_curso = {c_id: [] for c_id in cursos.keys()}
     for p in profesores_lista:
         p_id = p["id"]
@@ -33,7 +35,6 @@ def preprocesar(datos: dict) -> dict:
                 profesores_por_curso[c_id].append(p_id)
 
     # 2. Requerimientos de clases por sección
-    # seccion_id -> {curso_id: horas_semanales}
     requerimientos_seccion = {}
     for sec in secciones_lista:
         s_id = sec["id"]
@@ -43,8 +44,7 @@ def preprocesar(datos: dict) -> dict:
             reqs[req["curso_id"]] = req["horas_semanales"]
         requerimientos_seccion[s_id] = reqs
 
-    # 3. Transformar disponibilidades a un formato de acceso rápido: set de tuplas (dia, turno)
-    # disp_seccion[seccion_id] = {(dia1, turno1), (dia1, turno2), ...}
+    # 3. Transformar disponibilidades a formato de acceso rápido: set de tuplas (dia, turno)
     disp_seccion = {}
     for sec in secciones_lista:
         s_disp = set()
@@ -54,14 +54,37 @@ def preprocesar(datos: dict) -> dict:
         disp_seccion[sec["id"]] = s_disp
 
     disp_profesor = {}
+    disp_profesor_slots = {}
     for p in profesores_lista:
         p_disp = set()
-        for dia, turnos in p.get("disponibilidad", {}).items():
-            for t in turnos:
-                p_disp.add((dia, t))
-        disp_profesor[p["id"]] = p_disp
+        p_disp_slots = {}
+        disponibilidad = p.get("disponibilidad", {})
+        
+        if isinstance(disponibilidad, list):
+            # Nuevo formato: lista de {id_dia, id_turno, nro_bloque}
+            for slot in disponibilidad:
+                dia_nombre = dia_id_to_nombre.get(slot["id_dia"], str(slot["id_dia"]))
+                turno_nombre = turno_id_to_nombre.get(slot["id_turno"], str(slot["id_turno"]))
+                nro = slot["nro_bloque"]
+                p_disp.add((dia_nombre, turno_nombre))
+                if (dia_nombre, turno_nombre) not in p_disp_slots:
+                    p_disp_slots[(dia_nombre, turno_nombre)] = set()
+                p_disp_slots[(dia_nombre, turno_nombre)].add(nro)
+        elif isinstance(disponibilidad, dict):
+            # Formato legacy dict
+            for dia, turnos in disponibilidad.items():
+                if isinstance(turnos, list):
+                    for t in turnos:
+                        p_disp.add((dia, t))
+                        p_disp_slots[(dia, t)] = set([1, 2, 3, 4, 5, 6])
+                elif isinstance(turnos, dict):
+                    for t, slots in turnos.items():
+                        p_disp.add((dia, t))
+                        p_disp_slots[(dia, t)] = set(slots)
 
-    # Estructura final consolidada lista para instanciar variables en CP-SAT
+        disp_profesor[p["id"]] = p_disp
+        disp_profesor_slots[p["id"]] = p_disp_slots
+
     return {
         "configuracion": configuracion,
         "cursos": cursos,
@@ -72,5 +95,6 @@ def preprocesar(datos: dict) -> dict:
         "requerimientos_seccion": requerimientos_seccion,
         "disp_seccion": disp_seccion,
         "disp_profesor": disp_profesor,
+        "disp_profesor_slots": disp_profesor_slots,
         "tutorias": tutorias,
     }

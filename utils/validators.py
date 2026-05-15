@@ -203,38 +203,32 @@ def validar_profesores(
                         f"'cursos_habilitados' no existe en la lista de cursos"
                     )
  
-        # Validar max_horas_dia
-        if "max_horas_dia" not in profesor:
-            errores.append(f"[profesores][{pid}] Falta el campo 'max_horas_dia'")
-        else:
-            max_horas = profesor["max_horas_dia"]
-            if not isinstance(max_horas, int) or max_horas < 1:
-                errores.append(
-                    f"[profesores][{pid}] 'max_horas_dia' debe ser un entero mayor a 0, "
-                    f"se recibió: {max_horas}"
-                )
- 
-        # Validar disponibilidad
+        # Validar disponibilidad (ahora es una lista de {id_dia, id_turno, nro_bloque})
         if "disponibilidad" not in profesor:
             errores.append(f"[profesores][{pid}] Falta el campo 'disponibilidad'")
         else:
             disponibilidad = profesor["disponibilidad"]
-            if len(disponibilidad) == 0:
+            if not isinstance(disponibilidad, list):
+                errores.append(
+                    f"[profesores][{pid}] 'disponibilidad' debe ser una lista"
+                )
+            elif len(disponibilidad) == 0:
                 errores.append(
                     f"[profesores][{pid}] 'disponibilidad' no puede estar vacío"
                 )
-            for dia, turnos in disponibilidad.items():
-                if dia not in dias_validos:
-                    errores.append(
-                        f"[profesores][{pid}] El día '{dia}' en 'disponibilidad' "
-                        f"no está en la configuración"
-                    )
-                for turno in turnos:
-                    if turno not in turnos_validos:
+            else:
+                for slot in disponibilidad:
+                    if not isinstance(slot, dict):
                         errores.append(
-                            f"[profesores][{pid}] El turno '{turno}' en el día '{dia}' "
-                            f"no está en la configuración"
+                            f"[profesores][{pid}] Cada slot de disponibilidad debe ser un objeto"
                         )
+                        break
+                    for key in ("id_dia", "id_turno", "nro_bloque"):
+                        if key not in slot:
+                            errores.append(
+                                f"[profesores][{pid}] Falta '{key}' en un slot de disponibilidad"
+                            )
+                            break
  
     return errores
  

@@ -27,6 +27,7 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
     requerimientos_seccion = datos_procesados["requerimientos_seccion"]
     disp_seccion = datos_procesados["disp_seccion"]
     disp_profesor = datos_procesados["disp_profesor"]
+    disp_profesor_slots = datos_procesados.get("disp_profesor_slots", {})
     secciones_dict = datos_procesados["secciones"]
     tutorias_dict = datos_procesados.get("tutorias", {})
     
@@ -88,6 +89,7 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
             
             for p_id in posibles_profesores:
                 p_disp = disp_profesor.get(p_id, set())
+                p_disp_slots = disp_profesor_slots.get(p_id, {})
                 
                 for cfg_idx, blocks in enumerate(configs):
                     v = v_dict[(p_id, cfg_idx)]
@@ -99,8 +101,17 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
                             slots_del_dia = horario_plantilla.get(dia, 0)
                             for turno in turnos:
                                 if (dia, turno) in s_disp and (dia, turno) in p_disp:
+                                    slots_del_profe = p_disp_slots.get((dia, turno), set())
+                                    
                                     # Iteramos los slots de 'Inicio' en el que el sub-bloque cabe
                                     for start in range(slots_del_dia - sub_H + 1):
+                                        # start va de 0 a (slots_del_dia - sub_H)
+                                        # Los slots fisicos son 1-indexados (ej. 1, 2, 3...)
+                                        slots_requeridos = set(range(start + 1, start + sub_H + 1))
+                                        
+                                        if not slots_requeridos.issubset(slots_del_profe):
+                                            continue  # El profe no está libre en estos bloques exactos
+
                                         variable_name = f"z_{s_id}_{c_id}_{p_id}_{dia}_{turno}_{start}_H{sub_H}_cfg{cfg_idx}_sub{sub_idx}"
                                         var = model.NewBoolVar(variable_name)
                                         

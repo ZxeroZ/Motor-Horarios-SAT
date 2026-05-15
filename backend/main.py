@@ -9,7 +9,8 @@ from .database import create_db_and_tables, get_session, engine
 from .models import (
     Colegio, Turno, Grado, Dias, Areas, Sedes, Usuario, Bloque, 
     Cursos, Profesores, Seccion, GradoDiaConfig, PlanEstudio, 
-    ProfesorCurso, SeccionTurno, Restricciones, CargaAcademica, HorarioFinal, Tutoria
+    ProfesorCurso, SeccionTurno, Restricciones, CargaAcademica, HorarioFinal, Tutoria,
+    ProfesorSedes, ProfesorDisponibilidad, ProfesorPreferencia
 )
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -206,21 +207,19 @@ def create_profesor(profesor: Profesores, session: Session = Depends(get_session
     session.refresh(profesor)
     return profesor
 
-@app.put("/api/profesores/{id_profesores}", response_model=Profesores)
-def update_profesor(id_profesores: int, profesor_update: Profesores, session: Session = Depends(get_session)):
-    db_profesor = session.get(Profesores, id_profesores)
+@app.put("/api/profesores/{id_profesor}", response_model=Profesores)
+def update_profesor(id_profesor: int, profesor_update: Profesores, session: Session = Depends(get_session)):
+    db_profesor = session.get(Profesores, id_profesor)
     if not db_profesor: raise HTTPException(status_code=404, detail="Profesor no encontrado")
     db_profesor.nombre_profesor = profesor_update.nombre_profesor
-    db_profesor.id_sede = profesor_update.id_sede
-    db_profesor.max_horas_dia = profesor_update.max_horas_dia
     session.add(db_profesor)
     session.commit()
     session.refresh(db_profesor)
     return db_profesor
 
-@app.delete("/api/profesores/{id_profesores}")
-def delete_profesor(id_profesores: int, session: Session = Depends(get_session)):
-    db_profesor = session.get(Profesores, id_profesores)
+@app.delete("/api/profesores/{id_profesor}")
+def delete_profesor(id_profesor: int, session: Session = Depends(get_session)):
+    db_profesor = session.get(Profesores, id_profesor)
     if not db_profesor: raise HTTPException(status_code=404, detail="Profesor no encontrado")
     session.delete(db_profesor)
     session.commit()
@@ -388,16 +387,79 @@ def get_tutorias(session: Session = Depends(get_session)):
     return session.exec(select(Tutoria)).all()
 
 @app.post("/api/tutorias")
-def crear_tutoria(tutoria: Tutoria, session: Session = Depends(get_session)):
-    session.add(tutoria); session.commit(); session.refresh(tutoria)
+def create_tutoria(tutoria: Tutoria, session: Session = Depends(get_session)):
+    session.add(tutoria)
+    session.commit()
+    session.refresh(tutoria)
     return tutoria
 
-@app.delete("/api/tutorias/{id}")
-def borrar_tutoria(id: int, session: Session = Depends(get_session)):
-    db = session.get(Tutoria, id)
-    if not db: raise HTTPException(status_code=404)
-    session.delete(db); session.commit()
-    return {"message": "Borrado"}
+@app.delete("/api/tutorias/{id_tutotia}")
+def delete_tutoria(id_tutotia: int, session: Session = Depends(get_session)):
+    db_tutoria = session.get(Tutoria, id_tutotia)
+    if not db_tutoria: raise HTTPException(status_code=404, detail="Tutoría no encontrada")
+    session.delete(db_tutoria)
+    session.commit()
+    return {"message": "Tutoría borrada"}
+
+# --- Endpoints: Profesor-Sedes ---
+@app.get("/api/profesor-sedes")
+def get_profesor_sedes(session: Session = Depends(get_session)):
+    return session.exec(select(ProfesorSedes)).all()
+
+@app.post("/api/profesor-sedes")
+def create_profesor_sede(ps: ProfesorSedes, session: Session = Depends(get_session)):
+    session.add(ps)
+    session.commit()
+    session.refresh(ps)
+    return ps
+
+@app.delete("/api/profesor-sedes/{id_profe_sedes}")
+def delete_profesor_sede(id_profe_sedes: int, session: Session = Depends(get_session)):
+    db = session.get(ProfesorSedes, id_profe_sedes)
+    if not db: raise HTTPException(status_code=404, detail="Vínculo no encontrado")
+    session.delete(db)
+    session.commit()
+    return {"message": "Vínculo profesor-sede borrado"}
+
+# --- Endpoints: Profesor-Disponibilidad ---
+@app.get("/api/profesor-disponibilidad")
+def get_profesor_disponibilidad(session: Session = Depends(get_session)):
+    return session.exec(select(ProfesorDisponibilidad)).all()
+
+@app.post("/api/profesor-disponibilidad")
+def create_profesor_disponibilidad(pd: ProfesorDisponibilidad, session: Session = Depends(get_session)):
+    session.add(pd)
+    session.commit()
+    session.refresh(pd)
+    return pd
+
+@app.delete("/api/profesor-disponibilidad/{id_disponibilidad}")
+def delete_profesor_disponibilidad(id_disponibilidad: int, session: Session = Depends(get_session)):
+    db = session.get(ProfesorDisponibilidad, id_disponibilidad)
+    if not db: raise HTTPException(status_code=404, detail="Disponibilidad no encontrada")
+    session.delete(db)
+    session.commit()
+    return {"message": "Disponibilidad borrada"}
+
+# --- Endpoints: Profesor-Preferencia ---
+@app.get("/api/profesor-preferencia")
+def get_profesor_preferencia(session: Session = Depends(get_session)):
+    return session.exec(select(ProfesorPreferencia)).all()
+
+@app.post("/api/profesor-preferencia")
+def create_profesor_preferencia(pp: ProfesorPreferencia, session: Session = Depends(get_session)):
+    session.add(pp)
+    session.commit()
+    session.refresh(pp)
+    return pp
+
+@app.delete("/api/profesor-preferencia/{id_preferencia}")
+def delete_profesor_preferencia(id_preferencia: int, session: Session = Depends(get_session)):
+    db = session.get(ProfesorPreferencia, id_preferencia)
+    if not db: raise HTTPException(status_code=404, detail="Preferencia no encontrada")
+    session.delete(db)
+    session.commit()
+    return {"message": "Preferencia borrada"}
 
 # --- Endpoints del Motor ---
 from backend.engine_connector import generar_horario_engine

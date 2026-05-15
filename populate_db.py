@@ -7,7 +7,7 @@ from backend.database import engine, create_db_and_tables
 from backend.models import (
     Colegio, Sedes, Grado, Dias, Turno, Bloque, Areas, 
     Cursos, Profesores, ProfesorCurso, Seccion, PlanEstudio,
-    GradoDiaConfig, SeccionTurno, Usuario, Tutoria
+    GradoDiaConfig, SeccionTurno, Usuario, Tutoria, ProfesorSedes
 )
 from datetime import time as pytime
 
@@ -134,10 +134,11 @@ def poblar_bd():
         for n in [1,2,3]:
             for dia_nombre in ["Lunes","Martes","Miercoles","Jueves","Viernes"]:
                 s.add(GradoDiaConfig(id_grado=grados[n].id_grado, id_dia=dia_map[dia_nombre].id_dia, bloques_dia=6))
-        # Grados 4-5: L-S con 6 slots
+        # Grados 4-5: L-V con 6 slots + Sábado con 3 slots (33 total = 33h malla)
         for n in [4,5]:
-            for dia_nombre in ["Lunes","Martes","Miercoles","Jueves","Viernes","Sábado"]:
+            for dia_nombre in ["Lunes","Martes","Miercoles","Jueves","Viernes"]:
                 s.add(GradoDiaConfig(id_grado=grados[n].id_grado, id_dia=dia_map[dia_nombre].id_dia, bloques_dia=6))
+            s.add(GradoDiaConfig(id_grado=grados[n].id_grado, id_dia=dia_map["Sábado"].id_dia, bloques_dia=3))
         s.commit()
 
         # --- Profesores (25) ---
@@ -170,14 +171,17 @@ def poblar_bd():
         ]
         profes = {}
         for nombre, sede, _ in profes_data:
-            p = Profesores(nombre_profesor=nombre, id_sede=sede.id_sede)
+            p = Profesores(nombre_profesor=nombre)
             s.add(p); s.commit(); s.refresh(p)
+            ps = ProfesorSedes(id_profesor=p.id_profesor, id_sede=sede.id_sede)
+            s.add(ps)
             profes[nombre] = p
+        s.commit()
 
         # --- ProfesorCurso ---
         for nombre, _, cursos_list in profes_data:
             for curso_nombre in cursos_list:
-                s.add(ProfesorCurso(id_profesor=profes[nombre].id_profesores, id_curso=cursos[curso_nombre].id_curso))
+                s.add(ProfesorCurso(id_profesor=profes[nombre].id_profesor, id_curso=cursos[curso_nombre].id_curso))
         s.commit()
 
         # --- Secciones (14) ---
@@ -210,7 +214,9 @@ def poblar_bd():
                 dias_sec = ["Lunes","Martes","Miercoles","Jueves","Viernes"]
             
             for dia_nombre in dias_sec:
-                s.add(SeccionTurno(id_seccion=sec.id_seccion, id_turno=turno.id_turno, id_dia=dia_map[dia_nombre].id_dia))
+                # Sábado siempre es turno Mañana
+                turno_dia = t_man if dia_nombre == "Sábado" else turno
+                s.add(SeccionTurno(id_seccion=sec.id_seccion, id_turno=turno_dia.id_turno, id_dia=dia_map[dia_nombre].id_dia))
             s.commit()
 
         # --- Tutorías (cada sección tiene un tutor asignado) ---
@@ -228,7 +234,7 @@ def poblar_bd():
         for sec_key, prof_nombre in tutorias_map.items():
             sec = secciones[sec_key]
             prof = profes[prof_nombre]
-            s.add(Tutoria(id_seccion=sec.id_seccion, id_profesor=prof.id_profesores))
+            s.add(Tutoria(id_seccion=sec.id_seccion, id_profesor=prof.id_profesor))
         s.commit()
 
         print("=== BD v2 Poblada Exitosamente (Sábado + Tutorías) ===")

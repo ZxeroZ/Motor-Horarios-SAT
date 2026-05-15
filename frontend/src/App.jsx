@@ -40,6 +40,11 @@ function App() {
   const [secciones, setSecciones] = useState([]);
   const [planes, setPlanes] = useState([]);
   const [profesorCursos, setProfesorCursos] = useState([]);
+  const [profesorSedes, setProfesorSedes] = useState([]);
+  const [profesorDisp, setProfesorDisp] = useState([]);
+  const [profesorPref, setProfesorPref] = useState([]);
+  const [dias, setDias] = useState([]);
+  const [turnos, setTurnos] = useState([]);
 
   // --- Estado: Formularios ---
   const [formSede, setFormSede] = useState({ nombre_sede: "", id_colegio: "" });
@@ -50,6 +55,9 @@ function App() {
   const [formProfCurso, setFormProfCurso] = useState({ id_profesor: "", id_curso: "" });
   const [formSeccion, setFormSeccion] = useState({ nombre: "", id_grado: "", id_sede: "" });
   const [formPlan, setFormPlan] = useState({ id_grado: "", id_curso: "", horas_semanales: 1 });
+  const [formProfSede, setFormProfSede] = useState({ id_profesor: "", id_sede: "" });
+  const [formDisp, setFormDisp] = useState({ id_profesor: "", id_dia: "", id_turno: "", nro_bloque: "" });
+  const [formPref, setFormPref] = useState({ id_profesor: "", id_dia: "", id_turno: "", nro_bloque: "" });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -120,7 +128,7 @@ function App() {
 
   const loadAdminData = async () => {
     try {
-      const endpoints = ["colegio", "sedes", "grados", "areas", "cursos", "profesores", "secciones", "planes", "profesor-curso"];
+      const endpoints = ["colegio", "sedes", "grados", "areas", "cursos", "profesores", "secciones", "planes", "profesor-curso", "profesor-sedes", "profesor-disponibilidad", "profesor-preferencia", "dias", "turnos"];
       const responses = await Promise.all(endpoints.map(ep => fetch(`http://localhost:8000/api/${ep}`)));
       const data = await Promise.all(responses.map(r => r.json()));
       
@@ -133,6 +141,11 @@ function App() {
       setSecciones(data[6]);
       setPlanes(data[7]);
       setProfesorCursos(data[8]);
+      setProfesorSedes(data[9]);
+      setProfesorDisp(data[10]);
+      setProfesorPref(data[11]);
+      setDias(data[12]);
+      setTurnos(data[13]);
     } catch (e) {
       console.error("Error al cargar data de admin", e);
     }
@@ -197,7 +210,7 @@ function App() {
 
   const profNombre = useMemo(() => {
     const m = {};
-    profesores.forEach(p => { m[`PROF_${p.id_profesores}`] = p.nombre_profesor; });
+    profesores.forEach(p => { m[`PROF_${p.id_profesor}`] = p.nombre_profesor; });
     return m;
   }, [profesores]);
 
@@ -436,6 +449,7 @@ function App() {
               <button className={`tab-btn ${activeAdminTab === 'jerarquia' ? 'active' : ''}`} onClick={() => setActiveAdminTab('jerarquia')}>Jerarquía</button>
               <button className={`tab-btn ${activeAdminTab === 'materias' ? 'active' : ''}`} onClick={() => setActiveAdminTab('materias')}>Materias & Profes</button>
               <button className={`tab-btn ${activeAdminTab === 'malla' ? 'active' : ''}`} onClick={() => setActiveAdminTab('malla')}>Malla Curricular</button>
+              <button className={`tab-btn ${activeAdminTab === 'disponibilidad' ? 'active' : ''}`} onClick={() => setActiveAdminTab('disponibilidad')}>Disponibilidad</button>
             </div>
 
             <div className="admin-grid">
@@ -549,19 +563,14 @@ function App() {
                     <h3>Profesores</h3>
                     <form className="admin-form" style={{flexDirection: 'row', gap: '1rem'}} onSubmit={(e) => {
                       e.preventDefault();
-                      handleCreate('profesores', { nombre_profesor: formProf.nombre_profesor, id_sede: parseInt(formProf.id_sede), max_horas_dia: parseInt(formProf.max_horas_dia) }, () => setFormProf({ ...formProf, nombre_profesor: "" }))
+                      handleCreate('profesores', { nombre_profesor: formProf.nombre_profesor }, () => setFormProf({ ...formProf, nombre_profesor: "" }))
                     }}>
-                      <select style={{flex: 1}} value={formProf.id_sede} onChange={e => setFormProf({...formProf, id_sede: e.target.value})} required>
-                        <option value="">-- Sede --</option>
-                        {sedes.map(s => <option key={s.id_sede} value={s.id_sede}>{s.nombre_sede}</option>)}
-                      </select>
                       <input style={{flex: 2}} type="text" placeholder="Nombre de Profesor" value={formProf.nombre_profesor} onChange={e => setFormProf({...formProf, nombre_profesor: e.target.value})} required />
-                      <input style={{flex: 1}} type="number" placeholder="Hs Max" value={formProf.max_horas_dia} onChange={e => setFormProf({...formProf, max_horas_dia: e.target.value})} required />
                       <button type="submit" className="btn-save">Añadir</button>
                     </form>
                     <table className="admin-table">
-                      <thead><tr><th>ID</th><th>Nombre</th><th>Hs Max</th><th>Sede ID</th></tr></thead>
-                      <tbody>{profesores.map(p => <tr key={p.id_profesores}><td>{p.id_profesores}</td><td>{p.nombre_profesor}</td><td>{p.max_horas_dia}</td><td>{p.id_sede}</td></tr>)}</tbody>
+                      <thead><tr><th>ID</th><th>Nombre</th></tr></thead>
+                      <tbody>{profesores.map(p => <tr key={p.id_profesor}><td>{p.id_profesor}</td><td>{p.nombre_profesor}</td></tr>)}</tbody>
                     </table>
                   </div>
 
@@ -573,7 +582,7 @@ function App() {
                     }}>
                       <select style={{flex: 1}} value={formProfCurso.id_profesor} onChange={e => setFormProfCurso({...formProfCurso, id_profesor: e.target.value})} required>
                         <option value="">-- Seleccionar Profesor --</option>
-                        {profesores.map(p => <option key={p.id_profesores} value={p.id_profesores}>{p.nombre_profesor}</option>)}
+                        {profesores.map(p => <option key={p.id_profesor} value={p.id_profesor}>{p.nombre_profesor}</option>)}
                       </select>
                       <select style={{flex: 1}} value={formProfCurso.id_curso} onChange={e => setFormProfCurso({...formProfCurso, id_curso: e.target.value})} required>
                         <option value="">-- Seleccionar Curso --</option>
@@ -613,6 +622,104 @@ function App() {
                     <tbody>{planes.map(p => <tr key={p.id_plan}><td>{p.id_plan}</td><td>{p.id_grado}</td><td>{p.id_curso}</td><td>{p.horas_semanales}</td></tr>)}</tbody>
                   </table>
                 </div>
+              )}
+
+              {/* --- SUBTAB: DISPONIBILIDAD DOCENTE --- */}
+              {activeAdminTab === 'disponibilidad' && (
+                <>
+                  <div className="admin-card">
+                    <h3>🏫 Profesor → Sede</h3>
+                    <p style={{color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem'}}>Vincula a qué sede(s) pertenece cada profesor.</p>
+                    <form className="admin-form" style={{flexDirection: 'row', gap: '1rem'}} onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('profesor-sedes', { id_profesor: parseInt(formProfSede.id_profesor), id_sede: parseInt(formProfSede.id_sede) }, () => setFormProfSede({ id_profesor: "", id_sede: "" }))
+                    }}>
+                      <select style={{flex: 1}} value={formProfSede.id_profesor} onChange={e => setFormProfSede({...formProfSede, id_profesor: e.target.value})} required>
+                        <option value="">-- Profesor --</option>
+                        {profesores.map(p => <option key={p.id_profesor} value={p.id_profesor}>{p.nombre_profesor}</option>)}
+                      </select>
+                      <select style={{flex: 1}} value={formProfSede.id_sede} onChange={e => setFormProfSede({...formProfSede, id_sede: e.target.value})} required>
+                        <option value="">-- Sede --</option>
+                        {sedes.map(s => <option key={s.id_sede} value={s.id_sede}>{s.nombre_sede}</option>)}
+                      </select>
+                      <button type="submit" className="btn-save">Vincular</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID</th><th>Profesor</th><th>Sede</th></tr></thead>
+                      <tbody>{profesorSedes.map(ps => {
+                        const prof = profesores.find(p => p.id_profesor === ps.id_profesor);
+                        const sede = sedes.find(s => s.id_sede === ps.id_sede);
+                        return <tr key={ps.id_profe_sedes}><td>{ps.id_profe_sedes}</td><td>{prof?.nombre_profesor || ps.id_profesor}</td><td>{sede?.nombre_sede || ps.id_sede}</td></tr>
+                      })}</tbody>
+                    </table>
+                  </div>
+
+                  <div className="admin-card">
+                    <h3>✅ Disponibilidad (Cuándo SÍ puede)</h3>
+                    <p style={{color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem'}}>Bloques donde el profesor puede dar clases. Si no se registra nada, se asume disponibilidad total.</p>
+                    <form className="admin-form" style={{flexDirection: 'row', gap: '1rem'}} onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('profesor-disponibilidad', { id_profesor: parseInt(formDisp.id_profesor), id_dia: parseInt(formDisp.id_dia), id_turno: parseInt(formDisp.id_turno), nro_bloque: parseInt(formDisp.nro_bloque) }, () => setFormDisp({ ...formDisp, id_dia: "", nro_bloque: "" }))
+                    }}>
+                      <select style={{flex: 1}} value={formDisp.id_profesor} onChange={e => setFormDisp({...formDisp, id_profesor: e.target.value})} required>
+                        <option value="">-- Profesor --</option>
+                        {profesores.map(p => <option key={p.id_profesor} value={p.id_profesor}>{p.nombre_profesor}</option>)}
+                      </select>
+                      <select style={{flex: 1}} value={formDisp.id_dia} onChange={e => setFormDisp({...formDisp, id_dia: e.target.value})} required>
+                        <option value="">-- Día --</option>
+                        {dias.map(d => <option key={d.id_dia} value={d.id_dia}>{d.nombre_dia}</option>)}
+                      </select>
+                      <select style={{flex: 1}} value={formDisp.id_turno} onChange={e => setFormDisp({...formDisp, id_turno: e.target.value})} required>
+                        <option value="">-- Turno --</option>
+                        {turnos.map(t => <option key={t.id_turno} value={t.id_turno}>{t.nombre}</option>)}
+                      </select>
+                      <input style={{flex: 1}} type="number" min="1" max="6" placeholder="Nro Bloque" value={formDisp.nro_bloque} onChange={e => setFormDisp({...formDisp, nro_bloque: e.target.value})} required />
+                      <button type="submit" className="btn-save btn-success">Añadir</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID</th><th>Profesor</th><th>Día</th><th>Turno</th><th>Bloque</th></tr></thead>
+                      <tbody>{profesorDisp.map(pd => {
+                        const prof = profesores.find(p => p.id_profesor === pd.id_profesor);
+                        const dia = dias.find(d => d.id_dia === pd.id_dia);
+                        const turno = turnos.find(t => t.id_turno === pd.id_turno);
+                        return <tr key={pd.id_disponibilidad}><td>{pd.id_disponibilidad}</td><td>{prof?.nombre_profesor || pd.id_profesor}</td><td>{dia?.nombre_dia || pd.id_dia}</td><td>{turno?.nombre || pd.id_turno}</td><td>{pd.nro_bloque}</td></tr>
+                      })}</tbody>
+                    </table>
+                  </div>
+
+                  <div className="admin-card" style={{gridColumn: '1 / -1'}}>
+                    <h3>⭐ Preferencias (Cuándo PREFIERE)</h3>
+                    <p style={{color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem'}}>Bloques donde el profesor prefiere dar clases (restricción blanda, el motor intentará respetarlo).</p>
+                    <form className="admin-form" style={{flexDirection: 'row', gap: '1rem'}} onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('profesor-preferencia', { id_profesor: parseInt(formPref.id_profesor), id_dia: parseInt(formPref.id_dia), id_turno: parseInt(formPref.id_turno), nro_bloque: parseInt(formPref.nro_bloque) }, () => setFormPref({ ...formPref, id_dia: "", nro_bloque: "" }))
+                    }}>
+                      <select style={{flex: 1}} value={formPref.id_profesor} onChange={e => setFormPref({...formPref, id_profesor: e.target.value})} required>
+                        <option value="">-- Profesor --</option>
+                        {profesores.map(p => <option key={p.id_profesor} value={p.id_profesor}>{p.nombre_profesor}</option>)}
+                      </select>
+                      <select style={{flex: 1}} value={formPref.id_dia} onChange={e => setFormPref({...formPref, id_dia: e.target.value})} required>
+                        <option value="">-- Día --</option>
+                        {dias.map(d => <option key={d.id_dia} value={d.id_dia}>{d.nombre_dia}</option>)}
+                      </select>
+                      <select style={{flex: 1}} value={formPref.id_turno} onChange={e => setFormPref({...formPref, id_turno: e.target.value})} required>
+                        <option value="">-- Turno --</option>
+                        {turnos.map(t => <option key={t.id_turno} value={t.id_turno}>{t.nombre}</option>)}
+                      </select>
+                      <input style={{flex: 1}} type="number" min="1" max="6" placeholder="Nro Bloque" value={formPref.nro_bloque} onChange={e => setFormPref({...formPref, nro_bloque: e.target.value})} required />
+                      <button type="submit" className="btn-save btn-purple">Añadir</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID</th><th>Profesor</th><th>Día</th><th>Turno</th><th>Bloque</th></tr></thead>
+                      <tbody>{profesorPref.map(pp => {
+                        const prof = profesores.find(p => p.id_profesor === pp.id_profesor);
+                        const dia = dias.find(d => d.id_dia === pp.id_dia);
+                        const turno = turnos.find(t => t.id_turno === pp.id_turno);
+                        return <tr key={pp.id_preferencia}><td>{pp.id_preferencia}</td><td>{prof?.nombre_profesor || pp.id_profesor}</td><td>{dia?.nombre_dia || pp.id_dia}</td><td>{turno?.nombre || pp.id_turno}</td><td>{pp.nro_bloque}</td></tr>
+                      })}</tbody>
+                    </table>
+                  </div>
+                </>
               )}
 
             </div>

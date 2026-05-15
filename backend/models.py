@@ -18,6 +18,8 @@ class Turno(SQLModel, table=True):
     
     bloques: List["Bloque"] = Relationship(back_populates="turno")
     seccion_turnos: List["SeccionTurno"] = Relationship(back_populates="turno")
+    profesor_disponibilidad: List["ProfesorDisponibilidad"] = Relationship(back_populates="turno")
+    profesor_preferencia: List["ProfesorPreferencia"] = Relationship(back_populates="turno")
 
 class Grado(SQLModel, table=True):
     __tablename__ = "grado"
@@ -38,26 +40,33 @@ class Dias(SQLModel, table=True):
     seccion_turnos: List["SeccionTurno"] = Relationship(back_populates="dia")
     restricciones: List["Restricciones"] = Relationship(back_populates="dia")
     horarios_finales: List["HorarioFinal"] = Relationship(back_populates="dia")
+    profesor_disponibilidad: List["ProfesorDisponibilidad"] = Relationship(back_populates="dia")
+    profesor_preferencia: List["ProfesorPreferencia"] = Relationship(back_populates="dia")
 
 class Areas(SQLModel, table=True):
     __tablename__ = "areas"
     id_area: Optional[int] = Field(default=None, primary_key=True)
     nombre: str
-    max_horas_dia: int
+    max_horas_dia: Optional[int] = None
     
     cursos: List["Cursos"] = Relationship(back_populates="area")
 
-# --- 2. Tablas con Dependencias de Nivel 1 ---
-class Sedes(SQLModel, table=True):
-    __tablename__ = "sedes"
-    id_sede: Optional[int] = Field(default=None, primary_key=True)
-    id_colegio: Optional[int] = Field(default=None, foreign_key="colegio.id_colegio")
-    nombre_sede: str
+class Profesores(SQLModel, table=True):
+    __tablename__ = "profesores"
+    id_profesor: Optional[int] = Field(default=None, primary_key=True)
+    nombre_profesor: str
     
-    colegio: Optional[Colegio] = Relationship(back_populates="sedes")
-    profesores: List["Profesores"] = Relationship(back_populates="sede")
-    secciones: List["Seccion"] = Relationship(back_populates="sede")
+    profesor_cursos: List["ProfesorCurso"] = Relationship(back_populates="profesor")
+    restricciones: List["Restricciones"] = Relationship(back_populates="profesor")
+    cargas_academicas: List["CargaAcademica"] = Relationship(back_populates="profesor")
+    horarios_finales: List["HorarioFinal"] = Relationship(back_populates="profesor")
+    tutorias: List["Tutoria"] = Relationship(back_populates="profesor")
+    profesor_sedes: List["ProfesorSedes"] = Relationship(back_populates="profesor")
+    profesor_disponibilidad: List["ProfesorDisponibilidad"] = Relationship(back_populates="profesor")
+    profesor_preferencia: List["ProfesorPreferencia"] = Relationship(back_populates="profesor")
 
+
+# --- 2. Tablas con Dependencias Simples ---
 class Usuario(SQLModel, table=True):
     __tablename__ = "usuario"
     id_usuario: Optional[int] = Field(default=None, primary_key=True)
@@ -67,13 +76,23 @@ class Usuario(SQLModel, table=True):
     
     colegio: Optional[Colegio] = Relationship(back_populates="usuarios")
 
+class Sedes(SQLModel, table=True):
+    __tablename__ = "sedes"
+    id_sede: Optional[int] = Field(default=None, primary_key=True)
+    id_colegio: Optional[int] = Field(default=None, foreign_key="colegio.id_colegio")
+    nombre_sede: str
+    
+    colegio: Optional[Colegio] = Relationship(back_populates="sedes")
+    secciones: List["Seccion"] = Relationship(back_populates="sede")
+    profesor_sedes: List["ProfesorSedes"] = Relationship(back_populates="sede")
+
 class Bloque(SQLModel, table=True):
     __tablename__ = "bloque"
     id_bloque: Optional[int] = Field(default=None, primary_key=True)
     id_turno: Optional[int] = Field(default=None, foreign_key="turno.id_turno")
-    numero_bloque: int
-    hora_inicio: time
-    hora_final: time
+    numero_bloque: Optional[int] = None
+    hora_inicio: Optional[time] = None
+    hora_final: Optional[time] = None
     
     turno: Optional[Turno] = Relationship(back_populates="bloques")
     restricciones: List["Restricciones"] = Relationship(back_populates="bloque")
@@ -90,26 +109,14 @@ class Cursos(SQLModel, table=True):
     profesor_cursos: List["ProfesorCurso"] = Relationship(back_populates="curso")
     horarios_finales: List["HorarioFinal"] = Relationship(back_populates="curso")
 
-class Profesores(SQLModel, table=True):
-    __tablename__ = "profesores"
-    id_profesores: Optional[int] = Field(default=None, primary_key=True)
-    id_sede: Optional[int] = Field(default=None, foreign_key="sedes.id_sede")
-    nombre_profesor: str
-    
-    sede: Optional[Sedes] = Relationship(back_populates="profesores")
-    profesor_cursos: List["ProfesorCurso"] = Relationship(back_populates="profesor")
-    restricciones: List["Restricciones"] = Relationship(back_populates="profesor")
-    cargas_academicas: List["CargaAcademica"] = Relationship(back_populates="profesor")
-    horarios_finales: List["HorarioFinal"] = Relationship(back_populates="profesor")
-    tutorias: List["Tutoria"] = Relationship(back_populates="profesor")
 
-# --- 3. Tablas con Dependencias de Nivel 2 ---
+# --- 3. Tablas de Configuración y Relaciones Intermedias ---
 class Seccion(SQLModel, table=True):
     __tablename__ = "seccion"
     id_seccion: Optional[int] = Field(default=None, primary_key=True)
     id_sede: Optional[int] = Field(default=None, foreign_key="sedes.id_sede")
     id_grado: Optional[int] = Field(default=None, foreign_key="grado.id_grado")
-    nombre: str
+    nombre: Optional[str] = None
     
     sede: Optional[Sedes] = Relationship(back_populates="secciones")
     grado: Optional[Grado] = Relationship(back_populates="secciones")
@@ -123,7 +130,7 @@ class GradoDiaConfig(SQLModel, table=True):
     id_config: Optional[int] = Field(default=None, primary_key=True)
     id_grado: Optional[int] = Field(default=None, foreign_key="grado.id_grado")
     id_dia: Optional[int] = Field(default=None, foreign_key="dias.id_dia")
-    bloques_dia: int
+    bloques_dia: Optional[int] = None
     
     grado: Optional[Grado] = Relationship(back_populates="grado_dia_configs")
     dia: Optional[Dias] = Relationship(back_populates="grado_dia_configs")
@@ -133,22 +140,56 @@ class PlanEstudio(SQLModel, table=True):
     id_plan: Optional[int] = Field(default=None, primary_key=True)
     id_grado: Optional[int] = Field(default=None, foreign_key="grado.id_grado")
     id_curso: Optional[int] = Field(default=None, foreign_key="cursos.id_curso")
-    horas_semanales: int
+    horas_semanales: Optional[int] = None
     
     grado: Optional[Grado] = Relationship(back_populates="planes_estudio")
     curso: Optional[Cursos] = Relationship(back_populates="planes_estudio")
     cargas_academicas: List["CargaAcademica"] = Relationship(back_populates="plan")
 
+class ProfesorSedes(SQLModel, table=True):
+    __tablename__ = "profesor_sedes"
+    id_profe_sedes: Optional[int] = Field(default=None, primary_key=True)
+    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
+    id_sede: Optional[int] = Field(default=None, foreign_key="sedes.id_sede")
+
+    profesor: Optional[Profesores] = Relationship(back_populates="profesor_sedes")
+    sede: Optional[Sedes] = Relationship(back_populates="profesor_sedes")
+
+class ProfesorDisponibilidad(SQLModel, table=True):
+    __tablename__ = "profesor_disponibilidad"
+    id_disponibilidad: Optional[int] = Field(default=None, primary_key=True)
+    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
+    id_dia: Optional[int] = Field(default=None, foreign_key="dias.id_dia")
+    id_turno: Optional[int] = Field(default=None, foreign_key="turno.id_turno")
+    nro_bloque: Optional[int] = None
+
+    profesor: Optional[Profesores] = Relationship(back_populates="profesor_disponibilidad")
+    dia: Optional[Dias] = Relationship(back_populates="profesor_disponibilidad")
+    turno: Optional[Turno] = Relationship(back_populates="profesor_disponibilidad")
+
+class ProfesorPreferencia(SQLModel, table=True):
+    __tablename__ = "profesor_preferencia"
+    id_preferencia: Optional[int] = Field(default=None, primary_key=True)
+    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
+    id_dia: Optional[int] = Field(default=None, foreign_key="dias.id_dia")
+    id_turno: Optional[int] = Field(default=None, foreign_key="turno.id_turno")
+    nro_bloque: Optional[int] = None
+
+    profesor: Optional[Profesores] = Relationship(back_populates="profesor_preferencia")
+    dia: Optional[Dias] = Relationship(back_populates="profesor_preferencia")
+    turno: Optional[Turno] = Relationship(back_populates="profesor_preferencia")
+
 class ProfesorCurso(SQLModel, table=True):
     __tablename__ = "profesor_curso"
     id_profesor_curso: Optional[int] = Field(default=None, primary_key=True)
-    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesores")
+    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
     id_curso: Optional[int] = Field(default=None, foreign_key="cursos.id_curso")
     
     profesor: Optional[Profesores] = Relationship(back_populates="profesor_cursos")
     curso: Optional[Cursos] = Relationship(back_populates="profesor_cursos")
 
-# --- 4. Tablas con Dependencias de Nivel 3 (Relacionales/Configuración) ---
+
+# --- 4. Tablas con Dependencias de Nivel 3 ---
 class SeccionTurno(SQLModel, table=True):
     __tablename__ = "seccion_turno"
     id_seccion_turno: Optional[int] = Field(default=None, primary_key=True)
@@ -160,10 +201,21 @@ class SeccionTurno(SQLModel, table=True):
     turno: Optional[Turno] = Relationship(back_populates="seccion_turnos")
     dia: Optional[Dias] = Relationship(back_populates="seccion_turnos")
 
+class Tutoria(SQLModel, table=True):
+    __tablename__ = "tutoria"
+    id_tutotia: Optional[int] = Field(default=None, primary_key=True)
+    id_seccion: Optional[int] = Field(default=None, foreign_key="seccion.id_seccion")
+    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
+    
+    seccion: Optional[Seccion] = Relationship(back_populates="tutorias")
+    profesor: Optional[Profesores] = Relationship(back_populates="tutorias")
+
+
+# --- Compatibility/Legacy Classes (if any still referenced) ---
 class Restricciones(SQLModel, table=True):
     __tablename__ = "restricciones"
     id_restricciones: Optional[int] = Field(default=None, primary_key=True)
-    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesores")
+    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
     id_dia: Optional[int] = Field(default=None, foreign_key="dias.id_dia")
     id_bloque: Optional[int] = Field(default=None, foreign_key="bloque.id_bloque")
     
@@ -175,21 +227,13 @@ class CargaAcademica(SQLModel, table=True):
     __tablename__ = "carga_academica"
     id_carga: Optional[int] = Field(default=None, primary_key=True)
     id_seccion: Optional[int] = Field(default=None, foreign_key="seccion.id_seccion")
-    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesores")
+    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
     id_plan: Optional[int] = Field(default=None, foreign_key="plan_estudio.id_plan")
     
     seccion: Optional[Seccion] = Relationship(back_populates="cargas_academicas")
     profesor: Optional[Profesores] = Relationship(back_populates="cargas_academicas")
     plan: Optional[PlanEstudio] = Relationship(back_populates="cargas_academicas")
 
-class Tutoria(SQLModel, table=True):
-    __tablename__ = "tutoria"
-    id_tutoria: Optional[int] = Field(default=None, primary_key=True)
-    id_seccion: Optional[int] = Field(default=None, foreign_key="seccion.id_seccion")
-    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesores")
-    
-    seccion: Optional[Seccion] = Relationship(back_populates="tutorias")
-    profesor: Optional[Profesores] = Relationship(back_populates="tutorias")
 
 # --- 5. Resultado Final ---
 class HorarioFinal(SQLModel, table=True):
@@ -199,7 +243,7 @@ class HorarioFinal(SQLModel, table=True):
     id_dia: Optional[int] = Field(default=None, foreign_key="dias.id_dia")
     id_bloque: Optional[int] = Field(default=None, foreign_key="bloque.id_bloque")
     id_curso: Optional[int] = Field(default=None, foreign_key="cursos.id_curso")
-    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesores")
+    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
     
     seccion: Optional[Seccion] = Relationship(back_populates="horarios_finales")
     dia: Optional[Dias] = Relationship(back_populates="horarios_finales")

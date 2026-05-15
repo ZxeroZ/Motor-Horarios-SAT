@@ -382,6 +382,9 @@ body {
 .btn-info { background: #0ea5e9; color: #fff; }
 .btn-info:hover { background: #0284c7; }
 
+.btn-success { background: #10b981; color: #fff; }
+.btn-success:hover { background: #059669; }
+
 .btn-purple { background: #8b5cf6; color: #fff; }
 .btn-purple:hover { background: #7c3aed; }
 

@@ -1,7 +1,8 @@
 from sqlmodel import Session, select
 from backend.models import (
     Sedes, Dias, Areas, Cursos, Grado, Seccion, PlanEstudio, 
-    Profesores, ProfesorCurso, GradoDiaConfig, SeccionTurno, Turno, Tutoria
+    Profesores, ProfesorCurso, GradoDiaConfig, SeccionTurno, Turno, Tutoria,
+    ProfesorDisponibilidad, ProfesorPreferencia, Bloque
 )
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
@@ -30,7 +31,9 @@ def build_json_from_db(session: Session) -> dict:
     
     datos["configuracion"] = {
         "sedes": [s.nombre_sede for s in sedes],
-        "turnos": nombres_turnos
+        "turnos": nombres_turnos,
+        "dia_id_to_nombre": {d.id_dia: d.nombre_dia for d in dias_db},
+        "turno_id_to_nombre": {t.id_turno: t.nombre for t in turnos_db}
     }
     
     # --- Categorías (Áreas) ---
@@ -125,16 +128,53 @@ def build_json_from_db(session: Session) -> dict:
         
     # --- Profesores ---
     profesores = session.exec(select(Profesores)).all()
+    todos_los_dias = session.exec(select(Dias).order_by(Dias.orden)).all()
+    todos_los_bloques = session.exec(select(Bloque)).all()
+    
     for p in profesores:
         pcs = session.exec(
-            select(ProfesorCurso).where(ProfesorCurso.id_profesor == p.id_profesores)
+            select(ProfesorCurso).where(ProfesorCurso.id_profesor == p.id_profesor)
         ).all()
+        
+        disp = session.exec(
+            select(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_profesor == p.id_profesor)
+        ).all()
+        
+        disponibilidad = []
+        if disp:
+            for d in disp:
+                disponibilidad.append({
+                    "id_dia": d.id_dia,
+                    "id_turno": d.id_turno,
+                    "nro_bloque": d.nro_bloque
+                })
+        else:
+            for dia in todos_los_dias:
+                for b in todos_los_bloques:
+                    disponibilidad.append({
+                        "id_dia": dia.id_dia,
+                        "id_turno": b.id_turno,
+                        "nro_bloque": b.numero_bloque
+                    })
+        
+        prefs = session.exec(
+            select(ProfesorPreferencia).where(ProfesorPreferencia.id_profesor == p.id_profesor)
+        ).all()
+        
+        preferencias = []
+        for pr in prefs:
+            preferencias.append({
+                "id_dia": pr.id_dia,
+                "id_turno": pr.id_turno,
+                "nro_bloque": pr.nro_bloque
+            })
+                    
         datos["profesores"].append({
-            "id": f"PROF_{p.id_profesores}",
+            "id": f"PROF_{p.id_profesor}",
             "nombre": p.nombre_profesor,
             "cursos_habilitados": ["TUT1" if pc.id_curso == tutoria_id_bd else f"CUR_{pc.id_curso}" for pc in pcs],
-            "max_horas_dia": 6,
-            "disponibilidad": {d: list(nombres_turnos) for d in nombres_dias}
+            "disponibilidad": disponibilidad,
+            "preferencias": preferencias
         })
     
     # --- Tutorías ---

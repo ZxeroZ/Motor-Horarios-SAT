@@ -2,7 +2,7 @@ import collections
 import json
 from pathlib import Path
 
-def exportar_metricas(asignaciones: list, ruta_salida: str) -> None:
+def exportar_metricas(asignaciones: list, datos_procesados: dict, ruta_salida: str) -> None:
     """
     Toma la lista lineal de slots asignados y calcula estadísticas de negocio.
     """
@@ -36,8 +36,41 @@ def exportar_metricas(asignaciones: list, ruta_salida: str) -> None:
         # Cada registro en la lista plana representa 1 slot exacto
         profesor_horas_semanales[p_id] += 1
 
+    # Calcular métricas de slots (ocupados vs huecos)
+    metricas_slots = {
+        "total_disponibles": 0,
+        "total_ocupados": len(asignaciones),
+        "total_huecos": 0,
+        "detalle_secciones": {}
+    }
+    
+    secciones_info = datos_procesados.get("secciones", {})
+    ocupados_por_seccion = collections.defaultdict(int)
+    for asig in asignaciones:
+        if "seccion_id" in asig:
+            ocupados_por_seccion[asig["seccion_id"]] += 1
+            
+    for s_id, s_info in secciones_info.items():
+        plantilla = s_info.get("horario_plantilla", {})
+        slots_totales = sum(plantilla.values())
+        slots_ocupados = ocupados_por_seccion.get(s_id, 0)
+        huecos = slots_totales - slots_ocupados
+        
+        metricas_slots["total_disponibles"] += slots_totales
+        metricas_slots["total_huecos"] += huecos
+        
+        metricas_slots["detalle_secciones"][s_id] = {
+            "slots_totales": slots_totales,
+            "slots_ocupados": slots_ocupados,
+            "huecos": huecos
+        }
+    
+    # Ordenar detalle de secciones
+    metricas_slots["detalle_secciones"] = dict(sorted(metricas_slots["detalle_secciones"].items()))
+
     # 3. Ensamblado final de la respuesta analítica
     metricas = {
+        "resumen_slots": metricas_slots,
         "profesores": {},
         "cursos": {}
     }
