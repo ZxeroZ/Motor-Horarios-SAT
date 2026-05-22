@@ -1,73 +1,125 @@
-# Motor de Horarios CP-SAT (Python)
+<div align="center">
+  <h1>🏫 Motor de Horarios CP-SAT</h1>
+  <p><em>Un motor de optimización matemática para la generación de horarios escolares.</em></p>
 
-Este proyecto implementa un motor de optimización de horarios escolares utilizando **Google OR-Tools (CP-SAT)**.
-Está diseñado bajo una arquitectura modular y desacoplada, lo que permite su funcionamiento tanto de forma autónoma (CLI) como su futura integración como módulo externo o tarea en paralelo (Celery) dentro de un framework web.
-
----
-
-## 1. Flujo de Ejecución y Rol de Componentes
-
-La arquitectura del motor sigue un pipeline secuencial de procesamiento de datos:
-
-1. **`loader.py` & `validators.py`**: Puerta de entrada del sistema. Ingiere el archivo `datos.json`, valida la integridad referencial (que las sedes existan, que los profesores dicten cursos reales, etc.) y carga la memoria estructural.
-2. **`preprocessor.py`**: El traductor algorítmico. Convierte arreglos en diccionarios y Sets matemáticos ($\mathcal{O}(1)$). Aplana la jerarquía curricular para saber exactamente cuántas horas necesita cada sección, y procesa la disponibilidad granular de profesores a nivel de "Slots Físicos" (ej. `{1, 2, 3}`).
-3. **`model.py`**: El cerebro matemático. Traduce las entidades a variables booleanas de CP-SAT. Aquí se generan las configuraciones de fragmentación de bloques, se inyectan las restricciones duras (Hard Constraints) y se construye la Función Objetivo para maximizar la calidad del horario.
-4. **`solver.py`**: El orquestador de búsqueda. Invoca a los *workers* paralelos de Google OR-Tools para explorar el árbol de decisiones. Extrae la solución factible u óptima y decodifica las variables matemáticas ganadoras de vuelta a diccionarios Python.
-5. **`exporter.py`**: Formatea la salida bruta del solver en un archivo `horario_result.json` presentable, ordenado cronológicamente y agrupado por sección y por profesor.
-6. **`metrics.py`**: Módulo analítico post-ejecución. Evalúa el resultado final para emitir el `metrics.json`, calculando la carga horaria semanal de cada maestro, ocupación total de la infraestructura y contabilizando los "huecos" o espacios libres restantes por aula.
+  <p>
+    <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
+    <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
+    <img src="https://img.shields.io/badge/OR_Tools-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google OR-Tools"/>
+    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React"/>
+    <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"/>
+  </p>
+</div>
 
 ---
 
-## 2. Restricciones Implementadas (Constraints)
+## 📑 Tabla de Contenidos
 
-El motor opera bajo un riguroso set de reglas agrupadas en Restricciones Duras (inquebrantables) y Blandas (optimizables mediante recompensas).
-
-### A. Restricciones de Disponibilidad y Ubicuidad
-* **Disponibilidad Matricial Multi-Sede:** El motor procesa la disponibilidad del docente a un nivel altamente granular: Día $\rightarrow$ Turno $\rightarrow$ Sede $\rightarrow$ Slots Físicos (ej. `{1, 2, 3}`).
-* **Validación Estricta de Slots:** Un curso solo se asigna a un profesor si los *N* slots consecutivos que requiere el bloque son un subconjunto matemático estricto (`issubset`) de su disponibilidad en esa **sede específica**.
-* **Exclusividad de Sección:** Una sección no puede recibir dos cursos ni atender a dos profesores en el mismo slot físico.
-* **Exclusividad de Profesor:** Un maestro no puede estar en dos aulas al mismo tiempo.
-* **Tiempo de Traslado Inter-Sedes (Travel Time):** El motor prohíbe que un profesor sea asignado a dos sedes distintas en slots consecutivos (a excepción del quiebre natural provocado por el recreo).
-
-### C. Restricciones Blandas (Soft Constraints)
-* **Disponibilidad Preferente:** Los docentes pueden tener horarios "ideales" (ej. "Prefiero dictar los Lunes a primera hora"). Esta preferencia es una restricción blanda; el motor **premiará** la colocación de la clase en esos bloques específicos sin forzar un error si no es posible. Se garantiza matemáticamente mediante validadores que la zona preferente sea un subconjunto de la zona de disponibilidad estricta.
-
-### B. Restricciones Pedagógicas y Laborales
-* **Límite de Sobrecarga por Categoría:** Limita la cantidad de horas que una sección puede recibir de una misma área de conocimiento (ej. "Ciencias") en un solo día para evitar fatiga estudiantil.
-* **Repelencia de Días (Fragmentación):** Si un curso de 3 horas se divide en submódulos de 2 y 1 hora, estos fragmentos *jamás* caerán en el mismo día.
+1. [Acerca del Proyecto](#-acerca-del-proyecto)
+2. [Arquitectura y Componentes](#-arquitectura-y-componentes)
+3. [Restricciones (Constraints)](#️-restricciones-del-motor)
+4. [Modelo Matemático](#-modelo-matemático)
+5. [Instalación y Configuración](#-instalación-y-configuración)
 
 ---
 
-## 3. Modelo Matemático: Fragmentación y Función Objetivo
+## 💡 Acerca del Proyecto
 
-A diferencia de modelos básicos de franjas unitarias, este motor resuelve **Bloques Contiguos** dinámicos, lo cual eleva la complejidad matemática pero garantiza horarios humanamente coherentes.
+Este proyecto implementa un motor de optimización de horarios escolares utilizando **Google OR-Tools (Constraint Programming - SAT)**. Está diseñado bajo una arquitectura modular y desacoplada, lo que permite su funcionamiento tanto de forma autónoma como su integración dentro de un framework web moderno y responsivo.
 
-### 3.1. Booleanas de Sub-Bloque ($Z$)
-Para cada requerimiento (Sección $s$, Curso $c$, Profesor $p$), el motor evalúa distintas configuraciones de fragmentación ($cfg$). Por ejemplo, 3 horas pueden dictarse juntas `[3]` o dividirse `[2, 1]`.
+---
 
-Por cada sub-módulo (ej. el bloque de 2 horas) que inicia en el slot $i$, se crea una variable booleana $Z$:
-$$Z_{s, c, p, d, t, i, H, cfg, sub} \in \{0, 1\}$$
-Donde $H$ es la duración del bloque. Si $Z = 1$, significa que el curso arranca en el slot $i$ y ocupará automáticamente los slots $[i, i+1, \dots, i+H-1]$.
+## 🏗 Arquitectura y Componentes
 
-### 3.2. Activador de Configuración ($V$)
-Para que CP-SAT sepa qué estrategia de fragmentación se está usando, existe una booleana superior $V_{p, cfg}$.
-$$ \sum_{cfg} V_{p, cfg} \le 1 $$
-*(Un profesor solo puede ejecutar UNA configuración de fragmentación para un curso específico).*
+La arquitectura del motor sigue un pipeline secuencial de procesamiento de datos altamente estructurado:
 
-### 3.3. Relación de Dependencia
-Si el motor decide activar la configuración `[2, 1]` ($V = 1$), entonces está **obligado** a agendar exactamente un bloque de 2 horas y un bloque de 1 hora en la semana:
-$$ \sum (Z_{\text{bloque 1}}) = V \quad \text{y} \quad \sum (Z_{\text{bloque 2}}) = V $$
+| Módulo | Descripción |
+|---|---|
+| 🔌 **`loader.py` & `validators.py`** | Ingiere los datos, valida la integridad referencial y carga la memoria estructural. |
+| ⚙️ **`preprocessor.py`** | Traductor algorítmico. Convierte datos jerárquicos a diccionarios y conjuntos matemáticos ($O(1)$). |
+| 🧠 **`model.py`** | El cerebro matemático. Genera configuraciones, inyecta restricciones y construye la Función Objetivo. |
+| 🚀 **`solver.py`** | Invoca a los *workers* de OR-Tools para explorar el árbol de decisiones y decodificar la solución. |
+| 📤 **`exporter.py`** | Formatea la salida bruta del solver en un formato presentable y ordenado. |
+| 📊 **`metrics.py`** | Módulo analítico post-ejecución. Evalúa la calidad, calculando métricas de infraestructura y horas. |
 
-### 3.4. La Función Objetivo (Objective Function)
-Dado que a veces es matemáticamente imposible agendar el 100% de los cursos por topes de disponibilidad, el motor pasó de requerir "Cobertura Estricta" a un modelo de "Maximización por Recompensas".
+---
 
-Se crea una variable de estado $\text{Cobertura}_{s, c} \in \{0, 1\}$ que indica si un curso logró asignarse a una sección.
-Adicionalmente, se evalúa si los slots $k$ ocupados por una variable sub-bloque $Z$ intersecan con los slots de la **Disponibilidad Preferente** del docente ($\text{Pref}_{p}$).
+## ⚖️ Restricciones del Motor
 
-$$ \text{Maximize} \left( \sum (\text{Cobertura} \times 10000) + \sum (Z \cap \text{Pref}_{p} \times 500) + \sum (V_{cfg} \times \text{Reward}_{cfg}) \right) $$
+El motor opera bajo un riguroso set de reglas matemáticas para asegurar horarios humanos y factibles:
 
-**Jerarquía de Comportamiento Emergente (Asignación > Preferencia > Contigüidad):**
-1. **Asignación Primordial (+10,000 pts):** El motor prioriza sobre todas las cosas que la clase se dicte. Jamás dejará un curso vacío si existe una permutación matemática que permita encajarlo.
-2. **Preferencia Docente (+500 pts por slot):** Si hay múltiples lugares válidos, el motor escoge el que caiga en la "Disponibilidad Preferente" del maestro.
-3. **Contigüidad (+100 pts vs +10 pts):** Si el curso no se fragmenta (ej. `[3]`), gana 100 puntos. Si se fragmenta (ej. `[2, 1]`), gana 10 puntos.
-4. **El Sacrificio Calculado:** Al ser la Preferencia (+500) matemáticamente mayor que la Contigüidad (+100), si un curso de 3 horas no entra entero en la zona preferida del profesor, el motor **decidirá romper el curso** (sacrificando los 90 pts de diferencia) para poder colocar al menos 1 o 2 horas dentro del horario preferente del docente, maximizando el puntaje global.
+### 🔴 Restricciones Duras (Hard Constraints)
+- **Disponibilidad Matricial:** Control hiper-granular a nivel de (Día $\rightarrow$ Turno $\rightarrow$ Sede $\rightarrow$ Bloques).
+- **Validación Estricta:** Un profesor solo se asigna si los bloques requeridos son un subconjunto estricto de su disponibilidad en la sede adecuada.
+- **Exclusividad Absoluta:** Un profesor/sección no puede estar en dos clases simultáneamente.
+- **Tiempo de Traslado (Travel Time):** Prohíbe que un profesor dicte en sedes distintas en bloques consecutivos sin espacio natural de traslado.
+- **Límite de Sobrecarga:** Limita las horas que una sección recibe de una misma "Área de Conocimiento" en un mismo día.
+- **Repelencia de Días:** Si un curso de 3h se divide en `[2h, 1h]`, estos fragmentos jamás caerán el mismo día.
+
+### 🟢 Restricciones Blandas (Soft Constraints)
+- **Disponibilidad Preferente:** Zonas horarias "ideales" para el docente. El motor premia la asignación en estas franjas sin obligarlas estrictamente.
+
+---
+
+## 📐 Modelo Matemático
+
+A diferencia de modelos básicos de franjas unitarias, este motor resuelve **Bloques Contiguos** dinámicos.
+
+### Función Objetivo por Recompensas
+El motor maximiza el siguiente puntaje global en su árbol de búsqueda:
+
+1. **🏆 Asignación Primordial (+10,000 pts):** Prioridad absoluta para que no queden cursos sin dictarse.
+2. **⭐ Preferencia Docente (+500 pts / bloque):** Premia ubicar la clase en el horario ideal del maestro.
+3. **🧱 Contigüidad (+100 pts vs +10 pts):** Cursos impartidos sin fragmentarse ganan mayor puntaje.
+
+> **💡 El Sacrificio Calculado:** Dado que *Preferencia > Contigüidad*, el motor sacrificará tener bloques juntos (los romperá) si eso permite colocar las horas dentro del horario preferente del docente.
+
+---
+
+## 🚀 Instalación y Configuración
+
+> **Nota para Colaboradores:** La base de datos real y los scripts de poblamiento automatizado **no** se incluyen en el repositorio por políticas de privacidad de la data. 
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/ZxeroZ/Motor-Horarios-SAT.git
+   cd Motor-Horarios-SAT
+   ```
+
+2. **Crear y activar el entorno virtual**
+   ```bash
+   python -m venv venv
+   # En Windows:
+   .\venv\Scripts\activate
+   # En Linux/Mac:
+   source venv/bin/activate
+   ```
+
+3. **Instalar dependencias**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Inicializar la Base de Datos**
+   El repositorio no incluye datos reales. Para generar el esquema de SQLite en blanco, ejecuta:
+   ```bash
+   sqlite3 database.db < esquema_bd.sql
+   ```
+   *(Deberás insertar tus datos de prueba usando el panel de Administración en el Frontend).*
+
+5. **Levantar el Backend (API)**
+   ```bash
+   uvicorn backend.main:app --reload
+   ```
+
+6. **Levantar el Frontend (React)**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+---
+<div align="center">
+  <i>Construido con lógica, matemáticas y mucha paciencia ☕</i>
+</div>
