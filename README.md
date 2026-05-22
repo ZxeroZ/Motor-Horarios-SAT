@@ -31,7 +31,20 @@ Este proyecto implementa un motor de optimización de horarios escolares utiliza
 
 ## 🏗 Arquitectura y Componentes
 
-La arquitectura del motor sigue un pipeline secuencial de procesamiento de datos altamente estructurado:
+Este sistema está dividido en dos grandes pilares tecnológicos: el **Backend API** (Gestión de datos y reglas de negocio) y el **Motor Matemático** (Resolución NP-Hard).
+
+### 🖥️ 1. Pilar Backend y API (Gestión de Datos)
+Toda la capa de servicios, persistencia y orquestación está construida en **FastAPI** y **SQLModel (SQLite)**. Esta capa es fundamental, ya que el motor matemático no puede consumir datos crudos.
+
+| Componente | Descripción |
+|---|---|
+| 🗄️ **`models.py`** | Diseño de la Base de Datos Relacional. Implementa más de 15 tablas normalizadas para manejar Sedes, Cursos, Disponibilidad Hiper-Granular y Restricciones. |
+| 🛡️ **`main.py` (API)** | Expone endpoints RESTful robustos para realizar CRUD sobre las entidades académicas y actúa como pasarela segura para desencadenar el motor. |
+| 🔌 **`engine_connector.py`** | **El puente vital.** Se encarga de leer la base de datos relacional, aplanar las estructuras complejas y traducir los registros SQL a los diccionarios matriciales que el motor necesita. |
+| 💾 **Persistencia** | Se encarga de destruir horarios obsoletos y persistir eficientemente el resultado matemático (`HorarioFinal`) mapeándolo a los bloques visuales. |
+
+### 🧠 2. Pilar Motor Matemático (OR-Tools)
+Pipeline secuencial de procesamiento y búsqueda:
 
 | Módulo | Descripción |
 |---|---|
@@ -73,6 +86,7 @@ El motor maximiza el siguiente puntaje global en su árbol de búsqueda:
 3. **🧱 Contigüidad (+100 pts vs +10 pts):** Cursos impartidos sin fragmentarse ganan mayor puntaje.
 
 > **💡 El Sacrificio Calculado:** Dado que *Preferencia > Contigüidad*, el motor sacrificará tener bloques juntos (los romperá) si eso permite colocar las horas dentro del horario preferente del docente.
+
 
 ---
 
@@ -121,5 +135,6 @@ El motor maximiza el siguiente puntaje global en su árbol de búsqueda:
 
 ---
 <div align="center">
-  <i>Construido con lógica, matemáticas y mucha paciencia ☕</i>
+  <i>Construido con lógica, matemáticas y mucha paciencia ☕</i><br>
+  <!-- Backend by AG_zero -->
 </div>
