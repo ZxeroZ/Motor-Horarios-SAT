@@ -28,6 +28,7 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
     disp_seccion = datos_procesados["disp_seccion"]
     disp_profesor = datos_procesados["disp_profesor"]
     disp_profesor_slots = datos_procesados.get("disp_profesor_slots", {})
+    disp_profesor_pref_slots = datos_procesados.get("disp_profesor_pref_slots", {})
     secciones_dict = datos_procesados["secciones"]
     tutorias_dict = datos_procesados.get("tutorias", {})
     
@@ -101,7 +102,21 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
                             slots_del_dia = horario_plantilla.get(dia, 0)
                             for turno in turnos:
                                 if (dia, turno) in s_disp and (dia, turno) in p_disp:
-                                    slots_del_profe = p_disp_slots.get((dia, turno), set())
+                                    if (dia, turno, sede_id) in p_disp_slots:
+                                        slots_del_profe = p_disp_slots[(dia, turno, sede_id)]
+                                    elif (dia, turno) in p_disp_slots:
+                                        slots_del_profe = p_disp_slots[(dia, turno)]
+                                    else:
+                                        # Profesor no disponible en esta sede
+                                        continue
+                                    
+                                    p_pref_slots = disp_profesor_pref_slots.get(p_id, {})
+                                    if (dia, turno, sede_id) in p_pref_slots:
+                                        pref_slots_del_profe = p_pref_slots[(dia, turno, sede_id)]
+                                    elif (dia, turno) in p_pref_slots:
+                                        pref_slots_del_profe = p_pref_slots[(dia, turno)]
+                                    else:
+                                        pref_slots_del_profe = set()
                                     
                                     # Iteramos los slots de 'Inicio' en el que el sub-bloque cabe
                                     for start in range(slots_del_dia - sub_H + 1):
@@ -114,6 +129,11 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
 
                                         variable_name = f"z_{s_id}_{c_id}_{p_id}_{dia}_{turno}_{start}_H{sub_H}_cfg{cfg_idx}_sub{sub_idx}"
                                         var = model.NewBoolVar(variable_name)
+                                        
+                                        # Recompensa por preferencia docente (Opción B: intersección por slot)
+                                        interseccion_pref = len(slots_requeridos.intersection(pref_slots_del_profe))
+                                        if interseccion_pref > 0:
+                                            objetivo_recompensas.append((var, interseccion_pref * 500))
                                         
                                         # Registramos la tupla decodificadora para exporter/solver
                                         bloques_z[(s_id, c_id, p_id, dia, turno, start, sub_H, sub_idx)] = var

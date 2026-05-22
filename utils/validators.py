@@ -203,32 +203,57 @@ def validar_profesores(
                         f"'cursos_habilitados' no existe en la lista de cursos"
                     )
  
-        # Validar disponibilidad (ahora es una lista de {id_dia, id_turno, nro_bloque})
+        # Validar disponibilidad
         if "disponibilidad" not in profesor:
             errores.append(f"[profesores][{pid}] Falta el campo 'disponibilidad'")
         else:
             disponibilidad = profesor["disponibilidad"]
-            if not isinstance(disponibilidad, list):
-                errores.append(
-                    f"[profesores][{pid}] 'disponibilidad' debe ser una lista"
-                )
-            elif len(disponibilidad) == 0:
+            if len(disponibilidad) == 0:
                 errores.append(
                     f"[profesores][{pid}] 'disponibilidad' no puede estar vacío"
                 )
-            else:
-                for slot in disponibilidad:
-                    if not isinstance(slot, dict):
+            for dia, turnos in disponibilidad.items():
+                if dia not in dias_validos:
+                    errores.append(
+                        f"[profesores][{pid}] El día '{dia}' en 'disponibilidad' "
+                        f"no está en la configuración"
+                    )
+                for turno in turnos:
+                    if turno not in turnos_validos:
                         errores.append(
-                            f"[profesores][{pid}] Cada slot de disponibilidad debe ser un objeto"
+                            f"[profesores][{pid}] El turno '{turno}' en el día '{dia}' "
+                            f"no está en la configuración"
                         )
-                        break
-                    for key in ("id_dia", "id_turno", "nro_bloque"):
-                        if key not in slot:
-                            errores.append(
-                                f"[profesores][{pid}] Falta '{key}' en un slot de disponibilidad"
-                            )
-                            break
+
+        # Validar disponibilidad preferente (opcional, debe ser subconjunto de disponibilidad estricta)
+        if "disponibilidad_preferente" in profesor:
+            disp_pref = profesor["disponibilidad_preferente"]
+            disp_estricta = profesor.get("disponibilidad", {})
+            for dia, turnos in disp_pref.items():
+                if dia not in dias_validos:
+                    errores.append(
+                        f"[profesores][{pid}] El día '{dia}' en 'disponibilidad_preferente' "
+                        f"no está en la configuración"
+                    )
+                for turno, sedes in turnos.items():
+                    if turno not in turnos_validos:
+                        errores.append(
+                            f"[profesores][{pid}] El turno '{turno}' en el día '{dia}' "
+                            f"de 'disponibilidad_preferente' no está en la configuración"
+                        )
+                    for sede, slots_pref in sedes.items():
+                        # Validar subconjunto
+                        try:
+                            slots_estrictos = disp_estricta.get(dia, {}).get(turno, {}).get(sede, [])
+                            for slot in slots_pref:
+                                if slot not in slots_estrictos:
+                                    errores.append(
+                                        f"[profesores][{pid}] El slot {slot} en {dia}-{turno}-{sede} "
+                                        f"de 'disponibilidad_preferente' no existe en la 'disponibilidad' estricta"
+                                    )
+                        except AttributeError:
+                            # En caso de que la estructura estricta esté mal formada, será reportada arriba o fallará
+                            pass
  
     return errores
  

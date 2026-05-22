@@ -16,3 +16,9 @@ htmlcov/
 
 # Salidas de resultados (opcional, si no deseas versionar los json generados temporalmente)
 # data/output/*.json
+
+database.db
+*.db
+*.sqlite
+populate_from_json.py
+*.txt

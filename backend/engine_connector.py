@@ -1,8 +1,9 @@
+from collections import defaultdict
 from sqlmodel import Session, select
 from backend.models import (
     Sedes, Dias, Areas, Cursos, Grado, Seccion, PlanEstudio, 
     Profesores, ProfesorCurso, GradoDiaConfig, SeccionTurno, Turno, Tutoria,
-    ProfesorDisponibilidad, ProfesorPreferencia, Bloque
+    ProfesorDisponibilidad, ProfesorPreferencia, Bloque, ProfesorSedes
 )
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
@@ -129,53 +130,105 @@ def build_json_from_db(session: Session) -> dict:
     # --- Profesores ---
     profesores = session.exec(select(Profesores)).all()
     todos_los_dias = session.exec(select(Dias).order_by(Dias.orden)).all()
-    todos_los_bloques = session.exec(select(Bloque)).all()
+    
+    # Mapas de IDs a nombres para convertir formato BD → formato motor
+    dia_id_to_nombre = {d.id_dia: d.nombre_dia for d in todos_los_dias}
+    turno_id_to_nombre = {t.id_turno: t.nombre for t in turnos_db}
+    
+    # Máx bloques por día desde grado_dia_config (NO de la tabla Bloque que es visual)
+    all_grado_configs = session.exec(select(GradoDiaConfig)).all()
+    max_bloques_por_dia = {}
+    for cfg in all_grado_configs:
+        dia_nombre = dia_id_to_nombre.get(cfg.id_dia)
+        if dia_nombre and cfg.bloques_dia:
+            if cfg.bloques_dia > max_bloques_por_dia.get(dia_nombre, 0):
+                max_bloques_por_dia[dia_nombre] = cfg.bloques_dia
     
     for p in profesores:
         pcs = session.exec(
             select(ProfesorCurso).where(ProfesorCurso.id_profesor == p.id_profesor)
         ).all()
         
-        disp = session.exec(
+        # Sedes del profesor
+        prof_sedes_db = session.exec(
+            select(ProfesorSedes).where(ProfesorSedes.id_profesor == p.id_profesor)
+        ).all()
+        sedes_del_prof = []
+        for ps_obj in prof_sedes_db:
+            sede_obj = session.get(Sedes, ps_obj.id_sede)
+            if sede_obj:
+                sedes_del_prof.append(sede_obj.nombre_sede)
+        if not sedes_del_prof:
+            sedes_del_prof = [s.nombre_sede for s in sedes]
+        
+        # --- Disponibilidad: formato motor {dia: {turno: {sede: [bloques]}}} ---
+        disp_records = session.exec(
             select(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_profesor == p.id_profesor)
         ).all()
         
-        disponibilidad = []
-        if disp:
-            for d in disp:
-                disponibilidad.append({
-                    "id_dia": d.id_dia,
-                    "id_turno": d.id_turno,
-                    "nro_bloque": d.nro_bloque
-                })
+        disponibilidad = {}
+        if disp_records:
+            grouped = defaultdict(set)
+            for dr in disp_records:
+                dia_n = dia_id_to_nombre.get(dr.id_dia)
+                turno_n = turno_id_to_nombre.get(dr.id_turno)
+                sede_obj = session.get(Sedes, dr.id_sede) if dr.id_sede else None
+                sede_n = sede_obj.nombre_sede if sede_obj else "Sede A"
+                
+                if dia_n and turno_n:
+                    grouped[(dia_n, turno_n, sede_n)].add(dr.nro_bloque)
+            
+            for (dia_n, turno_n, sede_n), bloques in grouped.items():
+                if dia_n not in disponibilidad:
+                    disponibilidad[dia_n] = {}
+                if turno_n not in disponibilidad[dia_n]:
+                    disponibilidad[dia_n][turno_n] = {}
+                disponibilidad[dia_n][turno_n][sede_n] = sorted(bloques)
         else:
+            # Fallback: disponible todos los días/turnos/sedes
+            # Usa grado_dia_config para saber cuántos bloques tiene cada día
             for dia in todos_los_dias:
-                for b in todos_los_bloques:
-                    disponibilidad.append({
-                        "id_dia": dia.id_dia,
-                        "id_turno": b.id_turno,
-                        "nro_bloque": b.numero_bloque
-                    })
+                dia_nombre = dia.nombre_dia
+                max_b = max_bloques_por_dia.get(dia_nombre)
+                if max_b is None:
+                    continue  # Día sin configuración de grado, no generar
+                slots = list(range(1, max_b + 1))
+                disponibilidad[dia_nombre] = {}
+                for t in turnos_db:
+                    disponibilidad[dia_nombre][t.nombre] = {
+                        sede: list(slots) for sede in sedes_del_prof
+                    }
         
-        prefs = session.exec(
+        # --- Disponibilidad Preferente (clave que el preprocessor busca) ---
+        pref_records = session.exec(
             select(ProfesorPreferencia).where(ProfesorPreferencia.id_profesor == p.id_profesor)
         ).all()
         
-        preferencias = []
-        for pr in prefs:
-            preferencias.append({
-                "id_dia": pr.id_dia,
-                "id_turno": pr.id_turno,
-                "nro_bloque": pr.nro_bloque
-            })
-                    
-        datos["profesores"].append({
+        prof_data = {
             "id": f"PROF_{p.id_profesor}",
             "nombre": p.nombre_profesor,
             "cursos_habilitados": ["TUT1" if pc.id_curso == tutoria_id_bd else f"CUR_{pc.id_curso}" for pc in pcs],
-            "disponibilidad": disponibilidad,
-            "preferencias": preferencias
-        })
+            "disponibilidad": disponibilidad
+        }
+        
+        if pref_records:
+            grouped_pref = defaultdict(set)
+            for pr in pref_records:
+                dia_n = dia_id_to_nombre.get(pr.id_dia)
+                turno_n = turno_id_to_nombre.get(pr.id_turno)
+                if dia_n and turno_n:
+                    grouped_pref[(dia_n, turno_n)].add(pr.nro_bloque)
+            
+            disponibilidad_preferente = {}
+            for (dia_n, turno_n), bloques in grouped_pref.items():
+                if dia_n not in disponibilidad_preferente:
+                    disponibilidad_preferente[dia_n] = {}
+                disponibilidad_preferente[dia_n][turno_n] = {
+                    sede: sorted(bloques) for sede in sedes_del_prof
+                }
+            prof_data["disponibilidad_preferente"] = disponibilidad_preferente
+        
+        datos["profesores"].append(prof_data)
     
     # --- Tutorías ---
     tutorias_db = session.exec(select(Tutoria)).all()

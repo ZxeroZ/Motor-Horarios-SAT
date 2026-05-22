@@ -1,0 +1,4284 @@
+{
+  "configuracion": {
+    "sedes": [
+      "Sede A",
+      "Sede B"
+    ],
+    "turnos": [
+      "Mañana",
+      "Tarde"
+    ],
+    "dia_id_to_nombre": {
+      "1": "Lunes",
+      "2": "Martes",
+      "3": "Miercoles",
+      "4": "Jueves",
+      "5": "Viernes",
+      "6": "Sábado"
+    },
+    "turno_id_to_nombre": {
+      "1": "Mañana",
+      "2": "Tarde"
+    }
+  },
+  "categorias": [
+    {
+      "id": "CAT_1",
+      "nombre": "Matemática",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_2",
+      "nombre": "Comunicación",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_3",
+      "nombre": "Ciencia y Tecnología",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_4",
+      "nombre": "Ciencias Sociales",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_5",
+      "nombre": "Idiomas",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_6",
+      "nombre": "Educación Física",
+      "max_horas_dia": 4
+    },
+    {
+      "id": "CAT_7",
+      "nombre": "Tutoría",
+      "max_horas_dia": 4
+    }
+  ],
+  "cursos": [
+    {
+      "id": "CUR_1",
+      "nombre": "Álgebra",
+      "categoria_id": "CAT_1"
+    },
+    {
+      "id": "CUR_2",
+      "nombre": "Aritmética",
+      "categoria_id": "CAT_1"
+    },
+    {
+      "id": "CUR_3",
+      "nombre": "Geometría",
+      "categoria_id": "CAT_1"
+    },
+    {
+      "id": "CUR_4",
+      "nombre": "Trigonometría",
+      "categoria_id": "CAT_1"
+    },
+    {
+      "id": "CUR_5",
+      "nombre": "Razonamiento Matemático",
+      "categoria_id": "CAT_1"
+    },
+    {
+      "id": "CUR_6",
+      "nombre": "Literatura",
+      "categoria_id": "CAT_2"
+    },
+    {
+      "id": "CUR_7",
+      "nombre": "Razonamiento Verbal",
+      "categoria_id": "CAT_2"
+    },
+    {
+      "id": "CUR_8",
+      "nombre": "Anatomía",
+      "categoria_id": "CAT_3"
+    },
+    {
+      "id": "CUR_9",
+      "nombre": "Biología",
+      "categoria_id": "CAT_3"
+    },
+    {
+      "id": "CUR_10",
+      "nombre": "Química",
+      "categoria_id": "CAT_3"
+    },
+    {
+      "id": "CUR_11",
+      "nombre": "Física Elemental",
+      "categoria_id": "CAT_3"
+    },
+    {
+      "id": "CUR_12",
+      "nombre": "Historia y Geografía",
+      "categoria_id": "CAT_4"
+    },
+    {
+      "id": "CUR_13",
+      "nombre": "Economía",
+      "categoria_id": "CAT_4"
+    },
+    {
+      "id": "CUR_14",
+      "nombre": "Filosofía",
+      "categoria_id": "CAT_4"
+    },
+    {
+      "id": "CUR_15",
+      "nombre": "DPCC",
+      "categoria_id": "CAT_4"
+    },
+    {
+      "id": "CUR_16",
+      "nombre": "Inglés",
+      "categoria_id": "CAT_5"
+    },
+    {
+      "id": "CUR_17",
+      "nombre": "Educación Física",
+      "categoria_id": "CAT_6"
+    },
+    {
+      "id": "TUT1",
+      "nombre": "Tutoría",
+      "categoria_id": "CAT_7"
+    }
+  ],
+  "grados": [
+    {
+      "id": "GRA_1",
+      "nombre": "1°",
+      "cursos_requeridos": [
+        {
+          "curso_id": "CUR_1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_2",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_3",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_4",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "CUR_5",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_6",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_7",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_9",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_10",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_11",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_12",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_15",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_16",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_17",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TUT1",
+          "horas_semanales": 1
+        }
+      ],
+      "horario_plantilla": {
+        "Lunes": 6,
+        "Martes": 6,
+        "Miercoles": 6,
+        "Jueves": 6,
+        "Viernes": 6
+      }
+    },
+    {
+      "id": "GRA_2",
+      "nombre": "2°",
+      "cursos_requeridos": [
+        {
+          "curso_id": "CUR_1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_2",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_3",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_4",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "CUR_5",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_6",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_7",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_9",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_10",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_11",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_12",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_15",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_16",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_17",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TUT1",
+          "horas_semanales": 1
+        }
+      ],
+      "horario_plantilla": {
+        "Lunes": 6,
+        "Martes": 6,
+        "Miercoles": 6,
+        "Jueves": 6,
+        "Viernes": 6
+      }
+    },
+    {
+      "id": "GRA_3",
+      "nombre": "3°",
+      "cursos_requeridos": [
+        {
+          "curso_id": "CUR_1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_2",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_3",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_4",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "CUR_5",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_6",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_7",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_9",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_10",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_11",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_12",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_15",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_16",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_17",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TUT1",
+          "horas_semanales": 1
+        }
+      ],
+      "horario_plantilla": {
+        "Lunes": 6,
+        "Martes": 6,
+        "Miercoles": 6,
+        "Jueves": 6,
+        "Viernes": 6
+      }
+    },
+    {
+      "id": "GRA_4",
+      "nombre": "4°",
+      "cursos_requeridos": [
+        {
+          "curso_id": "CUR_1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_2",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_3",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_4",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "CUR_5",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_6",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_7",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_8",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_9",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_10",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_11",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_12",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_13",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_15",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TUT1",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "CUR_16",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "CUR_17",
+          "horas_semanales": 1
+        }
+      ],
+      "horario_plantilla": {
+        "Lunes": 6,
+        "Martes": 6,
+        "Miercoles": 6,
+        "Jueves": 6,
+        "Viernes": 6,
+        "Sábado": 3
+      }
+    },
+    {
+      "id": "GRA_5",
+      "nombre": "5°",
+      "cursos_requeridos": [
+        {
+          "curso_id": "CUR_1",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_3",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_4",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "CUR_5",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_6",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_7",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_8",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_9",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_10",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_11",
+          "horas_semanales": 3
+        },
+        {
+          "curso_id": "CUR_12",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_13",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "TUT1",
+          "horas_semanales": 1
+        },
+        {
+          "curso_id": "CUR_14",
+          "horas_semanales": 2
+        },
+        {
+          "curso_id": "CUR_16",
+          "horas_semanales": 1
+        }
+      ],
+      "horario_plantilla": {
+        "Lunes": 6,
+        "Martes": 6,
+        "Miercoles": 6,
+        "Jueves": 6,
+        "Viernes": 6,
+        "Sábado": 3
+      }
+    }
+  ],
+  "secciones": [
+    {
+      "id": "SEC_1",
+      "nombre": "1° A",
+      "grado": "GRA_1",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_2",
+      "nombre": "1° B",
+      "grado": "GRA_1",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_3",
+      "nombre": "2° A",
+      "grado": "GRA_2",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_4",
+      "nombre": "2° B",
+      "grado": "GRA_2",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_5",
+      "nombre": "3°",
+      "grado": "GRA_3",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_6",
+      "nombre": "4°",
+      "grado": "GRA_4",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Tarde"
+        ],
+        "Martes": [
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Tarde"
+        ],
+        "Jueves": [
+          "Tarde"
+        ],
+        "Viernes": [
+          "Tarde"
+        ],
+        "Sábado": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_7",
+      "nombre": "5° A",
+      "grado": "GRA_5",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Tarde"
+        ],
+        "Martes": [
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Tarde"
+        ],
+        "Jueves": [
+          "Tarde"
+        ],
+        "Viernes": [
+          "Tarde"
+        ],
+        "Sábado": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_8",
+      "nombre": "5° B",
+      "grado": "GRA_5",
+      "sede": "Sede A",
+      "disponibilidad": {
+        "Lunes": [
+          "Tarde"
+        ],
+        "Martes": [
+          "Tarde"
+        ],
+        "Miercoles": [
+          "Tarde"
+        ],
+        "Jueves": [
+          "Tarde"
+        ],
+        "Viernes": [
+          "Tarde"
+        ],
+        "Sábado": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_9",
+      "nombre": "1° A",
+      "grado": "GRA_1",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_10",
+      "nombre": "1° B",
+      "grado": "GRA_1",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_11",
+      "nombre": "2°",
+      "grado": "GRA_2",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_12",
+      "nombre": "3°",
+      "grado": "GRA_3",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_13",
+      "nombre": "4°",
+      "grado": "GRA_4",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ],
+        "Sábado": [
+          "Mañana"
+        ]
+      }
+    },
+    {
+      "id": "SEC_14",
+      "nombre": "5°",
+      "grado": "GRA_5",
+      "sede": "Sede B",
+      "disponibilidad": {
+        "Lunes": [
+          "Mañana"
+        ],
+        "Martes": [
+          "Mañana"
+        ],
+        "Miercoles": [
+          "Mañana"
+        ],
+        "Jueves": [
+          "Mañana"
+        ],
+        "Viernes": [
+          "Mañana"
+        ],
+        "Sábado": [
+          "Mañana"
+        ]
+      }
+    }
+  ],
+  "profesores": [
+    {
+      "id": "PROF_1",
+      "nombre": "Juan Perez",
+      "cursos_habilitados": [
+        "CUR_2",
+        "CUR_3",
+        "CUR_4",
+        "CUR_5"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_2",
+      "nombre": "Maria Lopez",
+      "cursos_habilitados": [
+        "CUR_6",
+        "CUR_7"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_3",
+      "nombre": "Carlos Rios",
+      "cursos_habilitados": [
+        "CUR_8",
+        "CUR_9",
+        "CUR_10",
+        "CUR_11"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_4",
+      "nombre": "Ana Torres",
+      "cursos_habilitados": [
+        "CUR_12",
+        "CUR_13"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_5",
+      "nombre": "Luis Mendoza",
+      "cursos_habilitados": [
+        "CUR_14",
+        "CUR_15"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_6",
+      "nombre": "Sofia Vargas",
+      "cursos_habilitados": [
+        "CUR_16"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_7",
+      "nombre": "Roberto Chavez",
+      "cursos_habilitados": [
+        "CUR_17"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_8",
+      "nombre": "Carmen Diaz",
+      "cursos_habilitados": [
+        "CUR_1",
+        "CUR_3"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_9",
+      "nombre": "Jorge Ramirez",
+      "cursos_habilitados": [
+        "CUR_1",
+        "CUR_2"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_10",
+      "nombre": "Patricia Flores",
+      "cursos_habilitados": [
+        "CUR_3",
+        "CUR_4"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_11",
+      "nombre": "Andres Castillo",
+      "cursos_habilitados": [
+        "CUR_5",
+        "CUR_1"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_12",
+      "nombre": "Valeria Gutierrez",
+      "cursos_habilitados": [
+        "CUR_6",
+        "CUR_7"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_13",
+      "nombre": "Ricardo Morales",
+      "cursos_habilitados": [
+        "CUR_6",
+        "CUR_7"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_14",
+      "nombre": "Claudia Herrera",
+      "cursos_habilitados": [
+        "CUR_8",
+        "CUR_9"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_15",
+      "nombre": "Miguel Sanchez",
+      "cursos_habilitados": [
+        "CUR_10",
+        "CUR_11"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_16",
+      "nombre": "Daniela Vega",
+      "cursos_habilitados": [
+        "CUR_8",
+        "CUR_10"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_17",
+      "nombre": "Fernando Paredes",
+      "cursos_habilitados": [
+        "CUR_12",
+        "CUR_13"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_18",
+      "nombre": "Gabriela Quispe",
+      "cursos_habilitados": [
+        "CUR_14",
+        "CUR_15"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_19",
+      "nombre": "Eduardo Mamani",
+      "cursos_habilitados": [
+        "CUR_12",
+        "CUR_14"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_20",
+      "nombre": "Lucia Condori",
+      "cursos_habilitados": [
+        "CUR_16"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_21",
+      "nombre": "Kevin Soto",
+      "cursos_habilitados": [
+        "CUR_16"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_22",
+      "nombre": "Diana Pinto",
+      "cursos_habilitados": [
+        "CUR_17"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_23",
+      "nombre": "Hector Medina",
+      "cursos_habilitados": [
+        "CUR_17"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_24",
+      "nombre": "Silvia Ramos",
+      "cursos_habilitados": [
+        "CUR_7"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede A": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "PROF_25",
+      "nombre": "Oscar Huanca",
+      "cursos_habilitados": [
+        "CUR_5",
+        "CUR_1"
+      ],
+      "disponibilidad": {
+        "Lunes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Martes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Miercoles": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Jueves": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Viernes": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        },
+        "Sábado": {
+          "Mañana": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          },
+          "Tarde": {
+            "Sede B": [
+              1,
+              2,
+              3
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "tutorias": {
+    "SEC_1": "PROF_1",
+    "SEC_2": "PROF_1",
+    "SEC_3": "PROF_2",
+    "SEC_4": "PROF_2",
+    "SEC_5": "PROF_3",
+    "SEC_6": "PROF_3",
+    "SEC_7": "PROF_4",
+    "SEC_8": "PROF_4",
+    "SEC_9": "PROF_5",
+    "SEC_10": "PROF_5",
+    "SEC_11": "PROF_6",
+    "SEC_12": "PROF_7",
+    "SEC_13": "PROF_8",
+    "SEC_14": "PROF_9"
+  }
+}

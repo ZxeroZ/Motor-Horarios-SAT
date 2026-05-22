@@ -85,6 +85,8 @@ class Sedes(SQLModel, table=True):
     colegio: Optional[Colegio] = Relationship(back_populates="sedes")
     secciones: List["Seccion"] = Relationship(back_populates="sede")
     profesor_sedes: List["ProfesorSedes"] = Relationship(back_populates="sede")
+    profesor_disponibilidad: List["ProfesorDisponibilidad"] = Relationship(back_populates="sede")
+    profesor_preferencia: List["ProfesorPreferencia"] = Relationship(back_populates="sede")
 
 class Bloque(SQLModel, table=True):
     __tablename__ = "bloque"
@@ -161,11 +163,13 @@ class ProfesorDisponibilidad(SQLModel, table=True):
     id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
     id_dia: Optional[int] = Field(default=None, foreign_key="dias.id_dia")
     id_turno: Optional[int] = Field(default=None, foreign_key="turno.id_turno")
+    id_sede: Optional[int] = Field(default=None, foreign_key="sedes.id_sede")
     nro_bloque: Optional[int] = None
 
     profesor: Optional[Profesores] = Relationship(back_populates="profesor_disponibilidad")
     dia: Optional[Dias] = Relationship(back_populates="profesor_disponibilidad")
     turno: Optional[Turno] = Relationship(back_populates="profesor_disponibilidad")
+    sede: Optional[Sedes] = Relationship(back_populates="profesor_disponibilidad")
 
 class ProfesorPreferencia(SQLModel, table=True):
     __tablename__ = "profesor_preferencia"
@@ -173,11 +177,13 @@ class ProfesorPreferencia(SQLModel, table=True):
     id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
     id_dia: Optional[int] = Field(default=None, foreign_key="dias.id_dia")
     id_turno: Optional[int] = Field(default=None, foreign_key="turno.id_turno")
+    id_sede: Optional[int] = Field(default=None, foreign_key="sedes.id_sede")
     nro_bloque: Optional[int] = None
 
     profesor: Optional[Profesores] = Relationship(back_populates="profesor_preferencia")
     dia: Optional[Dias] = Relationship(back_populates="profesor_preferencia")
     turno: Optional[Turno] = Relationship(back_populates="profesor_preferencia")
+    sede: Optional[Sedes] = Relationship(back_populates="profesor_preferencia")
 
 class ProfesorCurso(SQLModel, table=True):
     __tablename__ = "profesor_curso"
