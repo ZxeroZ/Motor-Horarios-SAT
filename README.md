@@ -9,6 +9,9 @@
     <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React"/>
     <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"/>
   </p>
+  <p>
+    <em>Basado en el <a href="https://github.com/Clatt4noia/timetable-engine">timetable-engine original por Clatt4noia</a></em>
+  </p>
 </div>
 
 ---
