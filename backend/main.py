@@ -93,6 +93,9 @@ def get_grado_dia_config(session: Session = Depends(get_session)):
 
 @app.post("/api/grado-dia-config", response_model=GradoDiaConfig)
 def create_grado_dia_config(config: GradoDiaConfig, session: Session = Depends(get_session)):
+    if config.bloques_dia is not None and config.bloques_dia <= 0:
+        raise HTTPException(status_code=400, detail="otra vez no leiste los cambios no envies 0 >:/")
+        
     session.add(config)
     session.commit()
     session.refresh(config)
