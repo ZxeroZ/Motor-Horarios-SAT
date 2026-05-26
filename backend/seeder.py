@@ -10,7 +10,7 @@ from backend.database import create_db_and_tables, engine
 from backend.models import (
     Colegio, Sedes, Usuario, Areas, Cursos, Grado, Seccion, 
     PlanEstudio, Dias, Turno, Bloque, GradoDiaConfig,
-    Profesores, ProfesorCurso, ProfesorSedes
+    Profesores, ProfesorCurso
 )
 
 def run_seeder():
@@ -132,19 +132,6 @@ def run_seeder():
             session.add(prof_obj)
             session.commit()
             session.refresh(prof_obj)
-            
-            # ProfesorSedes (inferir sede de disponibilidad)
-            sedes_asignadas = set()
-            for dia_data in p.get("disponibilidad", {}).values():
-                for turno_data in dia_data.values():
-                    if isinstance(turno_data, dict):
-                        sedes_asignadas.update(turno_data.keys())
-            for sede_nombre in sedes_asignadas:
-                if sede_nombre in sedes_db:
-                    session.add(ProfesorSedes(
-                        id_profesor=prof_obj.id_profesor,
-                        id_sede=sedes_db[sede_nombre].id_sede
-                    ))
             
             # ProfesorCurso
             for c_id in p.get("cursos_habilitados", []):

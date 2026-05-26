@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from backend.models import (
     Sedes, Dias, Areas, Cursos, Grado, Seccion, PlanEstudio, 
     Profesores, ProfesorCurso, GradoDiaConfig, SeccionTurno, Turno, Tutoria,
-    ProfesorDisponibilidad, ProfesorPreferencia, Bloque, ProfesorSedes
+    ProfesorDisponibilidad, ProfesorPreferencia, Bloque
 )
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
@@ -149,22 +149,20 @@ def build_json_from_db(session: Session) -> dict:
             select(ProfesorCurso).where(ProfesorCurso.id_profesor == p.id_profesor)
         ).all()
         
-        # Sedes del profesor
-        prof_sedes_db = session.exec(
-            select(ProfesorSedes).where(ProfesorSedes.id_profesor == p.id_profesor)
-        ).all()
-        sedes_del_prof = []
-        for ps_obj in prof_sedes_db:
-            sede_obj = session.get(Sedes, ps_obj.id_sede)
-            if sede_obj:
-                sedes_del_prof.append(sede_obj.nombre_sede)
-        if not sedes_del_prof:
-            sedes_del_prof = [s.nombre_sede for s in sedes]
-        
         # --- Disponibilidad: formato motor {dia: {turno: {sede: [bloques]}}} ---
         disp_records = session.exec(
             select(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_profesor == p.id_profesor)
         ).all()
+        
+        # Sedes del profesor inferidas de su disponibilidad
+        sedes_del_prof = set()
+        for dr in disp_records:
+            sede_obj = session.get(Sedes, dr.id_sede) if dr.id_sede else None
+            if sede_obj:
+                sedes_del_prof.add(sede_obj.nombre_sede)
+        sedes_del_prof = list(sedes_del_prof)
+        if not sedes_del_prof:
+            sedes_del_prof = [s.nombre_sede for s in sedes]
         
         disponibilidad = {}
         if disp_records:
@@ -265,7 +263,7 @@ def generar_horario_engine(session: Session) -> dict:
 
 def _guardar_horario(session: Session, asignaciones: list):
     """Persiste las asignaciones del motor en la tabla horario_final."""
-    from backend.models import HorarioFinal, Bloque
+    from backend.models import HorarioFinal
     
     old = session.exec(select(HorarioFinal)).all()
     for o in old:
@@ -277,11 +275,6 @@ def _guardar_horario(session: Session, asignaciones: list):
     
     turnos_db = session.exec(select(Turno)).all()
     turno_map = {t.nombre: t.id_turno for t in turnos_db}
-    
-    bloques_db = session.exec(select(Bloque)).all()
-    bloque_map = {}
-    for b in bloques_db:
-        bloque_map[(b.id_turno, b.numero_bloque)] = b.id_bloque
     
     for asig in asignaciones:
         sec_id = int(asig["seccion_id"].replace("SEC_", ""))
@@ -304,12 +297,12 @@ def _guardar_horario(session: Session, asignaciones: list):
         
         for i in range(horas):
             num_bloque = slot_inicio + i + 1
-            id_bloque = bloque_map.get((id_turno, num_bloque))
             
             session.add(HorarioFinal(
                 id_seccion=sec_id,
                 id_dia=id_dia,
-                id_bloque=id_bloque,
+                num_bloque=num_bloque,
+                id_turno=id_turno,
                 id_curso=cur_id,
                 id_profesor=prof_id
             ))

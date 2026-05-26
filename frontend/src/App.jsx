@@ -40,7 +40,6 @@ function App() {
   const [secciones, setSecciones] = useState([]);
   const [planes, setPlanes] = useState([]);
   const [profesorCursos, setProfesorCursos] = useState([]);
-  const [profesorSedes, setProfesorSedes] = useState([]);
   const [profesorDisp, setProfesorDisp] = useState([]);
   const [profesorPref, setProfesorPref] = useState([]);
   const [dias, setDias] = useState([]);
@@ -55,7 +54,6 @@ function App() {
   const [formProfCurso, setFormProfCurso] = useState({ id_profesor: "", id_curso: "" });
   const [formSeccion, setFormSeccion] = useState({ nombre: "", id_grado: "", id_sede: "" });
   const [formPlan, setFormPlan] = useState({ id_grado: "", id_curso: "", horas_semanales: 1 });
-  const [formProfSede, setFormProfSede] = useState({ id_profesor: "", id_sede: "" });
   const [formDisp, setFormDisp] = useState({ id_profesor: "", id_dia: "", id_turno: "", nro_bloque: "" });
   const [formPref, setFormPref] = useState({ id_profesor: "", id_dia: "", id_turno: "", nro_bloque: "" });
 
@@ -128,7 +126,7 @@ function App() {
 
   const loadAdminData = async () => {
     try {
-      const endpoints = ["colegio", "sedes", "grados", "areas", "cursos", "profesores", "secciones", "planes", "profesor-curso", "profesor-sedes", "profesor-disponibilidad", "profesor-preferencia", "dias", "turnos"];
+      const endpoints = ["colegio", "sedes", "grados", "areas", "cursos", "profesores", "secciones", "planes", "profesor-curso", "profesor-disponibilidad", "profesor-preferencia", "dias", "turnos"];
       const responses = await Promise.all(endpoints.map(ep => fetch(`http://localhost:8000/api/${ep}`)));
       const data = await Promise.all(responses.map(r => r.json()));
       
@@ -141,11 +139,10 @@ function App() {
       setSecciones(data[6]);
       setPlanes(data[7]);
       setProfesorCursos(data[8]);
-      setProfesorSedes(data[9]);
-      setProfesorDisp(data[10]);
-      setProfesorPref(data[11]);
-      setDias(data[12]);
-      setTurnos(data[13]);
+      setProfesorDisp(data[9]);
+      setProfesorPref(data[10]);
+      setDias(data[11]);
+      setTurnos(data[12]);
     } catch (e) {
       console.error("Error al cargar data de admin", e);
     }
@@ -627,33 +624,6 @@ function App() {
               {/* --- SUBTAB: DISPONIBILIDAD DOCENTE --- */}
               {activeAdminTab === 'disponibilidad' && (
                 <>
-                  <div className="admin-card">
-                    <h3>🏫 Profesor → Sede</h3>
-                    <p style={{color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem'}}>Vincula a qué sede(s) pertenece cada profesor.</p>
-                    <form className="admin-form" style={{flexDirection: 'row', gap: '1rem'}} onSubmit={(e) => {
-                      e.preventDefault();
-                      handleCreate('profesor-sedes', { id_profesor: parseInt(formProfSede.id_profesor), id_sede: parseInt(formProfSede.id_sede) }, () => setFormProfSede({ id_profesor: "", id_sede: "" }))
-                    }}>
-                      <select style={{flex: 1}} value={formProfSede.id_profesor} onChange={e => setFormProfSede({...formProfSede, id_profesor: e.target.value})} required>
-                        <option value="">-- Profesor --</option>
-                        {profesores.map(p => <option key={p.id_profesor} value={p.id_profesor}>{p.nombre_profesor}</option>)}
-                      </select>
-                      <select style={{flex: 1}} value={formProfSede.id_sede} onChange={e => setFormProfSede({...formProfSede, id_sede: e.target.value})} required>
-                        <option value="">-- Sede --</option>
-                        {sedes.map(s => <option key={s.id_sede} value={s.id_sede}>{s.nombre_sede}</option>)}
-                      </select>
-                      <button type="submit" className="btn-save">Vincular</button>
-                    </form>
-                    <table className="admin-table">
-                      <thead><tr><th>ID</th><th>Profesor</th><th>Sede</th></tr></thead>
-                      <tbody>{profesorSedes.map(ps => {
-                        const prof = profesores.find(p => p.id_profesor === ps.id_profesor);
-                        const sede = sedes.find(s => s.id_sede === ps.id_sede);
-                        return <tr key={ps.id_profe_sedes}><td>{ps.id_profe_sedes}</td><td>{prof?.nombre_profesor || ps.id_profesor}</td><td>{sede?.nombre_sede || ps.id_sede}</td></tr>
-                      })}</tbody>
-                    </table>
-                  </div>
-
                   <div className="admin-card">
                     <h3>✅ Disponibilidad (Cuándo SÍ puede)</h3>
                     <p style={{color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem'}}>Bloques donde el profesor puede dar clases. Si no se registra nada, se asume disponibilidad total.</p>

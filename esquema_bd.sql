@@ -1,209 +1,160 @@
--- Esquema de la Base de Datos (Estructura Vacía)
-
-CREATE TABLE colegio (
-	id_colegio INTEGER NOT NULL, 
-	nombre_colegio VARCHAR NOT NULL, 
-	PRIMARY KEY (id_colegio)
+-- 1. Tablas independientes o base
+CREATE TABLE Colegio (
+    id_colegio INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_colegio VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE turno (
-	id_turno INTEGER NOT NULL, 
-	nombre VARCHAR NOT NULL, 
-	PRIMARY KEY (id_turno)
+    id_turno INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE grado (
-	id_grado INTEGER NOT NULL, 
-	numero INTEGER NOT NULL, 
-	PRIMARY KEY (id_grado)
+CREATE TABLE Dias (
+    id_dia INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_dia VARCHAR(50) NOT NULL,
+    orden INT
 );
 
-CREATE TABLE dias (
-	id_dia INTEGER NOT NULL, 
-	nombre_dia VARCHAR NOT NULL, 
-	orden INTEGER NOT NULL, 
-	PRIMARY KEY (id_dia)
+CREATE TABLE Grado (
+    id_grado INT AUTO_INCREMENT PRIMARY KEY,
+    numero INT NOT NULL
 );
 
 CREATE TABLE areas (
-	id_area INTEGER NOT NULL, 
-	nombre VARCHAR NOT NULL, 
-	max_horas_dia INTEGER, 
-	PRIMARY KEY (id_area)
+    id_area INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    max_horas_dia INT
 );
 
 CREATE TABLE profesores (
-	id_profesor INTEGER NOT NULL, 
-	nombre_profesor VARCHAR NOT NULL, 
-	PRIMARY KEY (id_profesor)
+    id_profesor INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_profesor VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE usuario (
-	id_usuario INTEGER NOT NULL, 
-	email VARCHAR NOT NULL, 
-	nombre VARCHAR NOT NULL, 
-	id_colegio INTEGER, 
-	PRIMARY KEY (id_usuario), 
-	UNIQUE (email), 
-	FOREIGN KEY(id_colegio) REFERENCES colegio (id_colegio)
+-- 2. Tablas con dependencias de nivel 1
+CREATE TABLE Usuario (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    nombre VARCHAR(255) NOT NULL,
+    id_colegio INT,
+    FOREIGN KEY (id_colegio) REFERENCES Colegio(id_colegio)
 );
 
-CREATE TABLE sedes (
-	id_sede INTEGER NOT NULL, 
-	id_colegio INTEGER, 
-	nombre_sede VARCHAR NOT NULL, 
-	PRIMARY KEY (id_sede), 
-	FOREIGN KEY(id_colegio) REFERENCES colegio (id_colegio)
+CREATE TABLE Sedes (
+    id_sede INT AUTO_INCREMENT PRIMARY KEY,
+    id_colegio INT,
+    nombre_sede VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id_colegio) REFERENCES Colegio(id_colegio)
 );
 
-CREATE TABLE bloque (
-	id_bloque INTEGER NOT NULL, 
-	id_turno INTEGER, 
-	numero_bloque INTEGER, 
-	hora_inicio TIME, 
-	hora_final TIME, 
-	PRIMARY KEY (id_bloque), 
-	FOREIGN KEY(id_turno) REFERENCES turno (id_turno)
-);
-
-CREATE TABLE cursos (
-	id_curso INTEGER NOT NULL, 
-	id_area INTEGER, 
-	nombre_curso VARCHAR NOT NULL, 
-	PRIMARY KEY (id_curso), 
-	FOREIGN KEY(id_area) REFERENCES areas (id_area)
+CREATE TABLE Bloque (
+    id_bloque INT AUTO_INCREMENT PRIMARY KEY,
+    id_turno INT,
+    numero_bloque INT,
+    hora_inicio TIME,
+    hora_final TIME,
+    FOREIGN KEY (id_turno) REFERENCES turno(id_turno)
 );
 
 CREATE TABLE grado_dia_config (
-	id_config INTEGER NOT NULL, 
-	id_grado INTEGER, 
-	id_dia INTEGER, 
-	bloques_dia INTEGER, 
-	PRIMARY KEY (id_config), 
-	FOREIGN KEY(id_grado) REFERENCES grado (id_grado), 
-	FOREIGN KEY(id_dia) REFERENCES dias (id_dia)
+    id_config INT AUTO_INCREMENT PRIMARY KEY,
+    id_grado INT,
+    id_dia INT,
+    bloques_dia INT,
+    FOREIGN KEY (id_grado) REFERENCES Grado(id_grado),
+    FOREIGN KEY (id_dia) REFERENCES Dias(id_dia)
 );
 
+CREATE TABLE cursos (
+    id_curso INT AUTO_INCREMENT PRIMARY KEY,
+    id_area INT,
+    nombre_curso VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id_area) REFERENCES areas(id_area)
+);
+
+-- 3. Tablas con dependencias de nivel 2
 CREATE TABLE seccion (
-	id_seccion INTEGER NOT NULL, 
-	id_sede INTEGER, 
-	id_grado INTEGER, 
-	nombre VARCHAR, 
-	PRIMARY KEY (id_seccion), 
-	FOREIGN KEY(id_sede) REFERENCES sedes (id_sede), 
-	FOREIGN KEY(id_grado) REFERENCES grado (id_grado)
-);
-
-CREATE TABLE plan_estudio (
-	id_plan INTEGER NOT NULL, 
-	id_grado INTEGER, 
-	id_curso INTEGER, 
-	horas_semanales INTEGER, 
-	PRIMARY KEY (id_plan), 
-	FOREIGN KEY(id_grado) REFERENCES grado (id_grado), 
-	FOREIGN KEY(id_curso) REFERENCES cursos (id_curso)
-);
-
-CREATE TABLE profesor_sedes (
-	id_profe_sedes INTEGER NOT NULL, 
-	id_profesor INTEGER, 
-	id_sede INTEGER, 
-	PRIMARY KEY (id_profe_sedes), 
-	FOREIGN KEY(id_profesor) REFERENCES profesores (id_profesor), 
-	FOREIGN KEY(id_sede) REFERENCES sedes (id_sede)
-);
-
-CREATE TABLE profesor_disponibilidad (
-	id_disponibilidad INTEGER NOT NULL, 
-	id_profesor INTEGER, 
-	id_dia INTEGER, 
-	id_turno INTEGER, 
-	id_sede INTEGER, 
-	nro_bloque INTEGER, 
-	PRIMARY KEY (id_disponibilidad), 
-	FOREIGN KEY(id_profesor) REFERENCES profesores (id_profesor), 
-	FOREIGN KEY(id_dia) REFERENCES dias (id_dia), 
-	FOREIGN KEY(id_turno) REFERENCES turno (id_turno), 
-	FOREIGN KEY(id_sede) REFERENCES sedes (id_sede)
-);
-
-CREATE TABLE profesor_preferencia (
-	id_preferencia INTEGER NOT NULL, 
-	id_profesor INTEGER, 
-	id_dia INTEGER, 
-	id_turno INTEGER, 
-	id_sede INTEGER, 
-	nro_bloque INTEGER, 
-	PRIMARY KEY (id_preferencia), 
-	FOREIGN KEY(id_profesor) REFERENCES profesores (id_profesor), 
-	FOREIGN KEY(id_dia) REFERENCES dias (id_dia), 
-	FOREIGN KEY(id_turno) REFERENCES turno (id_turno), 
-	FOREIGN KEY(id_sede) REFERENCES sedes (id_sede)
+    id_seccion INT AUTO_INCREMENT PRIMARY KEY,
+    id_sede INT,
+    id_grado INT,
+    nombre VARCHAR(100) NOT NULL,
+    FOREIGN KEY (id_sede) REFERENCES Sedes(id_sede),
+    FOREIGN KEY (id_grado) REFERENCES Grado(id_grado)
 );
 
 CREATE TABLE profesor_curso (
-	id_profesor_curso INTEGER NOT NULL, 
-	id_profesor INTEGER, 
-	id_curso INTEGER, 
-	PRIMARY KEY (id_profesor_curso), 
-	FOREIGN KEY(id_profesor) REFERENCES profesores (id_profesor), 
-	FOREIGN KEY(id_curso) REFERENCES cursos (id_curso)
+    id_profesor_curso INT AUTO_INCREMENT PRIMARY KEY,
+    id_profesor INT,
+    id_curso INT,
+    FOREIGN KEY (id_profesor) REFERENCES profesores(id_profesor),
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
 );
 
-CREATE TABLE restricciones (
-	id_restricciones INTEGER NOT NULL, 
-	id_profesor INTEGER, 
-	id_dia INTEGER, 
-	id_bloque INTEGER, 
-	PRIMARY KEY (id_restricciones), 
-	FOREIGN KEY(id_profesor) REFERENCES profesores (id_profesor), 
-	FOREIGN KEY(id_dia) REFERENCES dias (id_dia), 
-	FOREIGN KEY(id_bloque) REFERENCES bloque (id_bloque)
-);
-
+-- 4. Tablas con dependencias de nivel 3 (relacionales y cruces complejos)
 CREATE TABLE seccion_turno (
-	id_seccion_turno INTEGER NOT NULL, 
-	id_seccion INTEGER, 
-	id_turno INTEGER, 
-	id_dia INTEGER, 
-	PRIMARY KEY (id_seccion_turno), 
-	FOREIGN KEY(id_seccion) REFERENCES seccion (id_seccion), 
-	FOREIGN KEY(id_turno) REFERENCES turno (id_turno), 
-	FOREIGN KEY(id_dia) REFERENCES dias (id_dia)
+    id_seccion_turno INT AUTO_INCREMENT PRIMARY KEY,
+    id_seccion INT,
+    id_turno INT,
+    id_dia INT,
+    FOREIGN KEY (id_seccion) REFERENCES seccion(id_seccion),
+    FOREIGN KEY (id_turno) REFERENCES turno(id_turno),
+    FOREIGN KEY (id_dia) REFERENCES Dias(id_dia)
 );
 
-CREATE TABLE tutoria (
-	id_tutotia INTEGER NOT NULL, 
-	id_seccion INTEGER, 
-	id_profesor INTEGER, 
-	PRIMARY KEY (id_tutotia), 
-	FOREIGN KEY(id_seccion) REFERENCES seccion (id_seccion), 
-	FOREIGN KEY(id_profesor) REFERENCES profesores (id_profesor)
+CREATE TABLE plan_estudio (
+    id_plan INT AUTO_INCREMENT PRIMARY KEY,
+    id_grado INT,
+    id_curso INT,
+    horas_semanales INT,
+    FOREIGN KEY (id_grado) REFERENCES Grado(id_grado),
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
 );
 
-CREATE TABLE carga_academica (
-	id_carga INTEGER NOT NULL, 
-	id_seccion INTEGER, 
-	id_profesor INTEGER, 
-	id_plan INTEGER, 
-	PRIMARY KEY (id_carga), 
-	FOREIGN KEY(id_seccion) REFERENCES seccion (id_seccion), 
-	FOREIGN KEY(id_profesor) REFERENCES profesores (id_profesor), 
-	FOREIGN KEY(id_plan) REFERENCES plan_estudio (id_plan)
+CREATE TABLE Tutoria (
+    id_tutoria INT AUTO_INCREMENT PRIMARY KEY,
+    id_seccion INT,
+    id_profesor INT,
+    FOREIGN KEY (id_seccion) REFERENCES seccion(id_seccion),
+    FOREIGN KEY (id_profesor) REFERENCES profesores(id_profesor)
+);
+
+CREATE TABLE profesor_disponibilidad (
+    id_disponibilidad INT AUTO_INCREMENT PRIMARY KEY,
+    id_profesor INT,
+    id_dia INT,
+    id_turno INT,
+    id_sede INT,
+    nro_bloque INT,
+    FOREIGN KEY (id_profesor) REFERENCES profesores(id_profesor),
+    FOREIGN KEY (id_dia) REFERENCES Dias(id_dia),
+    FOREIGN KEY (id_turno) REFERENCES turno(id_turno),
+    FOREIGN KEY (id_sede) REFERENCES Sedes(id_sede)
+);
+
+CREATE TABLE profesor_preferencia (
+    id_preferencia INT AUTO_INCREMENT PRIMARY KEY,
+    id_profesor INT,
+    id_dia INT,
+    id_turno INT,
+    id_sede INT,
+    nro_bloque INT,
+    FOREIGN KEY (id_profesor) REFERENCES profesores(id_profesor),
+    FOREIGN KEY (id_dia) REFERENCES Dias(id_dia),
+    FOREIGN KEY (id_turno) REFERENCES turno(id_turno),
+    FOREIGN KEY (id_sede) REFERENCES Sedes(id_sede)
 );
 
 CREATE TABLE horario_final (
-	id_horario_final INTEGER NOT NULL, 
-	id_seccion INTEGER, 
-	id_dia INTEGER, 
-	id_bloque INTEGER, 
-	id_curso INTEGER, 
-	id_profesor INTEGER, 
-	PRIMARY KEY (id_horario_final), 
-	FOREIGN KEY(id_seccion) REFERENCES seccion (id_seccion), 
-	FOREIGN KEY(id_dia) REFERENCES dias (id_dia), 
-	FOREIGN KEY(id_bloque) REFERENCES bloque (id_bloque), 
-	FOREIGN KEY(id_curso) REFERENCES cursos (id_curso), 
-	FOREIGN KEY(id_profesor) REFERENCES profesores (id_profesor)
+    id_horario_final INT AUTO_INCREMENT PRIMARY KEY,
+    id_seccion INT,
+    id_dia INT,
+    num_bloque INT,
+    id_curso INT,
+    id_profesor INT,
+    id_turno INT,
+    FOREIGN KEY (id_seccion) REFERENCES seccion(id_seccion),
+    FOREIGN KEY (id_dia) REFERENCES Dias(id_dia),
+    FOREIGN KEY (id_curso) REFERENCES cursos(id_curso),
+    FOREIGN KEY (id_profesor) REFERENCES profesores(id_profesor),
+    FOREIGN KEY (id_turno) REFERENCES turno(id_turno)
 );
-

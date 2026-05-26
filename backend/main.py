@@ -9,8 +9,8 @@ from .database import create_db_and_tables, get_session, engine
 from .models import (
     Colegio, Turno, Grado, Dias, Areas, Sedes, Usuario, Bloque, 
     Cursos, Profesores, Seccion, GradoDiaConfig, PlanEstudio, 
-    ProfesorCurso, SeccionTurno, Restricciones, CargaAcademica, HorarioFinal, Tutoria,
-    ProfesorSedes, ProfesorDisponibilidad, ProfesorPreferencia
+    ProfesorCurso, SeccionTurno, HorarioFinal, Tutoria,
+    ProfesorDisponibilidad, ProfesorPreferencia
 )
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -324,45 +324,6 @@ def delete_seccion_turno(id_seccion_turno: int, session: Session = Depends(get_s
     session.commit()
     return {"message": "Borrado"}
 
-# --- Endpoints: Restricciones ---
-@app.get("/api/restricciones", response_model=List[Restricciones])
-def get_restricciones(session: Session = Depends(get_session)):
-    return session.exec(select(Restricciones)).all()
-
-@app.post("/api/restricciones", response_model=Restricciones)
-def create_restriccion(r: Restricciones, session: Session = Depends(get_session)):
-    session.add(r)
-    session.commit()
-    session.refresh(r)
-    return r
-
-@app.delete("/api/restricciones/{id_restricciones}")
-def delete_restriccion(id_restricciones: int, session: Session = Depends(get_session)):
-    db = session.get(Restricciones, id_restricciones)
-    if not db: raise HTTPException(status_code=404)
-    session.delete(db)
-    session.commit()
-    return {"message": "Borrado"}
-
-# --- Endpoints: Carga Académica ---
-@app.get("/api/carga-academica", response_model=List[CargaAcademica])
-def get_carga_academica(session: Session = Depends(get_session)):
-    return session.exec(select(CargaAcademica)).all()
-
-@app.post("/api/carga-academica", response_model=CargaAcademica)
-def create_carga_academica(ca: CargaAcademica, session: Session = Depends(get_session)):
-    session.add(ca)
-    session.commit()
-    session.refresh(ca)
-    return ca
-
-@app.delete("/api/carga-academica/{id_carga}")
-def delete_carga_academica(id_carga: int, session: Session = Depends(get_session)):
-    db = session.get(CargaAcademica, id_carga)
-    if not db: raise HTTPException(status_code=404)
-    session.delete(db)
-    session.commit()
-    return {"message": "Borrado"}
 
 # --- Endpoints: Horario Final ---
 @app.get("/api/horario-final", response_model=List[HorarioFinal])
@@ -396,33 +357,14 @@ def create_tutoria(tutoria: Tutoria, session: Session = Depends(get_session)):
     session.refresh(tutoria)
     return tutoria
 
-@app.delete("/api/tutorias/{id_tutotia}")
-def delete_tutoria(id_tutotia: int, session: Session = Depends(get_session)):
-    db_tutoria = session.get(Tutoria, id_tutotia)
+@app.delete("/api/tutorias/{id_tutoria}")
+def delete_tutoria(id_tutoria: int, session: Session = Depends(get_session)):
+    db_tutoria = session.get(Tutoria, id_tutoria)
     if not db_tutoria: raise HTTPException(status_code=404, detail="Tutoría no encontrada")
     session.delete(db_tutoria)
     session.commit()
     return {"message": "Tutoría borrada"}
 
-# --- Endpoints: Profesor-Sedes ---
-@app.get("/api/profesor-sedes")
-def get_profesor_sedes(session: Session = Depends(get_session)):
-    return session.exec(select(ProfesorSedes)).all()
-
-@app.post("/api/profesor-sedes")
-def create_profesor_sede(ps: ProfesorSedes, session: Session = Depends(get_session)):
-    session.add(ps)
-    session.commit()
-    session.refresh(ps)
-    return ps
-
-@app.delete("/api/profesor-sedes/{id_profe_sedes}")
-def delete_profesor_sede(id_profe_sedes: int, session: Session = Depends(get_session)):
-    db = session.get(ProfesorSedes, id_profe_sedes)
-    if not db: raise HTTPException(status_code=404, detail="Vínculo no encontrado")
-    session.delete(db)
-    session.commit()
-    return {"message": "Vínculo profesor-sede borrado"}
 
 # --- Endpoints: Profesor-Disponibilidad ---
 @app.get("/api/profesor-disponibilidad")
@@ -481,20 +423,15 @@ def cargar_horario_guardado(session: Session = Depends(get_session)):
     
     # Lookups inversos
     dias_db = {d.id_dia: d.nombre_dia for d in session.exec(select(Dias)).all()}
-    from backend.models import Bloque
-    bloques_db = {}
     turnos_db = {t.id_turno: t.nombre for t in session.exec(select(Turno)).all()}
-    for b in session.exec(select(Bloque)).all():
-        bloques_db[b.id_bloque] = (b.id_turno, b.numero_bloque)
     
     # Agrupar slots en bloques contiguos: (seccion, curso, profesor, dia, turno) -> slots
     from collections import defaultdict
     grupos = defaultdict(list)
     for r in rows:
-        turno_id, num_bloque = bloques_db.get(r.id_bloque, (1, 1))
-        turno_nombre = turnos_db.get(turno_id, "Mañana")
+        turno_nombre = turnos_db.get(r.id_turno, "Mañana")
         key = (r.id_seccion, r.id_curso, r.id_profesor, r.id_dia, turno_nombre)
-        grupos[key].append(num_bloque)
+        grupos[key].append(r.num_bloque)
     
     asignaciones = []
     for (sec, cur, prof, dia_id, turno), slots in grupos.items():
