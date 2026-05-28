@@ -61,6 +61,7 @@ class Profesores(SQLModel, table=True):
     tutorias: List["Tutoria"] = Relationship(back_populates="profesor")
     profesor_disponibilidad: List["ProfesorDisponibilidad"] = Relationship(back_populates="profesor")
     profesor_preferencia: List["ProfesorPreferencia"] = Relationship(back_populates="profesor")
+    sedes_profesor: List["SedeProfesor"] = Relationship(back_populates="profesor")
 
 
 # --- 2. Tablas con Dependencias Simples ---
@@ -83,6 +84,7 @@ class Sedes(SQLModel, table=True):
     secciones: List["Seccion"] = Relationship(back_populates="sede")
     profesor_disponibilidad: List["ProfesorDisponibilidad"] = Relationship(back_populates="sede")
     profesor_preferencia: List["ProfesorPreferencia"] = Relationship(back_populates="sede")
+    sedes_profesor: List["SedeProfesor"] = Relationship(back_populates="sede")
 
 class Bloque(SQLModel, table=True):
     __tablename__ = "bloque"
@@ -139,6 +141,15 @@ class PlanEstudio(SQLModel, table=True):
     
     grado: Optional[Grado] = Relationship(back_populates="planes_estudio")
     curso: Optional[Cursos] = Relationship(back_populates="planes_estudio")
+
+class SedeProfesor(SQLModel, table=True):
+    __tablename__ = "sedes_profesor"
+    id_sede_profesor: Optional[int] = Field(default=None, primary_key=True)
+    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
+    id_sede: Optional[int] = Field(default=None, foreign_key="sedes.id_sede")
+    
+    profesor: Optional[Profesores] = Relationship(back_populates="sedes_profesor")
+    sede: Optional[Sedes] = Relationship(back_populates="sedes_profesor")
 
 class ProfesorDisponibilidad(SQLModel, table=True):
     __tablename__ = "profesor_disponibilidad"

@@ -90,6 +90,14 @@ CREATE TABLE profesor_curso (
     FOREIGN KEY (id_curso) REFERENCES cursos(id_curso)
 );
 
+CREATE TABLE sedes_profesor (
+    id_sede_profesor INT AUTO_INCREMENT PRIMARY KEY,
+    id_profesor INT,
+    id_sede INT,
+    FOREIGN KEY (id_profesor) REFERENCES profesores(id_profesor),
+    FOREIGN KEY (id_sede) REFERENCES Sedes(id_sede)
+);
+
 -- 4. Tablas con dependencias de nivel 3 (relacionales y cruces complejos)
 CREATE TABLE seccion_turno (
     id_seccion_turno INT AUTO_INCREMENT PRIMARY KEY,

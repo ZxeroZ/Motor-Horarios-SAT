@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from backend.models import (
     Sedes, Dias, Areas, Cursos, Grado, Seccion, PlanEstudio, 
     Profesores, ProfesorCurso, GradoDiaConfig, SeccionTurno, Turno, Tutoria,
-    ProfesorDisponibilidad, ProfesorPreferencia, Bloque
+    ProfesorDisponibilidad, ProfesorPreferencia, Bloque, SedeProfesor
 )
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
@@ -149,20 +149,22 @@ def build_json_from_db(session: Session) -> dict:
             select(ProfesorCurso).where(ProfesorCurso.id_profesor == p.id_profesor)
         ).all()
         
+        # Sedes del profesor
+        prof_sedes_db = session.exec(
+            select(SedeProfesor).where(SedeProfesor.id_profesor == p.id_profesor)
+        ).all()
+        sedes_del_prof = []
+        for ps_obj in prof_sedes_db:
+            sede_obj = session.get(Sedes, ps_obj.id_sede)
+            if sede_obj:
+                sedes_del_prof.append(sede_obj.nombre_sede)
+        if not sedes_del_prof:
+            sedes_del_prof = [s.nombre_sede for s in sedes]
+        
         # --- Disponibilidad: formato motor {dia: {turno: {sede: [bloques]}}} ---
         disp_records = session.exec(
             select(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_profesor == p.id_profesor)
         ).all()
-        
-        # Sedes del profesor inferidas de su disponibilidad
-        sedes_del_prof = set()
-        for dr in disp_records:
-            sede_obj = session.get(Sedes, dr.id_sede) if dr.id_sede else None
-            if sede_obj:
-                sedes_del_prof.add(sede_obj.nombre_sede)
-        sedes_del_prof = list(sedes_del_prof)
-        if not sedes_del_prof:
-            sedes_del_prof = [s.nombre_sede for s in sedes]
         
         disponibilidad = {}
         if disp_records:

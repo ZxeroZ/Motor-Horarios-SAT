@@ -10,7 +10,7 @@ from .models import (
     Colegio, Turno, Grado, Dias, Areas, Sedes, Usuario, Bloque, 
     Cursos, Profesores, Seccion, GradoDiaConfig, PlanEstudio, 
     ProfesorCurso, SeccionTurno, HorarioFinal, Tutoria,
-    ProfesorDisponibilidad, ProfesorPreferencia
+    SedeProfesor, ProfesorDisponibilidad, ProfesorPreferencia
 )
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -365,6 +365,26 @@ def delete_tutoria(id_tutoria: int, session: Session = Depends(get_session)):
     session.commit()
     return {"message": "Tutoría borrada"}
 
+
+# --- Endpoints: Profesor-Sedes ---
+@app.get("/api/profesor-sedes")
+def get_profesor_sedes(session: Session = Depends(get_session)):
+    return session.exec(select(SedeProfesor)).all()
+
+@app.post("/api/profesor-sedes")
+def create_profesor_sede(ps: SedeProfesor, session: Session = Depends(get_session)):
+    session.add(ps)
+    session.commit()
+    session.refresh(ps)
+    return ps
+
+@app.delete("/api/profesor-sedes/{id_sede_profesor}")
+def delete_profesor_sede(id_sede_profesor: int, session: Session = Depends(get_session)):
+    db = session.get(SedeProfesor, id_sede_profesor)
+    if not db: raise HTTPException(status_code=404, detail="Vínculo no encontrado")
+    session.delete(db)
+    session.commit()
+    return {"message": "Vínculo profesor-sede borrado"}
 
 # --- Endpoints: Profesor-Disponibilidad ---
 @app.get("/api/profesor-disponibilidad")
