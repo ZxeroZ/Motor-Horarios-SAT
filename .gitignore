@@ -22,3 +22,4 @@ database.db
 *.sqlite
 populate_from_json.py
 *.txt
+limpiar_db.py
