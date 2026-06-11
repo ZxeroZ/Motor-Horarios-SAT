@@ -146,6 +146,16 @@ def create_dia(dia: Dias, session: Session = Depends(get_session)):
     session.commit()
     return dia
 
+
+@app.delete("/api/dias/{id_dia}")
+def delete_dia(id_dia: int, session: Session = Depends(get_session)):
+    db = session.get(Dias, id_dia)
+    if not db:
+        raise HTTPException(status_code=404, detail="Dia no encontrado")
+    session.delete(db)
+    session.commit()
+    return {"message": "Día borrado"}
+
 @app.get("/api/turnos", response_model=List[Turno])
 def get_turnos(session: Session = Depends(get_session)):
     return session.exec(select(Turno)).all()
