@@ -77,6 +77,34 @@ def create_sede(sede: Sedes, session: Session = Depends(get_session)):
     session.commit()
     return sede
 
+@app.put("/api/sedes/{id_sede}", response_model=Sedes)
+def update_sede(id_sede: int, sede_in: Sedes, session: Session = Depends(get_session)):
+    db_sede = session.get(Sedes, id_sede)
+    if not db_sede:
+        raise HTTPException(status_code=404, detail="Sede no encontrada")
+    db_sede.nombre_sede = sede_in.nombre_sede
+    session.add(db_sede)
+    session.commit()
+    session.refresh(db_sede)
+    return db_sede
+
+@app.delete("/api/sedes/{id_sede}")
+def delete_sede(id_sede: int, session: Session = Depends(get_session)):
+    db_sede = session.get(Sedes, id_sede)
+    if not db_sede:
+        raise HTTPException(status_code=404, detail="Sede no encontrada")
+    # Chequear uso (Seccion y SedeProfesor)
+    in_use_seccion = session.exec(select(Seccion).where(Seccion.id_sede == id_sede)).first()
+    if in_use_seccion:
+        raise HTTPException(status_code=400, detail="Sede en uso")
+    in_use_prof = session.exec(select(SedeProfesor).where(SedeProfesor.id_sede == id_sede)).first()
+    if in_use_prof:
+        raise HTTPException(status_code=400, detail="Sede en uso")
+    
+    session.delete(db_sede)
+    session.commit()
+    return {"message": "Sede borrada"}
+
 @app.get("/api/grados", response_model=List[Grado])
 def get_grados(session: Session = Depends(get_session)):
     return session.exec(select(Grado)).all()
@@ -118,6 +146,16 @@ def create_dia(dia: Dias, session: Session = Depends(get_session)):
     session.commit()
     return dia
 
+
+@app.delete("/api/dias/{id_dia}")
+def delete_dia(id_dia: int, session: Session = Depends(get_session)):
+    db = session.get(Dias, id_dia)
+    if not db:
+        raise HTTPException(status_code=404, detail="Dia no encontrado")
+    session.delete(db)
+    session.commit()
+    return {"message": "Día borrado"}
+
 @app.get("/api/turnos", response_model=List[Turno])
 def get_turnos(session: Session = Depends(get_session)):
     return session.exec(select(Turno)).all()
@@ -126,6 +164,31 @@ def create_turno(turno: Turno, session: Session = Depends(get_session)):
     session.add(turno)
     session.commit()
     return turno
+
+@app.put("/api/turnos/{id_turno}", response_model=Turno)
+def update_turno(id_turno: int, turno_in: Turno, session: Session = Depends(get_session)):
+    db_turno = session.get(Turno, id_turno)
+    if not db_turno:
+        raise HTTPException(status_code=404, detail="Turno no encontrado")
+    db_turno.nombre = turno_in.nombre
+    session.add(db_turno)
+    session.commit()
+    session.refresh(db_turno)
+    return db_turno
+
+@app.delete("/api/turnos/{id_turno}")
+def delete_turno(id_turno: int, session: Session = Depends(get_session)):
+    db_turno = session.get(Turno, id_turno)
+    if not db_turno:
+        raise HTTPException(status_code=404, detail="Turno no encontrado")
+    # Chequear uso en SeccionTurno
+    in_use_turno = session.exec(select(SeccionTurno).where(SeccionTurno.id_turno == id_turno)).first()
+    if in_use_turno:
+        raise HTTPException(status_code=400, detail="Turno en uso")
+    
+    session.delete(db_turno)
+    session.commit()
+    return {"message": "Turno borrado"}
 
 @app.get("/api/bloques", response_model=List[Bloque])
 def get_bloques(session: Session = Depends(get_session)):

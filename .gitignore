@@ -57,7 +57,11 @@ logs/
 # Salidas de resultados
 data/output/*.json
 
-# Archivos temporales y de notas en la raíz
-/*.txt
-!/requirements.txt
-/*.json
+# Archivos temporales y de notas
+*.txt
+!requirements.txt
+*.json
+
+# Archivos especificos del proyecto
+populate_from_json.py
+limpiar_db.py

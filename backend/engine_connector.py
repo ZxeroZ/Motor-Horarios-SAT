@@ -228,16 +228,19 @@ def build_json_from_db(session: Session) -> dict:
             for pr in pref_records:
                 dia_n = dia_id_to_nombre.get(pr.id_dia)
                 turno_n = turno_id_to_nombre.get(pr.id_turno)
+                sede_obj = session.get(Sedes, pr.id_sede) if pr.id_sede else None
+                sede_n = sede_obj.nombre_sede if sede_obj else "Sede A"
+                
                 if dia_n and turno_n:
-                    grouped_pref[(dia_n, turno_n)].add(pr.nro_bloque)
+                    grouped_pref[(dia_n, turno_n, sede_n)].add(pr.nro_bloque)
             
             disponibilidad_preferente = {}
-            for (dia_n, turno_n), bloques in grouped_pref.items():
+            for (dia_n, turno_n, sede_n), bloques in grouped_pref.items():
                 if dia_n not in disponibilidad_preferente:
                     disponibilidad_preferente[dia_n] = {}
-                disponibilidad_preferente[dia_n][turno_n] = {
-                    sede: sorted(bloques) for sede in sedes_del_prof
-                }
+                if turno_n not in disponibilidad_preferente[dia_n]:
+                    disponibilidad_preferente[dia_n][turno_n] = {}
+                disponibilidad_preferente[dia_n][turno_n][sede_n] = sorted(bloques)
             prof_data["disponibilidad_preferente"] = disponibilidad_preferente
         
         datos["profesores"].append(prof_data)
