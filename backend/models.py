@@ -21,6 +21,7 @@ class Turno(SQLModel, table=True):
     profesor_disponibilidad: List["ProfesorDisponibilidad"] = Relationship(back_populates="turno")
     profesor_preferencia: List["ProfesorPreferencia"] = Relationship(back_populates="turno")
     horarios_finales: List["HorarioFinal"] = Relationship(back_populates="turno")
+    bloques_reservados: List["BloqueReservado"] = Relationship(back_populates="turno")
 
 class Grado(SQLModel, table=True):
     __tablename__ = "grado"
@@ -30,6 +31,8 @@ class Grado(SQLModel, table=True):
     secciones: List["Seccion"] = Relationship(back_populates="grado")
     grado_dia_configs: List["GradoDiaConfig"] = Relationship(back_populates="grado")
     planes_estudio: List["PlanEstudio"] = Relationship(back_populates="grado")
+    grados_profesor: List["GradoProfesor"] = Relationship(back_populates="grado")
+    bloques_grado: List["BloqueGrado"] = Relationship(back_populates="grado")
 
 class Dias(SQLModel, table=True):
     __tablename__ = "dias"
@@ -42,6 +45,7 @@ class Dias(SQLModel, table=True):
     horarios_finales: List["HorarioFinal"] = Relationship(back_populates="dia")
     profesor_disponibilidad: List["ProfesorDisponibilidad"] = Relationship(back_populates="dia")
     profesor_preferencia: List["ProfesorPreferencia"] = Relationship(back_populates="dia")
+    bloques_reservados: List["BloqueReservado"] = Relationship(back_populates="dia")
 
 class Areas(SQLModel, table=True):
     __tablename__ = "areas"
@@ -62,6 +66,7 @@ class Profesores(SQLModel, table=True):
     profesor_disponibilidad: List["ProfesorDisponibilidad"] = Relationship(back_populates="profesor")
     profesor_preferencia: List["ProfesorPreferencia"] = Relationship(back_populates="profesor")
     sedes_profesor: List["SedeProfesor"] = Relationship(back_populates="profesor")
+    grados_profesor: List["GradoProfesor"] = Relationship(back_populates="profesor")
 
 
 # --- 2. Tablas con Dependencias Simples ---
@@ -85,6 +90,7 @@ class Sedes(SQLModel, table=True):
     profesor_disponibilidad: List["ProfesorDisponibilidad"] = Relationship(back_populates="sede")
     profesor_preferencia: List["ProfesorPreferencia"] = Relationship(back_populates="sede")
     sedes_profesor: List["SedeProfesor"] = Relationship(back_populates="sede")
+    bloques_reservados: List["BloqueReservado"] = Relationship(back_populates="sede")
 
 class Bloque(SQLModel, table=True):
     __tablename__ = "bloque"
@@ -101,6 +107,7 @@ class Cursos(SQLModel, table=True):
     id_curso: Optional[int] = Field(default=None, primary_key=True)
     id_area: Optional[int] = Field(default=None, foreign_key="areas.id_area")
     nombre_curso: str
+    requiere_espacio_unico: Optional[bool] = Field(default=False)
     
     area: Optional[Areas] = Relationship(back_populates="cursos")
     planes_estudio: List["PlanEstudio"] = Relationship(back_populates="curso")
@@ -150,6 +157,15 @@ class SedeProfesor(SQLModel, table=True):
     
     profesor: Optional[Profesores] = Relationship(back_populates="sedes_profesor")
     sede: Optional[Sedes] = Relationship(back_populates="sedes_profesor")
+
+class GradoProfesor(SQLModel, table=True):
+    __tablename__ = "grado_profesor"
+    id_grado_profesor: Optional[int] = Field(default=None, primary_key=True)
+    id_grado: Optional[int] = Field(default=None, foreign_key="grado.id_grado")
+    id_profesor: Optional[int] = Field(default=None, foreign_key="profesores.id_profesor")
+    
+    grado: Optional[Grado] = Relationship(back_populates="grados_profesor")
+    profesor: Optional[Profesores] = Relationship(back_populates="grados_profesor")
 
 class ProfesorDisponibilidad(SQLModel, table=True):
     __tablename__ = "profesor_disponibilidad"
@@ -211,7 +227,48 @@ class Tutoria(SQLModel, table=True):
     profesor: Optional[Profesores] = Relationship(back_populates="tutorias")
 
 
-# --- 5. Resultado Final ---
+# --- 5. Bloques Reservados ---
+class BloqueReservado(SQLModel, table=True):
+    __tablename__ = "bloque_reservado"
+    id_bloque_reservado: Optional[int] = Field(default=None, primary_key=True)
+    id_sede: Optional[int] = Field(default=None, foreign_key="sedes.id_sede")
+    id_dia: Optional[int] = Field(default=None, foreign_key="dias.id_dia")
+    id_turno: Optional[int] = Field(default=None, foreign_key="turno.id_turno")
+    
+    sede: Optional[Sedes] = Relationship(back_populates="bloques_reservados")
+    dia: Optional[Dias] = Relationship(back_populates="bloques_reservados")
+    turno: Optional[Turno] = Relationship(back_populates="bloques_reservados")
+    bloques_grado: List["BloqueGrado"] = Relationship(back_populates="bloque_reservado")
+    bloques_opcion: List["BloqueOpcion"] = Relationship(back_populates="bloque_reservado")
+
+class BloqueGrado(SQLModel, table=True):
+    __tablename__ = "bloque_grado"
+    id_bloque_grado: Optional[int] = Field(default=None, primary_key=True)
+    id_bloque_reservado: Optional[int] = Field(default=None, foreign_key="bloque_reservado.id_bloque_reservado")
+    id_grado: Optional[int] = Field(default=None, foreign_key="grado.id_grado")
+    
+    bloque_reservado: Optional[BloqueReservado] = Relationship(back_populates="bloques_grado")
+    grado: Optional[Grado] = Relationship(back_populates="bloques_grado")
+
+class BloqueOpcion(SQLModel, table=True):
+    __tablename__ = "bloque_opcion"
+    id_bloque_opcion: Optional[int] = Field(default=None, primary_key=True)
+    id_bloque_reservado: Optional[int] = Field(default=None, foreign_key="bloque_reservado.id_bloque_reservado")
+    nro_opcion: Optional[int] = None
+    
+    bloque_reservado: Optional[BloqueReservado] = Relationship(back_populates="bloques_opcion")
+    slots: List["BloqueOpcionSlot"] = Relationship(back_populates="bloque_opcion")
+
+class BloqueOpcionSlot(SQLModel, table=True):
+    __tablename__ = "bloque_opcion_slot"
+    id_bloque_opcion_slot: Optional[int] = Field(default=None, primary_key=True)
+    id_bloque_opcion: Optional[int] = Field(default=None, foreign_key="bloque_opcion.id_bloque_opcion")
+    nro_bloque: Optional[int] = None
+    
+    bloque_opcion: Optional[BloqueOpcion] = Relationship(back_populates="slots")
+
+
+# --- 6. Resultado Final ---
 class HorarioFinal(SQLModel, table=True):
     __tablename__ = "horario_final"
     id_horario_final: Optional[int] = Field(default=None, primary_key=True)

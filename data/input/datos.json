@@ -50,92 +50,110 @@
         {
             "id": "ALG1",
             "nombre": "Álgebra",
-            "categoria_id": "CAT_MAT"
+            "categoria_id": "CAT_MAT",
+            "requiere_espacio_unico": false
         },
         {
             "id": "ARI1",
             "nombre": "Aritmética",
-            "categoria_id": "CAT_MAT"
+            "categoria_id": "CAT_MAT",
+            "requiere_espacio_unico": false
         },
         {
             "id": "GEO1",
             "nombre": "Geometría",
-            "categoria_id": "CAT_MAT"
+            "categoria_id": "CAT_MAT",
+            "requiere_espacio_unico": false
         },
         {
             "id": "TRI1",
             "nombre": "Trigonometría",
-            "categoria_id": "CAT_MAT"
+            "categoria_id": "CAT_MAT",
+            "requiere_espacio_unico": false
         },
         {
             "id": "RM1",
             "nombre": "Razonamiento Matemático",
-            "categoria_id": "CAT_MAT"
+            "categoria_id": "CAT_MAT",
+            "requiere_espacio_unico": false
         },
         {
             "id": "LIT1",
             "nombre": "Literatura",
-            "categoria_id": "CAT_COM"
+            "categoria_id": "CAT_COM",
+            "requiere_espacio_unico": false
         },
         {
             "id": "RV1",
             "nombre": "Razonamiento Verbal",
-            "categoria_id": "CAT_COM"
+            "categoria_id": "CAT_COM",
+            "requiere_espacio_unico": false
         },
         {
             "id": "ANA1",
             "nombre": "Anatomía",
-            "categoria_id": "CAT_CYT"
+            "categoria_id": "CAT_CYT",
+            "requiere_espacio_unico": false
         },
         {
             "id": "BIO1",
             "nombre": "Biología",
-            "categoria_id": "CAT_CYT"
+            "categoria_id": "CAT_CYT",
+            "requiere_espacio_unico": false
         },
         {
             "id": "QUI1",
             "nombre": "Química",
-            "categoria_id": "CAT_CYT"
+            "categoria_id": "CAT_CYT",
+            "requiere_espacio_unico": true
         },
         {
             "id": "FE1",
             "nombre": "Física Elemental",
-            "categoria_id": "CAT_CYT"
+            "categoria_id": "CAT_CYT",
+            "requiere_espacio_unico": false
         },
         {
             "id": "HGE1",
             "nombre": "Historia y Geografía",
-            "categoria_id": "CAT_CSS"
+            "categoria_id": "CAT_CSS",
+            "requiere_espacio_unico": false
         },
         {
             "id": "ECO1",
             "nombre": "Economía",
-            "categoria_id": "CAT_CSS"
+            "categoria_id": "CAT_CSS",
+            "requiere_espacio_unico": false
         },
         {
             "id": "FIL1",
             "nombre": "Filosofía",
-            "categoria_id": "CAT_CSS"
+            "categoria_id": "CAT_CSS",
+            "requiere_espacio_unico": false
         },
         {
             "id": "DPC1",
             "nombre": "Desarrollo Personal, Ciudadana y Cívica (DPCC)",
-            "categoria_id": "CAT_CSS"
+            "categoria_id": "CAT_CSS",
+            "requiere_espacio_unico": false
         },
         {
             "id": "ING1",
             "nombre": "Inglés",
-            "categoria_id": "CAT_IDI"
+            "categoria_id": "CAT_IDI",
+            "requiere_espacio_unico": false
         },
         {
             "id": "EFI1",
             "nombre": "Educación Física",
-            "categoria_id": "CAT_EFI"
+            "categoria_id": "CAT_EFI",
+            "requiere_espacio_unico": true
         },
         {
             "id": "TUT1",
             "nombre": "Tutoría",
-            "categoria_id": "CAT_TUT"
+            "categoria_id": "CAT_TUT",
+            "requiere_espacio_unico": false
         }
     ],
     "grados": [
@@ -433,7 +451,7 @@
                 "Miercoles": 6,
                 "Jueves": 6,
                 "Viernes": 6,
-                "Sábado": 3
+                "Sábado": 6
             }
         },
         {
@@ -507,7 +525,7 @@
                 "Miercoles": 6,
                 "Jueves": 6,
                 "Viernes": 6,
-                "Sábado": 3
+                "Sábado": 6
             }
         }
     ],
@@ -649,7 +667,11 @@
                         ]
                     }
                 }
-            }
+            },
+            "grados_habilitados": [
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P002",
@@ -870,7 +892,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P003",
@@ -1073,7 +1102,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P004",
@@ -1274,7 +1310,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P005",
@@ -1495,7 +1538,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P006",
@@ -1715,7 +1765,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P007",
@@ -1915,7 +1972,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P008",
@@ -2136,7 +2200,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P009",
@@ -2357,7 +2428,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P010",
@@ -2558,7 +2636,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P011",
@@ -2759,7 +2844,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P012",
@@ -2980,7 +3072,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P013",
@@ -3181,7 +3280,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P014",
@@ -3382,7 +3488,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P015",
@@ -3583,7 +3696,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P016",
@@ -3784,7 +3904,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P017",
@@ -3985,7 +4112,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P018",
@@ -4186,7 +4320,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P019",
@@ -4387,7 +4528,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P020",
@@ -4587,7 +4735,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P021",
@@ -4787,7 +4942,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P022",
@@ -4987,7 +5149,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P023",
@@ -5187,7 +5356,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P024",
@@ -5387,7 +5563,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         },
         {
             "id": "P025",
@@ -5608,7 +5791,14 @@
                     }
                 }
             },
-            "disponibilidad_preferente": {}
+            "disponibilidad_preferente": {},
+            "grados_habilitados": [
+                "GRADO_1",
+                "GRADO_2",
+                "GRADO_3",
+                "GRADO_4",
+                "GRADO_5"
+            ]
         }
     ],
     "secciones": [
@@ -5965,5 +6155,49 @@
         "B_3": "P012",
         "B_4": "P013",
         "B_5": "P014"
-    }
+    },
+    "bloques_reservados": [
+        {
+            "sede": "Sede A",
+            "dia": "Sábado",
+            "turno": "Mañana",
+            "grados_afectados": [
+                "GRADO_4",
+                "GRADO_5"
+            ],
+            "opciones_slots": [
+                [
+                    1,
+                    2,
+                    3
+                ],
+                [
+                    4,
+                    5,
+                    6
+                ]
+            ]
+        },
+        {
+            "sede": "Sede B",
+            "dia": "Sábado",
+            "turno": "Mañana",
+            "grados_afectados": [
+                "GRADO_4",
+                "GRADO_5"
+            ],
+            "opciones_slots": [
+                [
+                    1,
+                    2,
+                    3
+                ],
+                [
+                    4,
+                    5,
+                    6
+                ]
+            ]
+        }
+    ]
 }

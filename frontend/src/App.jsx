@@ -45,6 +45,8 @@ function App() {
   const [profesorPref, setProfesorPref] = useState([]);
   const [dias, setDias] = useState([]);
   const [turnos, setTurnos] = useState([]);
+  const [gradoProfesores, setGradoProfesores] = useState([]);
+  const [bloquesReservados, setBloquesReservados] = useState([]);
 
   // --- Estado: Formularios ---
   const [formSede, setFormSede] = useState({ nombre_sede: "", id_colegio: "" });
@@ -58,6 +60,8 @@ function App() {
   const [formProfSede, setFormProfSede] = useState({ id_profesor: "", id_sede: "" });
   const [formDisp, setFormDisp] = useState({ id_profesor: "", id_dia: "", id_turno: "", nro_bloque: "" });
   const [formPref, setFormPref] = useState({ id_profesor: "", id_dia: "", id_turno: "", nro_bloque: "" });
+  const [formGradoProf, setFormGradoProf] = useState({ id_profesor: "", id_grado: "" });
+  const [formBloqueReservado, setFormBloqueReservado] = useState({ id_sede: "", id_dia: "", id_turno: "", grados_text: "", opciones_slots_text: "" });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -128,7 +132,7 @@ function App() {
 
   const loadAdminData = async () => {
     try {
-      const endpoints = ["colegio", "sedes", "grados", "areas", "cursos", "profesores", "secciones", "planes", "profesor-curso", "profesor-sedes", "profesor-disponibilidad", "profesor-preferencia", "dias", "turnos"];
+      const endpoints = ["colegio", "sedes", "grados", "areas", "cursos", "profesores", "secciones", "planes", "profesor-curso", "profesor-sedes", "profesor-disponibilidad", "profesor-preferencia", "dias", "turnos", "grado-profesor", "bloque-reservado"];
       const responses = await Promise.all(endpoints.map(ep => fetch(`http://localhost:8000/api/${ep}`)));
       const data = await Promise.all(responses.map(r => r.json()));
       
@@ -146,6 +150,8 @@ function App() {
       setProfesorPref(data[11]);
       setDias(data[12]);
       setTurnos(data[13]);
+      setGradoProfesores(data[14]);
+      setBloquesReservados(data[15]);
     } catch (e) {
       console.error("Error al cargar data de admin", e);
     }
@@ -450,6 +456,7 @@ function App() {
               <button className={`tab-btn ${activeAdminTab === 'materias' ? 'active' : ''}`} onClick={() => setActiveAdminTab('materias')}>Materias & Profes</button>
               <button className={`tab-btn ${activeAdminTab === 'malla' ? 'active' : ''}`} onClick={() => setActiveAdminTab('malla')}>Malla Curricular</button>
               <button className={`tab-btn ${activeAdminTab === 'disponibilidad' ? 'active' : ''}`} onClick={() => setActiveAdminTab('disponibilidad')}>Disponibilidad</button>
+              <button className={`tab-btn ${activeAdminTab === 'bloques' ? 'active' : ''}`} onClick={() => setActiveAdminTab('bloques')}>Bloques Reservados</button>
             </div>
 
             <div className="admin-grid">
@@ -544,18 +551,22 @@ function App() {
                     <h3>Cursos</h3>
                     <form className="admin-form" onSubmit={(e) => {
                       e.preventDefault();
-                      handleCreate('cursos', { nombre_curso: formCurso.nombre_curso, id_area: parseInt(formCurso.id_area) }, () => setFormCurso({ ...formCurso, nombre_curso: "" }))
+                      handleCreate('cursos', { nombre_curso: formCurso.nombre_curso, id_area: parseInt(formCurso.id_area), requiere_espacio_unico: formCurso.requiere_espacio_unico }, () => setFormCurso({ ...formCurso, nombre_curso: "", requiere_espacio_unico: false }))
                     }}>
                       <select value={formCurso.id_area} onChange={e => setFormCurso({...formCurso, id_area: e.target.value})} required>
                         <option value="">-- Área --</option>
                         {areas.map(a => <option key={a.id_area} value={a.id_area}>{a.nombre}</option>)}
                       </select>
                       <input type="text" placeholder="Curso" value={formCurso.nombre_curso} onChange={e => setFormCurso({...formCurso, nombre_curso: e.target.value})} required />
+                      <label style={{display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem'}}>
+                        <input type="checkbox" checked={formCurso.requiere_espacio_unico} onChange={e => setFormCurso({...formCurso, requiere_espacio_unico: e.target.checked})} />
+                        Requiere espacio único (ej. Lab/Cancha)
+                      </label>
                       <button type="submit" className="btn-save">Guardar Curso</button>
                     </form>
                     <table className="admin-table">
-                      <thead><tr><th>ID</th><th>Curso</th><th>Área ID</th></tr></thead>
-                      <tbody>{cursos.map(c => <tr key={c.id_curso}><td>{c.id_curso}</td><td>{c.nombre_curso}</td><td>{c.id_area}</td></tr>)}</tbody>
+                      <thead><tr><th>ID</th><th>Curso</th><th>Espacio Único</th><th>Área ID</th></tr></thead>
+                      <tbody>{cursos.map(c => <tr key={c.id_curso}><td>{c.id_curso}</td><td>{c.nombre_curso}</td><td>{c.requiere_espacio_unico ? "Sí" : "No"}</td><td>{c.id_area}</td></tr>)}</tbody>
                     </table>
                   </div>
 
@@ -593,6 +604,28 @@ function App() {
                     <table className="admin-table">
                       <thead><tr><th>ID Vínculo</th><th>ID Profesor</th><th>ID Curso</th></tr></thead>
                       <tbody>{profesorCursos.map(pc => <tr key={pc.id_profesor_curso}><td>{pc.id_profesor_curso}</td><td>{pc.id_profesor}</td><td>{pc.id_curso}</td></tr>)}</tbody>
+                    </table>
+                  </div>
+
+                  <div className="admin-card" style={{gridColumn: '1 / -1'}}>
+                    <h3>Habilitar Grado a Profesor</h3>
+                    <form className="admin-form" style={{flexDirection: 'row', gap: '1rem'}} onSubmit={(e) => {
+                      e.preventDefault();
+                      handleCreate('grado-profesor', { id_profesor: parseInt(formGradoProf.id_profesor), id_grado: parseInt(formGradoProf.id_grado) }, () => setFormGradoProf({ ...formGradoProf, id_grado: "" }))
+                    }}>
+                      <select style={{flex: 1}} value={formGradoProf.id_profesor} onChange={e => setFormGradoProf({...formGradoProf, id_profesor: e.target.value})} required>
+                        <option value="">-- Seleccionar Profesor --</option>
+                        {profesores.map(p => <option key={p.id_profesor} value={p.id_profesor}>{p.nombre_profesor}</option>)}
+                      </select>
+                      <select style={{flex: 1}} value={formGradoProf.id_grado} onChange={e => setFormGradoProf({...formGradoProf, id_grado: e.target.value})} required>
+                        <option value="">-- Seleccionar Grado --</option>
+                        {grados.map(g => <option key={g.id_grado} value={g.id_grado}>{g.numero}°</option>)}
+                      </select>
+                      <button type="submit" className="btn-save">Vincular</button>
+                    </form>
+                    <table className="admin-table">
+                      <thead><tr><th>ID Vínculo</th><th>ID Profesor</th><th>ID Grado</th></tr></thead>
+                      <tbody>{gradoProfesores.map(gp => <tr key={gp.id_grado_profesor}><td>{gp.id_grado_profesor}</td><td>{gp.id_profesor}</td><td>{gp.id_grado}</td></tr>)}</tbody>
                     </table>
                   </div>
                 </>
@@ -720,6 +753,75 @@ function App() {
                     </table>
                   </div>
                 </>
+              )}
+
+              {/* --- SUBTAB: BLOQUES RESERVADOS --- */}
+              {activeAdminTab === 'bloques' && (
+                <div className="admin-card" style={{gridColumn: '1 / -1'}}>
+                  <h3>⛔ Bloques Reservados</h3>
+                  <p style={{color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem'}}>
+                    Define bloques que el motor NO usará (ej. recreos largos, simulacros). 
+                    Para "grados", ingresa IDs separados por comas (ej. 1, 2). Si aplica a todo el colegio, déjalo vacío o pon todos. 
+                    Para "opciones de slots", usa punto y coma para separar grupos y comas para los bloques (ej. "4,5,6" o "1,2; 3,4").
+                  </p>
+                  <form className="admin-form" style={{flexDirection: 'column', gap: '1rem'}} onSubmit={(e) => {
+                    e.preventDefault();
+                    try {
+                      const payload = {
+                        id_sede: parseInt(formBloqueReservado.id_sede),
+                        id_dia: parseInt(formBloqueReservado.id_dia),
+                        id_turno: parseInt(formBloqueReservado.id_turno),
+                        grados: formBloqueReservado.grados_text ? formBloqueReservado.grados_text.split(',').map(n => parseInt(n.trim())) : [],
+                        opciones_slots: formBloqueReservado.opciones_slots_text.split(';').map(g => g.split(',').map(n => parseInt(n.trim())))
+                      };
+                      handleCreate('bloque-reservado-completo', payload, () => setFormBloqueReservado({ id_sede: "", id_dia: "", id_turno: "", grados_text: "", opciones_slots_text: "" }));
+                    } catch (err) {
+                      alert("Error al parsear campos. Verifica el formato.");
+                    }
+                  }}>
+                    <div style={{display: 'flex', gap: '1rem'}}>
+                      <select style={{flex: 1}} value={formBloqueReservado.id_sede} onChange={e => setFormBloqueReservado({...formBloqueReservado, id_sede: e.target.value})} required>
+                        <option value="">-- Sede --</option>
+                        {sedes.map(s => <option key={s.id_sede} value={s.id_sede}>{s.nombre_sede}</option>)}
+                      </select>
+                      <select style={{flex: 1}} value={formBloqueReservado.id_dia} onChange={e => setFormBloqueReservado({...formBloqueReservado, id_dia: e.target.value})} required>
+                        <option value="">-- Día --</option>
+                        {dias.map(d => <option key={d.id_dia} value={d.id_dia}>{d.nombre_dia}</option>)}
+                      </select>
+                      <select style={{flex: 1}} value={formBloqueReservado.id_turno} onChange={e => setFormBloqueReservado({...formBloqueReservado, id_turno: e.target.value})} required>
+                        <option value="">-- Turno --</option>
+                        {turnos.map(t => <option key={t.id_turno} value={t.id_turno}>{t.nombre}</option>)}
+                      </select>
+                    </div>
+                    <div style={{display: 'flex', gap: '1rem'}}>
+                      <input style={{flex: 1}} type="text" placeholder="Grados afectados (ej: 1, 2) o vacío" value={formBloqueReservado.grados_text} onChange={e => setFormBloqueReservado({...formBloqueReservado, grados_text: e.target.value})} />
+                      <input style={{flex: 2}} type="text" placeholder="Opciones (ej: 4,5; 5,6)" value={formBloqueReservado.opciones_slots_text} onChange={e => setFormBloqueReservado({...formBloqueReservado, opciones_slots_text: e.target.value})} required />
+                      <button type="submit" className="btn-save btn-danger">Reservar</button>
+                    </div>
+                  </form>
+                  <table className="admin-table" style={{marginTop: '1.5rem'}}>
+                    <thead><tr><th>ID</th><th>Sede / Día / Turno</th><th>Acción</th></tr></thead>
+                    <tbody>{bloquesReservados.map(br => {
+                      const sede = sedes.find(s => s.id_sede === br.id_sede);
+                      const dia = dias.find(d => d.id_dia === br.id_dia);
+                      const turno = turnos.find(t => t.id_turno === br.id_turno);
+                      return (
+                        <tr key={br.id_bloque_reservado}>
+                          <td>{br.id_bloque_reservado}</td>
+                          <td>{sede?.nombre_sede || br.id_sede} / {dia?.nombre_dia || br.id_dia} / {turno?.nombre || br.id_turno}</td>
+                          <td>
+                            <button className="btn-save btn-danger" style={{padding: '0.2rem 0.5rem', fontSize: '0.8rem', width: 'auto'}} onClick={async () => {
+                              if (confirm("¿Eliminar bloque reservado?")) {
+                                await fetch(`http://localhost:8000/api/bloque-reservado/${br.id_bloque_reservado}`, { method: 'DELETE' });
+                                loadAdminData();
+                              }
+                            }}>Eliminar</button>
+                          </td>
+                        </tr>
+                      )
+                    })}</tbody>
+                  </table>
+                </div>
               )}
 
             </div>

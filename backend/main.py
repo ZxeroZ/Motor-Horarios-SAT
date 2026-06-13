@@ -4,15 +4,15 @@ from sqlmodel import Session, select
 from typing import List
 from pydantic import BaseModel
 
-from .database import create_db_and_tables, get_session, engine
+from backend.database import create_db_and_tables, get_session, engine
 
-from .models import (
+from backend.models import (
     Colegio, Turno, Grado, Dias, Areas, Sedes, Usuario, Bloque, 
     Cursos, Profesores, Seccion, GradoDiaConfig, PlanEstudio, 
     ProfesorCurso, SeccionTurno, HorarioFinal, Tutoria,
-    SedeProfesor, ProfesorDisponibilidad, ProfesorPreferencia
+    SedeProfesor, ProfesorDisponibilidad, ProfesorPreferencia,
+    GradoProfesor, BloqueReservado, BloqueGrado, BloqueOpcion, BloqueOpcionSlot
 )
-
 from fastapi.middleware.cors import CORSMiddleware
 
 class LoginRequest(BaseModel):
@@ -385,6 +385,93 @@ def delete_profesor_sede(id_sede_profesor: int, session: Session = Depends(get_s
     session.delete(db)
     session.commit()
     return {"message": "Vínculo profesor-sede borrado"}
+
+# --- Endpoints: Grado-Profesor ---
+@app.get("/api/grado-profesor")
+def get_grado_profesor(session: Session = Depends(get_session)):
+    return session.exec(select(GradoProfesor)).all()
+
+@app.post("/api/grado-profesor")
+def create_grado_profesor(gp: GradoProfesor, session: Session = Depends(get_session)):
+    session.add(gp)
+    session.commit()
+    session.refresh(gp)
+    return gp
+
+@app.delete("/api/grado-profesor/{id_grado_profesor}")
+def delete_grado_profesor(id_grado_profesor: int, session: Session = Depends(get_session)):
+    db = session.get(GradoProfesor, id_grado_profesor)
+    if not db: raise HTTPException(status_code=404, detail="Vínculo grado-profesor no encontrado")
+    session.delete(db)
+    session.commit()
+    return {"message": "Vínculo grado-profesor borrado"}
+
+# --- Endpoints: Bloques Reservados ---
+@app.get("/api/bloque-reservado")
+def get_bloques_reservados(session: Session = Depends(get_session)):
+    reservas = session.exec(select(BloqueReservado)).all()
+    resultado = []
+    for r in reservas:
+        grados = session.exec(select(BloqueGrado).where(BloqueGrado.id_bloque_reservado == r.id_bloque_reservado)).all()
+        opciones = session.exec(select(BloqueOpcion).where(BloqueOpcion.id_bloque_reservado == r.id_bloque_reservado)).all()
+        opciones_data = []
+        for op in opciones:
+            slots = session.exec(select(BloqueOpcionSlot).where(BloqueOpcionSlot.id_bloque_opcion == op.id_bloque_opcion)).all()
+            opciones_data.append({
+                "id_bloque_opcion": op.id_bloque_opcion,
+                "nro_opcion": op.nro_opcion,
+                "slots": [s.nro_bloque for s in slots]
+            })
+        resultado.append({
+            "id_bloque_reservado": r.id_bloque_reservado,
+            "id_sede": r.id_sede,
+            "id_dia": r.id_dia,
+            "id_turno": r.id_turno,
+            "grados": [g.id_grado for g in grados],
+            "opciones": opciones_data
+        })
+    return resultado
+
+@app.post("/api/bloque-reservado-completo")
+def create_bloque_reservado_completo(data: dict, session: Session = Depends(get_session)):
+    """Crea una reserva completa: sede/dia/turno + grados + opciones con slots."""
+    reserva = BloqueReservado(
+        id_sede=data["id_sede"],
+        id_dia=data["id_dia"],
+        id_turno=data["id_turno"]
+    )
+    session.add(reserva)
+    session.commit()
+    session.refresh(reserva)
+    
+    for grado_id in data.get("grados", []):
+        session.add(BloqueGrado(id_bloque_reservado=reserva.id_bloque_reservado, id_grado=grado_id))
+    
+    for idx, slots in enumerate(data.get("opciones_slots", [])):
+        opcion = BloqueOpcion(id_bloque_reservado=reserva.id_bloque_reservado, nro_opcion=idx + 1)
+        session.add(opcion)
+        session.commit()
+        session.refresh(opcion)
+        for nro in slots:
+            session.add(BloqueOpcionSlot(id_bloque_opcion=opcion.id_bloque_opcion, nro_bloque=nro))
+    
+    session.commit()
+    return {"message": "Bloque reservado creado", "id": reserva.id_bloque_reservado}
+
+@app.delete("/api/bloque-reservado/{id_bloque_reservado}")
+def delete_bloque_reservado(id_bloque_reservado: int, session: Session = Depends(get_session)):
+    reserva = session.get(BloqueReservado, id_bloque_reservado)
+    if not reserva: raise HTTPException(status_code=404, detail="Bloque reservado no encontrado")
+    # Borrar hijos en cascada
+    for bg in session.exec(select(BloqueGrado).where(BloqueGrado.id_bloque_reservado == id_bloque_reservado)).all():
+        session.delete(bg)
+    for bo in session.exec(select(BloqueOpcion).where(BloqueOpcion.id_bloque_reservado == id_bloque_reservado)).all():
+        for slot in session.exec(select(BloqueOpcionSlot).where(BloqueOpcionSlot.id_bloque_opcion == bo.id_bloque_opcion)).all():
+            session.delete(slot)
+        session.delete(bo)
+    session.delete(reserva)
+    session.commit()
+    return {"message": "Bloque reservado y dependientes borrados"}
 
 # --- Endpoints: Profesor-Disponibilidad ---
 @app.get("/api/profesor-disponibilidad")

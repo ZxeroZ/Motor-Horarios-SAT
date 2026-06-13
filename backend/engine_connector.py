@@ -3,7 +3,8 @@ from sqlmodel import Session, select
 from backend.models import (
     Sedes, Dias, Areas, Cursos, Grado, Seccion, PlanEstudio, 
     Profesores, ProfesorCurso, GradoDiaConfig, SeccionTurno, Turno, Tutoria,
-    ProfesorDisponibilidad, ProfesorPreferencia, Bloque, SedeProfesor
+    ProfesorDisponibilidad, ProfesorPreferencia, Bloque, SedeProfesor,
+    GradoProfesor, BloqueReservado, BloqueGrado, BloqueOpcion, BloqueOpcionSlot
 )
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
@@ -57,7 +58,8 @@ def build_json_from_db(session: Session) -> dict:
         datos["cursos"].append({
             "id": cid,
             "nombre": c.nombre_curso,
-            "categoria_id": f"CAT_{c.id_area}"
+            "categoria_id": f"CAT_{c.id_area}",
+            "requiere_espacio_unico": c.requiere_espacio_unico or False
         })
     
     # --- Grados (con horario_plantilla y cursos_requeridos) ---
@@ -161,6 +163,15 @@ def build_json_from_db(session: Session) -> dict:
         if not sedes_del_prof:
             sedes_del_prof = [s.nombre_sede for s in sedes]
         
+        # Grados habilitados del profesor
+        grados_prof_db = session.exec(
+            select(GradoProfesor).where(GradoProfesor.id_profesor == p.id_profesor)
+        ).all()
+        grados_habilitados = [f"GRA_{gp.id_grado}" for gp in grados_prof_db]
+        # Fallback: si no tiene grados asignados, habilitarlo para todos
+        if not grados_habilitados:
+            grados_habilitados = [f"GRA_{g.id_grado}" for g in grados]
+        
         # --- Disponibilidad: formato motor {dia: {turno: {sede: [bloques]}}} ---
         disp_records = session.exec(
             select(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_profesor == p.id_profesor)
@@ -208,6 +219,7 @@ def build_json_from_db(session: Session) -> dict:
             "id": f"PROF_{p.id_profesor}",
             "nombre": p.nombre_profesor,
             "cursos_habilitados": ["TUT1" if pc.id_curso == tutoria_id_bd else f"CUR_{pc.id_curso}" for pc in pcs],
+            "grados_habilitados": grados_habilitados,
             "disponibilidad": disponibilidad
         }
         
@@ -234,6 +246,38 @@ def build_json_from_db(session: Session) -> dict:
     tutorias_db = session.exec(select(Tutoria)).all()
     for t in tutorias_db:
         datos["tutorias"][f"SEC_{t.id_seccion}"] = f"PROF_{t.id_profesor}"
+    
+    # --- Bloques Reservados ---
+    reservas_db = session.exec(select(BloqueReservado)).all()
+    bloques_reservados_lista = []
+    for r in reservas_db:
+        sede_obj = session.get(Sedes, r.id_sede)
+        dia_obj = session.get(Dias, r.id_dia)
+        turno_obj = session.get(Turno, r.id_turno)
+        
+        if not (sede_obj and dia_obj and turno_obj):
+            continue
+        
+        # Grados afectados
+        bg_list = session.exec(select(BloqueGrado).where(BloqueGrado.id_bloque_reservado == r.id_bloque_reservado)).all()
+        grados_afectados = [f"GRA_{bg.id_grado}" for bg in bg_list] if bg_list else None
+        
+        # Opciones de slots
+        opciones_db = session.exec(select(BloqueOpcion).where(BloqueOpcion.id_bloque_reservado == r.id_bloque_reservado)).all()
+        opciones_slots = []
+        for op in opciones_db:
+            slots_db = session.exec(select(BloqueOpcionSlot).where(BloqueOpcionSlot.id_bloque_opcion == op.id_bloque_opcion)).all()
+            opciones_slots.append([s.nro_bloque for s in slots_db])
+        
+        bloques_reservados_lista.append({
+            "sede": sede_obj.nombre_sede,
+            "dia": dia_obj.nombre_dia,
+            "turno": turno_obj.nombre,
+            "grados_afectados": grados_afectados,
+            "opciones_slots": opciones_slots
+        })
+    
+    datos["bloques_reservados"] = bloques_reservados_lista
         
     return datos
 

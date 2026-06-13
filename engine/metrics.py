@@ -45,6 +45,8 @@ def exportar_metricas(asignaciones: list, datos_procesados: dict, ruta_salida: s
     }
     
     secciones_info = datos_procesados.get("secciones", {})
+    bloques_reservados = datos_procesados.get("bloques_reservados", [])
+    
     ocupados_por_seccion = collections.defaultdict(int)
     for asig in asignaciones:
         if "seccion_id" in asig:
@@ -53,14 +55,36 @@ def exportar_metricas(asignaciones: list, datos_procesados: dict, ruta_salida: s
     for s_id, s_info in secciones_info.items():
         plantilla = s_info.get("horario_plantilla", {})
         slots_totales = sum(plantilla.values())
-        slots_ocupados = ocupados_por_seccion.get(s_id, 0)
-        huecos = slots_totales - slots_ocupados
         
-        metricas_slots["total_disponibles"] += slots_totales
+        # Restar la menor cantidad posible de slots reservados por cada regla que aplica
+        slots_reservados = 0
+        for r in bloques_reservados:
+            if r.get("sede") == s_info.get("sede"):
+                grados_afectados = r.get("grados_afectados")
+                if not grados_afectados or s_info.get("grado") in grados_afectados:
+                    dia_reserva = r.get("dia")
+                    if dia_reserva in plantilla:
+                        max_slots_dia = plantilla[dia_reserva]
+                        opciones_slots = r.get("opciones_slots", [])
+                        if opciones_slots:
+                            # Calculamos cuántos slots efectivos bloquea cada opción dentro de la plantilla
+                            bloqueos_por_opcion = [
+                                sum(1 for s in opt if 1 <= s <= max_slots_dia)
+                                for opt in opciones_slots
+                            ]
+                            # Asumimos el mejor escenario (la opción que bloquea menos)
+                            slots_reservados += min(bloqueos_por_opcion)
+                            
+        slots_efectivos = slots_totales - slots_reservados
+        
+        slots_ocupados = ocupados_por_seccion.get(s_id, 0)
+        huecos = slots_efectivos - slots_ocupados
+        
+        metricas_slots["total_disponibles"] += slots_efectivos
         metricas_slots["total_huecos"] += huecos
         
         metricas_slots["detalle_secciones"][s_id] = {
-            "slots_totales": slots_totales,
+            "slots_totales": slots_efectivos,
             "slots_ocupados": slots_ocupados,
             "huecos": huecos
         }

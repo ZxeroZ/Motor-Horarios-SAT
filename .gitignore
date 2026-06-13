@@ -14,11 +14,50 @@ __pycache__/
 .coverage
 htmlcov/
 
-# Salidas de resultados (opcional, si no deseas versionar los json generados temporalmente)
-# data/output/*.json
-
-database.db
+# Base de datos
 *.db
 *.sqlite
-populate_from_json.py
-*.txt
+*.sqlite3
+
+# Variables de entorno
+.env
+.env.local
+.env.production
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Dependencias Python
+*.egg-info/
+*.egg
+dist/
+build/
+eggs/
+*.whl
+
+# Logs
+*.log
+logs/
+
+# Mypy / type checking
+.mypy_cache/
+
+# Ruff / linter
+.ruff_cache/
+
+# Salidas de resultados
+data/output/*.json
+
+# Archivos temporales y de notas en la raíz
+/*.txt
+!/requirements.txt
+/*.json

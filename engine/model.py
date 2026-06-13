@@ -31,6 +31,7 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
     disp_profesor_pref_slots = datos_procesados.get("disp_profesor_pref_slots", {})
     secciones_dict = datos_procesados["secciones"]
     tutorias_dict = datos_procesados.get("tutorias", {})
+    bloques_reservados = datos_procesados.get("bloques_reservados", [])
     
     turnos = config["turnos"]
 
@@ -47,12 +48,18 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
     limite_dia_profesor = collections.defaultdict(list)       
     limite_dia_categoria_sec = collections.defaultdict(list)  
     presencia_profesor_sede = collections.defaultdict(list)
+    curso_espacio_unico_vars = collections.defaultdict(list)
+    presencia_profesor_sede = collections.defaultdict(list)
+    
+    # Almacenaremos los Z clasificados para las reservas: (s_id, dia, turno, slot) -> [var, var...]
+    vars_por_slot = collections.defaultdict(list)
 
     # 1. GENERACIÓN DEL ESPACIO BOOLEANO POR BLOQUES (Contiguos y Únicos)
     for s_id, reqs in requerimientos_seccion.items():
         s_disp = disp_seccion.get(s_id, set())
         seccion_info = secciones_dict[s_id]
         sede_id = seccion_info.get("sede")
+        grado_id = seccion_info.get("grado")
         horario_plantilla = seccion_info.get("horario_plantilla", {})
         dias_seccion = list(horario_plantilla.keys())
         
@@ -60,11 +67,14 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
             cat_id = cursos[c_id]["categoria_id"]
             H = horas
             
-            if c_id == "TUT1":
+            if c_id == "TUT1" and tutorias_dict:
                 tutor_asignado = tutorias_dict.get(s_id)
                 posibles_profesores = [tutor_asignado] if tutor_asignado else []
             else:
-                posibles_profesores = profesores_por_curso.get(c_id, [])
+                posibles_profesores = [
+                    p_id for p_id in profesores_por_curso.get(c_id, [])
+                    if grado_id in profesores_dict[p_id].get("grados_habilitados", [])
+                ]
             
             configs = get_configs(H)
             all_cfg_p_vars = []
@@ -146,8 +156,13 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
                                             slot_ocupado = start + k
                                             unicidad_seccion[(s_id, dia, turno, slot_ocupado)].append(var)
                                             unicidad_profesor[(p_id, dia, turno, slot_ocupado)].append(var)
+                                            vars_por_slot[(s_id, dia, turno, slot_ocupado)].append(var)
                                             if sede_id:
                                                 presencia_profesor_sede[(p_id, dia, turno, slot_ocupado, sede_id)].append(var)
+                                            
+                                            # Restricción de espacio único para cursos especiales
+                                            if cursos[c_id].get("requiere_espacio_unico", False):
+                                                curso_espacio_unico_vars[(c_id, sede_id, dia, turno, slot_ocupado)].append(var)
                                         
                                         # Para los topes diarios, ponderamos por la duración
                                         limite_dia_profesor[(p_id, dia)].append((var, sub_H))
@@ -200,10 +215,6 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
             for dia in dias_usados:
                 for turno in turnos:
                     for k in range(max_slots_global - 1):
-                        # Excepción solicitada: El recreo existe entre el slot 3 y 4 (índices 2 y 3).
-                        if k == 2:
-                            continue
-                            
                         for sede1 in sedes_disponibles:
                             for sede2 in sedes_disponibles:
                                 if sede1 != sede2:
@@ -213,6 +224,49 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
                                     if vars_sede1_k and vars_sede2_k_plus_1:
                                         model.Add(sum(vars_sede1_k) + sum(vars_sede2_k_plus_1) <= 1)
                                         
+    # [G] Espacio único para cursos especiales (por sede)
+    for vars_list in curso_espacio_unico_vars.values():
+        if len(vars_list) > 1:
+            model.AddAtMostOne(vars_list)
+            
+    # [H] Reservas Disyuntivas de Bloques
+    for r_idx, r in enumerate(bloques_reservados):
+        r_sede = r.get("sede")
+        r_dia = r.get("dia")
+        r_turno = r.get("turno")
+        r_opciones = r.get("opciones_slots", [])
+        r_grados = r.get("grados_afectados")
+        
+        # Identificar secciones afectadas por esta regla
+        secciones_afectadas = []
+        for s_id, s_info in secciones_dict.items():
+            if s_info.get("sede") == r_sede:
+                if not r_grados or s_info.get("grado") in r_grados:
+                    secciones_afectadas.append(s_id)
+        
+        if not secciones_afectadas or not r_opciones:
+            continue
+            
+        # Crear variables booleanas de decisión para cada opción de la regla
+        y_vars = []
+        for opt_idx, opt_slots in enumerate(r_opciones):
+            y_var = model.NewBoolVar(f"y_reserva_{r_idx}_opt_{opt_idx}")
+            y_vars.append(y_var)
+            
+            # Recolectar todas las variables Z que intersecan con esta opción
+            vars_en_colision = []
+            for s_id in secciones_afectadas:
+                for slot_fisico in opt_slots:
+                    slot_idx = slot_fisico - 1  # vars_por_slot usa 0-indexing internamente
+                    vars_en_colision.extend(vars_por_slot.get((s_id, r_dia, r_turno, slot_idx), []))
+                    
+            # Si se elige esta opción (y_var == 1), ninguna de estas Z puede ser 1
+            for z_var in vars_en_colision:
+                model.AddImplication(y_var, z_var.Not())
+                
+        # El solver DEBE elegir exactamente una opción de reserva
+        model.AddExactlyOne(y_vars)
+
     # 3. FUNCIÓN OBJETIVO
     # Maximizar las recompensas: +10000 por cobertura, +100 por no fragmentar, +10 por fragmentar.
     model.Maximize(sum(var * recompensa for var, recompensa in objetivo_recompensas))

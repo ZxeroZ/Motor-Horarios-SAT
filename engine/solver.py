@@ -1,6 +1,6 @@
 from ortools.sat.python import cp_model
 
-def resolver_modelo(modelo: cp_model.CpModel, bloques_z: dict, max_tiempo_segundos: int = 60) -> dict:
+def resolver_modelo(modelo: cp_model.CpModel, bloques_z: dict, max_tiempo_segundos: int = 120) -> dict:
     """
     Ejecuta el resolver CP-SAT sobre el modelo modificado (basado en bloques contiguos) y extrae los resultados.
     """

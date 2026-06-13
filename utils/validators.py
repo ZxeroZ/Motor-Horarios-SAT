@@ -89,6 +89,10 @@ def validar_cursos(cursos: list[dict], ids_categorias: set[str]) -> list[str]:
                 f"[cursos][{cid}] La categoría '{curso['categoria_id']}' "
                 f"no existe en la lista de categorías"
             )
+
+        if "requiere_espacio_unico" in curso:
+            if not isinstance(curso["requiere_espacio_unico"], bool):
+                errores.append(f"[cursos][{cid}] 'requiere_espacio_unico' debe ser un booleano (true/false)")
  
     return errores
 
@@ -169,6 +173,7 @@ def validar_profesores(
     ids_cursos: set[str],
     dias_validos: list[str],
     turnos_validos: list[str],
+    ids_grados: set[str],
 ) -> list[str]:
     errores = []
  
@@ -201,6 +206,20 @@ def validar_profesores(
                     errores.append(
                         f"[profesores][{pid}] El curso '{curso_id}' en "
                         f"'cursos_habilitados' no existe en la lista de cursos"
+                    )
+                    
+        # Validar grados habilitados
+        if "grados_habilitados" not in profesor:
+            errores.append(f"[profesores][{pid}] Falta el campo 'grados_habilitados'")
+        else:
+            grados_hab = profesor["grados_habilitados"]
+            if len(grados_hab) == 0:
+                errores.append(f"[profesores][{pid}] 'grados_habilitados' no puede estar vacío")
+            for grado_id in grados_hab:
+                if grado_id not in ids_grados:
+                    errores.append(
+                        f"[profesores][{pid}] El grado '{grado_id}' en "
+                        f"'grados_habilitados' no existe en la lista de grados"
                     )
  
         # Validar disponibilidad
@@ -347,12 +366,52 @@ def validar_tutorias(tutorias: dict, ids_secciones: set[str], ids_profesores: se
     return errores
  
  
+def validar_bloques_reservados(reservas: list[dict], sedes_validas: list[str], dias_validos: list[str], turnos_validos: list[str], ids_grados: set[str]) -> list[str]:
+    errores = []
+    
+    for idx, r in enumerate(reservas):
+        sede = r.get("sede")
+        dia = r.get("dia")
+        turno = r.get("turno")
+        opciones_slots = r.get("opciones_slots")
+        grados = r.get("grados_afectados")
+        
+        if not sede or not dia or not turno or not opciones_slots:
+            errores.append(f"[bloques_reservados][indice {idx}] Faltan campos obligatorios (sede, dia, turno, opciones_slots)")
+            continue
+            
+        if sede not in sedes_validas:
+            errores.append(f"[bloques_reservados][indice {idx}] Sede '{sede}' inválida")
+        if dia not in dias_validos:
+            errores.append(f"[bloques_reservados][indice {idx}] Día '{dia}' inválido")
+        if turno not in turnos_validos:
+            errores.append(f"[bloques_reservados][indice {idx}] Turno '{turno}' inválido")
+            
+        if not isinstance(opciones_slots, list) or len(opciones_slots) == 0:
+            errores.append(f"[bloques_reservados][indice {idx}] 'opciones_slots' debe ser un arreglo de opciones")
+        else:
+            for o_idx, opt in enumerate(opciones_slots):
+                if not isinstance(opt, list) or not all(isinstance(x, int) for x in opt):
+                    errores.append(f"[bloques_reservados][indice {idx}][opcion {o_idx}] debe ser un arreglo de enteros")
+            
+        if grados is not None:
+            if not isinstance(grados, list):
+                errores.append(f"[bloques_reservados][indice {idx}] 'grados_afectados' debe ser un arreglo")
+            else:
+                for g in grados:
+                    if g not in ids_grados:
+                        errores.append(f"[bloques_reservados][indice {idx}] Grado afectado '{g}' no existe")
+
+    return errores
+
+
 def validar_cobertura(
     secciones: list[dict],
     profesores: list[dict],
     cursos: list[dict],
     grados: list[dict],
     tutorias: dict,
+    bloques_reservados: list[dict],
 ) -> list[str]:
     """
     Verifica que cada curso requerido por cada sección tenga al menos
@@ -375,7 +434,7 @@ def validar_cobertura(
             if curso_id not in mapa_cursos:
                 continue  # Ya reportado en validar_grados
                 
-            if curso_id == "TUT1":
+            if curso_id == "TUT1" and tutorias:
                 if not tutorias.get(sid):
                     errores.append(
                         f"[cobertura][{sid}] El curso de tutoría (TUT1) no tiene un "
@@ -385,14 +444,53 @@ def validar_cobertura(
                 
             profesores_aptos = [
                 p for p in profesores
-                if curso_id in p.get("cursos_habilitados", [])
+                if curso_id in p.get("cursos_habilitados", []) and grado_id in p.get("grados_habilitados", [])
             ]
             if len(profesores_aptos) == 0:
                 errores.append(
                     f"[cobertura][{sid}] El curso '{curso_id}' no tiene ningún "
-                    f"profesor habilitado para enseñarlo"
+                    f"profesor habilitado para enseñarlo en el grado '{grado_id}'"
                 )
- 
+
+        # Análisis Preventivo de Capacidad
+        horas_requeridas = sum(req.get("horas_semanales", 0) for req in grado.get("cursos_requeridos", []))
+        
+        # Calcular slots disponibles originalmente
+        plantilla = grado.get("horario_plantilla", {})
+        # Solo sumamos los dias que tiene la seccion en su disponibilidad por si acaso,
+        # o asumimos que la plantilla es el máximo. Las secciones también tienen disponibilidad,
+        # pero asumiremos la plantilla global del grado.
+        slots_totales = sum(plantilla.values())
+        
+        # Restar los slots reservados que le aplican a esta sección
+        slots_reservados_seccion = 0
+        for r in bloques_reservados:
+            if r.get("sede") == seccion.get("sede"):
+                grados_afectados = r.get("grados_afectados")
+                # Aplica si el arreglo de grados está vacío/ausente, o si el grado de la sección está explícitamente en el arreglo
+                if not grados_afectados or grado_id in grados_afectados:
+                    # Buscamos la opción que reserve la MAYOR cantidad de slots dentro del horario habilitado (el peor escenario de capacidad)
+                    dia_reserva = r.get("dia")
+                    opciones_slots = r.get("opciones_slots", [])
+                    
+                    if dia_reserva in plantilla:
+                        max_slots_dia = plantilla[dia_reserva]
+                        peor_escenario = 0
+                        for opt in opciones_slots:
+                            slots_validos_opt = sum(1 for s in opt if 1 <= s <= max_slots_dia)
+                            if slots_validos_opt > peor_escenario:
+                                peor_escenario = slots_validos_opt
+                        slots_reservados_seccion += peor_escenario
+                                
+        capacidad_real = slots_totales - slots_reservados_seccion
+        if capacidad_real < horas_requeridas:
+            errores.append(
+                f"[cobertura][{sid}] La sección requiere {horas_requeridas} horas, pero tras aplicar "
+                f"las reservas de bloques, su capacidad real es de solo {capacidad_real} slots físicos. "
+                f"(Slots base: {slots_totales}, Reservas que le afectan: {slots_reservados_seccion}). "
+                f"Esto garantiza que el escenario sea irresoluble."
+            )
+
     return errores
  
  
@@ -409,6 +507,7 @@ def validar_todo(datos: dict) -> list[str]:
     secciones     = datos.get("secciones", [])
     grados        = datos.get("grados", [])
     tutorias      = datos.get("tutorias", {})
+    bloques_reservados = datos.get("bloques_reservados", [])
  
     errores = []
     errores += validar_configuracion(configuracion)
@@ -436,7 +535,7 @@ def validar_todo(datos: dict) -> list[str]:
             dias_validos_set.update(g["horario_plantilla"].keys())
     dias_validos = list(dias_validos_set)
  
-    errores += validar_profesores(profesores, ids_cursos, dias_validos, turnos_validos)
+    errores += validar_profesores(profesores, ids_cursos, dias_validos, turnos_validos, ids_grados)
     errores += validar_secciones(
         secciones, ids_grados, sedes_validas, dias_validos, turnos_validos
     )
@@ -445,7 +544,9 @@ def validar_todo(datos: dict) -> list[str]:
     ids_profesores = {p["id"] for p in profesores if "id" in p}
     errores += validar_tutorias(tutorias, ids_secciones, ids_profesores)
     
-    errores += validar_cobertura(secciones, profesores, cursos, grados, tutorias)
+    errores += validar_bloques_reservados(bloques_reservados, sedes_validas, dias_validos, turnos_validos, ids_grados)
+    
+    errores += validar_cobertura(secciones, profesores, cursos, grados, tutorias, bloques_reservados)
  
     return errores
  

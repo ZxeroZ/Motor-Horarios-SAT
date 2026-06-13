@@ -84,6 +84,9 @@ def preprocesar(datos: dict) -> dict:
                                 p_disp_pref_slots[(dia, t, sede)] = set(slots)
         disp_profesor_pref_slots[p["id"]] = p_disp_pref_slots
 
+    # 4. Construcción de Reglas de Bloques Reservados
+    bloques_reservados = datos.get("bloques_reservados", [])
+
     # Estructura final consolidada lista para instanciar variables en CP-SAT
     return {
         "configuracion": configuracion,
@@ -98,4 +101,5 @@ def preprocesar(datos: dict) -> dict:
         "disp_profesor_slots": disp_profesor_slots,
         "disp_profesor_pref_slots": disp_profesor_pref_slots,
         "tutorias": tutorias,
+        "bloques_reservados": bloques_reservados,
     }
