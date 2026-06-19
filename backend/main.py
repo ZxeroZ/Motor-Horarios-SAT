@@ -483,10 +483,12 @@ def get_bloques_reservados(session: Session = Depends(get_session)):
             opciones_data.append({
                 "id_bloque_opcion": op.id_bloque_opcion,
                 "nro_opcion": op.nro_opcion,
+                "nombre": op.nombre,
                 "slots": [s.nro_bloque for s in slots]
             })
         resultado.append({
             "id_bloque_reservado": r.id_bloque_reservado,
+            "nombre": r.nombre,
             "id_sede": r.id_sede,
             "id_dia": r.id_dia,
             "id_turno": r.id_turno,
@@ -499,6 +501,7 @@ def get_bloques_reservados(session: Session = Depends(get_session)):
 def create_bloque_reservado_completo(data: dict, session: Session = Depends(get_session)):
     """Crea una reserva completa: sede/dia/turno + grados + opciones con slots."""
     reserva = BloqueReservado(
+        nombre=data.get("nombre"),
         id_sede=data["id_sede"],
         id_dia=data["id_dia"],
         id_turno=data["id_turno"]
@@ -510,13 +513,27 @@ def create_bloque_reservado_completo(data: dict, session: Session = Depends(get_
     for grado_id in data.get("grados", []):
         session.add(BloqueGrado(id_bloque_reservado=reserva.id_bloque_reservado, id_grado=grado_id))
     
-    for idx, slots in enumerate(data.get("opciones_slots", [])):
-        opcion = BloqueOpcion(id_bloque_reservado=reserva.id_bloque_reservado, nro_opcion=idx + 1)
-        session.add(opcion)
-        session.commit()
-        session.refresh(opcion)
-        for nro in slots:
-            session.add(BloqueOpcionSlot(id_bloque_opcion=opcion.id_bloque_opcion, nro_bloque=nro))
+    # Soporta el nuevo formato 'opciones' o el formato antiguo 'opciones_slots'
+    if "opciones" in data:
+        for op_data in data["opciones"]:
+            opcion = BloqueOpcion(
+                id_bloque_reservado=reserva.id_bloque_reservado, 
+                nro_opcion=op_data.get("nro_opcion", 1),
+                nombre=op_data.get("nombre")
+            )
+            session.add(opcion)
+            session.commit()
+            session.refresh(opcion)
+            for nro in op_data.get("slots", []):
+                session.add(BloqueOpcionSlot(id_bloque_opcion=opcion.id_bloque_opcion, nro_bloque=nro))
+    else:
+        for idx, slots in enumerate(data.get("opciones_slots", [])):
+            opcion = BloqueOpcion(id_bloque_reservado=reserva.id_bloque_reservado, nro_opcion=idx + 1)
+            session.add(opcion)
+            session.commit()
+            session.refresh(opcion)
+            for nro in slots:
+                session.add(BloqueOpcionSlot(id_bloque_opcion=opcion.id_bloque_opcion, nro_bloque=nro))
     
     session.commit()
     return {"message": "Bloque reservado creado", "id": reserva.id_bloque_reservado}

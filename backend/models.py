@@ -231,6 +231,7 @@ class Tutoria(SQLModel, table=True):
 class BloqueReservado(SQLModel, table=True):
     __tablename__ = "bloque_reservado"
     id_bloque_reservado: Optional[int] = Field(default=None, primary_key=True)
+    nombre: Optional[str] = None
     id_sede: Optional[int] = Field(default=None, foreign_key="sedes.id_sede")
     id_dia: Optional[int] = Field(default=None, foreign_key="dias.id_dia")
     id_turno: Optional[int] = Field(default=None, foreign_key="turno.id_turno")
@@ -255,6 +256,7 @@ class BloqueOpcion(SQLModel, table=True):
     id_bloque_opcion: Optional[int] = Field(default=None, primary_key=True)
     id_bloque_reservado: Optional[int] = Field(default=None, foreign_key="bloque_reservado.id_bloque_reservado")
     nro_opcion: Optional[int] = None
+    nombre: Optional[str] = None
     
     bloque_reservado: Optional[BloqueReservado] = Relationship(back_populates="bloques_opcion")
     slots: List["BloqueOpcionSlot"] = Relationship(back_populates="bloque_opcion")
