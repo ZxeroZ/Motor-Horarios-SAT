@@ -225,7 +225,8 @@ function App() {
         addToast(`${label} eliminado`);
         loadAdminData();
       } else {
-        addToast("Error al eliminar", "error");
+        const data = await res.json();
+        addToast(data.detail || "Error al eliminar", "error");
       }
     } catch {
       addToast("Error de conexión", "error");
@@ -329,31 +330,63 @@ function App() {
     setProgress({ percent: 0, message: "Iniciando...", step: "init" });
 
     try {
+      // Capturar versión actual antes de generar
+      let prevVersion = null;
+      try {
+        const prevRes = await fetch("http://localhost:8000/api/cargar-horario?t=" + Date.now());
+        const prevData = await prevRes.json();
+        prevVersion = prevData.resultado?.version ?? null;
+      } catch {}
+
       // 1. Lanzar generación en background
       const startRes = await fetch('http://localhost:8000/api/generar-horario/start', { method: 'POST' });
       const { task_id } = await startRes.json();
 
-      // 2. Polling de progreso
+      // 2. Polling dual: horario-progress (primario) + cargar-horario (fallback)
       let done = false;
-      const poll = setInterval(async () => {
+
+      const finishGeneration = async (prog) => {
+        if (done) return;
+        done = true;
+        clearInterval(pollPrimary);
+        clearInterval(pollFallback);
+        setProgress({ percent: 100, message: "¡Horario generado!", step: "done" });
+        await new Promise(r => setTimeout(r, 1000));
+        let loaded = false;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            const horarioRes = await fetch("http://localhost:8000/api/cargar-horario?t=" + Date.now());
+            const horarioData = await horarioRes.json();
+            if (horarioData.status === "success" && horarioData.resultado?.asignaciones?.length > 0) {
+              setResult(horarioData.resultado);
+              setSelectedSeccion(horarioData.resultado.asignaciones[0].seccion_id);
+              loaded = true;
+              break;
+            }
+          } catch {}
+          await new Promise(r => setTimeout(r, 1000));
+        }
+        if (!loaded && prog?.resultado?.asignaciones?.length > 0) {
+          setResult(prog.resultado);
+          setSelectedSeccion(prog.resultado.asignaciones[0].seccion_id);
+        }
+        addToast(`Horario generado en ${prog?.resultado?.estadisticas?.tiempo_segundos?.toFixed(1) || '?'}s`);
+        setTimeout(() => { setLoading(false); setProgress(null); }, 1000);
+      };
+
+      // Primario: poll /api/horario-progress/{task_id}
+      const pollPrimary = setInterval(async () => {
         if (done) return;
         try {
           const progRes = await fetch(`http://localhost:8000/api/horario-progress/${task_id}`);
           const prog = await progRes.json();
 
           if (prog.status === 'done') {
-            done = true;
-            clearInterval(poll);
-            setProgress({ percent: 100, message: "¡Horario generado!", step: "done" });
-            setResult(prog.resultado);
-            addToast(`Horario generado en ${prog.resultado?.estadisticas?.tiempo_segundos?.toFixed(1)}s`);
-            if (prog.resultado?.asignaciones?.length > 0) {
-              setSelectedSeccion(prog.resultado.asignaciones[0].seccion_id);
-            }
-            setTimeout(() => { setLoading(false); setProgress(null); }, 1000);
+            finishGeneration(prog);
           } else if (prog.status === 'error') {
             done = true;
-            clearInterval(poll);
+            clearInterval(pollPrimary);
+            clearInterval(pollFallback);
             setError(prog.errors ? JSON.stringify(prog.errors, null, 2) : prog.message);
             addToast("Error al generar horario", "error");
             setLoading(false);
@@ -364,8 +397,29 @@ function App() {
         } catch {}
       }, 500);
 
+      // Fallback: poll /api/cargar-horario cada 3s, detectar cambio de versión
+      const pollFallback = setInterval(async () => {
+        if (done) return;
+        try {
+          const res = await fetch("http://localhost:8000/api/cargar-horario?t=" + Date.now());
+          const data = await res.json();
+          const currentVersion = data.resultado?.version ?? null;
+          if (currentVersion !== null && currentVersion !== prevVersion) {
+            finishGeneration({ resultado: data.resultado });
+          }
+        } catch {}
+      }, 3000);
+
       // Safety timeout
-      setTimeout(() => { if (!done) { done = true; clearInterval(poll); setLoading(false); setProgress(null); } }, 120000);
+      setTimeout(() => {
+        if (!done) {
+          done = true;
+          clearInterval(pollPrimary);
+          clearInterval(pollFallback);
+          setLoading(false);
+          setProgress(null);
+        }
+      }, 180000);
     } catch (err) {
       setError(err.message);
       addToast("Error de conexión", "error");

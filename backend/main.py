@@ -73,6 +73,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def _reject_if_dependents(session: Session, parent_name: str, checks: list):
+    """Si alguna dependencia existe, rechaza con 400 indicando qué borrar primero."""
+    conflicts = []
+    for query, label in checks:
+        if query is not None and session.exec(query).first():
+            conflicts.append(label)
+    if conflicts:
+        raise HTTPException(
+            status_code=400,
+            detail=f"No se puede eliminar {parent_name}. Primero elimina: {', '.join(conflicts)}"
+        )
+
+
 @app.post("/api/login")
 def login(req: LoginRequest, session: Session = Depends(get_session)):
     user = session.exec(select(Usuario).where(Usuario.email == req.email)).first()
@@ -89,6 +102,13 @@ def read_root():
 def get_colegio(session: Session = Depends(get_session)):
     return session.exec(select(Colegio)).all()
 
+@app.post("/api/colegio", response_model=Colegio)
+def create_colegio(col: Colegio, session: Session = Depends(get_session)):
+    session.add(col)
+    session.commit()
+    session.refresh(col)
+    return col
+
 @app.put("/api/colegio/{id}", response_model=Colegio)
 def update_colegio(id: int, col: Colegio, session: Session = Depends(get_session)):
     db_c = session.get(Colegio, id)
@@ -96,6 +116,18 @@ def update_colegio(id: int, col: Colegio, session: Session = Depends(get_session
     db_c.nombre_colegio = col.nombre_colegio
     session.commit()
     return db_c
+
+@app.delete("/api/colegio/{id}")
+def delete_colegio(id: int, session: Session = Depends(get_session)):
+    db_c = session.get(Colegio, id)
+    if not db_c: raise HTTPException(status_code=404, detail="Colegio no encontrado")
+    _reject_if_dependents(session, "el Colegio", [
+        (select(Sedes).where(Sedes.id_colegio == id), "Sedes"),
+        (select(Usuario).where(Usuario.id_colegio == id), "Usuarios"),
+    ])
+    session.delete(db_c)
+    session.commit()
+    return {"message": "Colegio borrado"}
 
 @app.get("/api/sedes", response_model=List[Sedes])
 def get_sedes(session: Session = Depends(get_session)):
@@ -122,14 +154,13 @@ def delete_sede(id_sede: int, session: Session = Depends(get_session)):
     db_sede = session.get(Sedes, id_sede)
     if not db_sede:
         raise HTTPException(status_code=404, detail="Sede no encontrada")
-    # Chequear uso (Seccion y SedeProfesor)
-    in_use_seccion = session.exec(select(Seccion).where(Seccion.id_sede == id_sede)).first()
-    if in_use_seccion:
-        raise HTTPException(status_code=400, detail="Sede en uso")
-    in_use_prof = session.exec(select(SedeProfesor).where(SedeProfesor.id_sede == id_sede)).first()
-    if in_use_prof:
-        raise HTTPException(status_code=400, detail="Sede en uso")
-    
+    _reject_if_dependents(session, "la Sede", [
+        (select(Seccion).where(Seccion.id_sede == id_sede), "Secciones"),
+        (select(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_sede == id_sede), "Disponibilidades"),
+        (select(ProfesorPreferencia).where(ProfesorPreferencia.id_sede == id_sede), "Preferencias"),
+        (select(SedeProfesor).where(SedeProfesor.id_sede == id_sede), "Vínculos Profesor-Sede"),
+        (select(BloqueReservado).where(BloqueReservado.id_sede == id_sede), "Bloques Reservados"),
+    ])
     session.delete(db_sede)
     session.commit()
     return {"message": "Sede borrada"}
@@ -144,11 +175,29 @@ def create_grado(grado: Grado, session: Session = Depends(get_session)):
     session.commit()
     return grado
 
+@app.put("/api/grados/{id_grado}", response_model=Grado)
+def update_grado(id_grado: int, grado_update: Grado, session: Session = Depends(get_session)):
+    db_grado = session.get(Grado, id_grado)
+    if not db_grado:
+        raise HTTPException(status_code=404, detail="Grado no encontrado")
+    db_grado.numero = grado_update.numero
+    session.add(db_grado)
+    session.commit()
+    session.refresh(db_grado)
+    return db_grado
+
 @app.delete("/api/grados/{id_grado}")
 def delete_grado(id_grado: int, session: Session = Depends(get_session)):
     db_grado = session.get(Grado, id_grado)
     if not db_grado:
         raise HTTPException(status_code=404, detail="Grado no encontrado")
+    _reject_if_dependents(session, "el Grado", [
+        (select(Seccion).where(Seccion.id_grado == id_grado), "Secciones"),
+        (select(GradoDiaConfig).where(GradoDiaConfig.id_grado == id_grado), "Configs Día-Grado"),
+        (select(PlanEstudio).where(PlanEstudio.id_grado == id_grado), "Planes de Estudio"),
+        (select(GradoProfesor).where(GradoProfesor.id_grado == id_grado), "Vínculos Grado-Profesor"),
+        (select(BloqueGrado).where(BloqueGrado.id_grado == id_grado), "Bloques de Grado"),
+    ])
     session.delete(db_grado)
     session.commit()
     return {"message": "Grado borrado"}
@@ -199,12 +248,31 @@ def create_dia(dia: Dias, session: Session = Depends(get_session)):
     session.commit()
     return dia
 
+@app.put("/api/dias/{id_dia}", response_model=Dias)
+def update_dia(id_dia: int, dia_update: Dias, session: Session = Depends(get_session)):
+    db_dia = session.get(Dias, id_dia)
+    if not db_dia:
+        raise HTTPException(status_code=404, detail="Día no encontrado")
+    db_dia.nombre_dia = dia_update.nombre_dia
+    db_dia.orden = dia_update.orden
+    session.add(db_dia)
+    session.commit()
+    session.refresh(db_dia)
+    return db_dia
 
 @app.delete("/api/dias/{id_dia}")
 def delete_dia(id_dia: int, session: Session = Depends(get_session)):
     db = session.get(Dias, id_dia)
     if not db:
         raise HTTPException(status_code=404, detail="Dia no encontrado")
+    _reject_if_dependents(session, "el Día", [
+        (select(GradoDiaConfig).where(GradoDiaConfig.id_dia == id_dia), "Configs Día-Grado"),
+        (select(SeccionTurno).where(SeccionTurno.id_dia == id_dia), "Sección-Turnos"),
+        (select(HorarioFinal).where(HorarioFinal.id_dia == id_dia), "Horarios Finales"),
+        (select(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_dia == id_dia), "Disponibilidades"),
+        (select(ProfesorPreferencia).where(ProfesorPreferencia.id_dia == id_dia), "Preferencias"),
+        (select(BloqueReservado).where(BloqueReservado.id_dia == id_dia), "Bloques Reservados"),
+    ])
     session.delete(db)
     session.commit()
     return {"message": "Día borrado"}
@@ -234,11 +302,14 @@ def delete_turno(id_turno: int, session: Session = Depends(get_session)):
     db_turno = session.get(Turno, id_turno)
     if not db_turno:
         raise HTTPException(status_code=404, detail="Turno no encontrado")
-    # Chequear uso en SeccionTurno
-    in_use_turno = session.exec(select(SeccionTurno).where(SeccionTurno.id_turno == id_turno)).first()
-    if in_use_turno:
-        raise HTTPException(status_code=400, detail="Turno en uso")
-    
+    _reject_if_dependents(session, "el Turno", [
+        (select(Bloque).where(Bloque.id_turno == id_turno), "Bloques"),
+        (select(SeccionTurno).where(SeccionTurno.id_turno == id_turno), "Sección-Turnos"),
+        (select(HorarioFinal).where(HorarioFinal.id_turno == id_turno), "Horarios Finales"),
+        (select(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_turno == id_turno), "Disponibilidades"),
+        (select(ProfesorPreferencia).where(ProfesorPreferencia.id_turno == id_turno), "Preferencias"),
+        (select(BloqueReservado).where(BloqueReservado.id_turno == id_turno), "Bloques Reservados"),
+    ])
     session.delete(db_turno)
     session.commit()
     return {"message": "Turno borrado"}
@@ -251,6 +322,29 @@ def create_bloque(bloque: Bloque, session: Session = Depends(get_session)):
     session.add(bloque)
     session.commit()
     return bloque
+
+@app.put("/api/bloques/{id_bloque}", response_model=Bloque)
+def update_bloque(id_bloque: int, bloque_update: Bloque, session: Session = Depends(get_session)):
+    db_bloque = session.get(Bloque, id_bloque)
+    if not db_bloque:
+        raise HTTPException(status_code=404, detail="Bloque no encontrado")
+    db_bloque.numero_bloque = bloque_update.numero_bloque
+    db_bloque.hora_inicio = bloque_update.hora_inicio
+    db_bloque.hora_final = bloque_update.hora_final
+    db_bloque.id_turno = bloque_update.id_turno
+    session.add(db_bloque)
+    session.commit()
+    session.refresh(db_bloque)
+    return db_bloque
+
+@app.delete("/api/bloques/{id_bloque}")
+def delete_bloque(id_bloque: int, session: Session = Depends(get_session)):
+    db_bloque = session.get(Bloque, id_bloque)
+    if not db_bloque:
+        raise HTTPException(status_code=404, detail="Bloque no encontrado")
+    session.delete(db_bloque)
+    session.commit()
+    return {"message": "Bloque borrado"}
 
 # --- Endpoints Administrativos: Áreas ---
 @app.get("/api/areas", response_model=List[Areas])
@@ -279,6 +373,9 @@ def update_area(id_area: int, area_update: Areas, session: Session = Depends(get
 def delete_area(id_area: int, session: Session = Depends(get_session)):
     db_area = session.get(Areas, id_area)
     if not db_area: raise HTTPException(status_code=404, detail="Area no encontrada")
+    _reject_if_dependents(session, "el Área", [
+        (select(Cursos).where(Cursos.id_area == id_area), "Cursos"),
+    ])
     session.delete(db_area)
     session.commit()
     return {"message": "Area borrada"}
@@ -310,6 +407,11 @@ def update_curso(id_curso: int, curso_update: Cursos, session: Session = Depends
 def delete_curso(id_curso: int, session: Session = Depends(get_session)):
     db_curso = session.get(Cursos, id_curso)
     if not db_curso: raise HTTPException(status_code=404, detail="Curso no encontrado")
+    _reject_if_dependents(session, "el Curso", [
+        (select(PlanEstudio).where(PlanEstudio.id_curso == id_curso), "Planes de Estudio"),
+        (select(ProfesorCurso).where(ProfesorCurso.id_curso == id_curso), "Vínculos Profesor-Curso"),
+        (select(HorarioFinal).where(HorarioFinal.id_curso == id_curso), "Horarios Finales"),
+    ])
     session.delete(db_curso)
     session.commit()
     return {"message": "Curso borrado"}
@@ -340,6 +442,15 @@ def update_profesor(id_profesor: int, profesor_update: Profesores, session: Sess
 def delete_profesor(id_profesor: int, session: Session = Depends(get_session)):
     db_profesor = session.get(Profesores, id_profesor)
     if not db_profesor: raise HTTPException(status_code=404, detail="Profesor no encontrado")
+    _reject_if_dependents(session, "el Profesor", [
+        (select(ProfesorCurso).where(ProfesorCurso.id_profesor == id_profesor), "Vínculos Profesor-Curso"),
+        (select(HorarioFinal).where(HorarioFinal.id_profesor == id_profesor), "Horarios Finales"),
+        (select(Tutoria).where(Tutoria.id_profesor == id_profesor), "Tutorías"),
+        (select(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_profesor == id_profesor), "Disponibilidades"),
+        (select(ProfesorPreferencia).where(ProfesorPreferencia.id_profesor == id_profesor), "Preferencias"),
+        (select(SedeProfesor).where(SedeProfesor.id_profesor == id_profesor), "Vínculos Profesor-Sede"),
+        (select(GradoProfesor).where(GradoProfesor.id_profesor == id_profesor), "Vínculos Grado-Profesor"),
+    ])
     session.delete(db_profesor)
     session.commit()
     return {"message": "Profesor borrado"}
@@ -355,6 +466,17 @@ def create_profesor_curso(pc: ProfesorCurso, session: Session = Depends(get_sess
     session.commit()
     session.refresh(pc)
     return pc
+
+@app.put("/api/profesor-curso/{id_profesor_curso}", response_model=ProfesorCurso)
+def update_profesor_curso(id_profesor_curso: int, pc_update: ProfesorCurso, session: Session = Depends(get_session)):
+    db = session.get(ProfesorCurso, id_profesor_curso)
+    if not db: raise HTTPException(status_code=404, detail="ProfesorCurso no encontrado")
+    db.id_profesor = pc_update.id_profesor
+    db.id_curso = pc_update.id_curso
+    session.add(db)
+    session.commit()
+    session.refresh(db)
+    return db
 
 @app.delete("/api/profesor-curso/{id_profesor_curso}")
 def delete_profesor_curso(id_profesor_curso: int, session: Session = Depends(get_session)):
@@ -392,6 +514,11 @@ def update_seccion(id_seccion: int, seccion_update: Seccion, session: Session = 
 def delete_seccion(id_seccion: int, session: Session = Depends(get_session)):
     db_seccion = session.get(Seccion, id_seccion)
     if not db_seccion: raise HTTPException(status_code=404, detail="Seccion no encontrada")
+    _reject_if_dependents(session, "la Sección", [
+        (select(SeccionTurno).where(SeccionTurno.id_seccion == id_seccion), "Sección-Turnos"),
+        (select(HorarioFinal).where(HorarioFinal.id_seccion == id_seccion), "Horarios Finales"),
+        (select(Tutoria).where(Tutoria.id_seccion == id_seccion), "Tutorías"),
+    ])
     session.delete(db_seccion)
     session.commit()
     return {"message": "Seccion borrada"}
@@ -440,6 +567,18 @@ def create_seccion_turno(st: SeccionTurno, session: Session = Depends(get_sessio
     session.refresh(st)
     return st
 
+@app.put("/api/seccion-turno/{id_seccion_turno}", response_model=SeccionTurno)
+def update_seccion_turno(id_seccion_turno: int, st_update: SeccionTurno, session: Session = Depends(get_session)):
+    db = session.get(SeccionTurno, id_seccion_turno)
+    if not db: raise HTTPException(status_code=404, detail="SeccionTurno no encontrado")
+    db.id_seccion = st_update.id_seccion
+    db.id_turno = st_update.id_turno
+    db.id_dia = st_update.id_dia
+    session.add(db)
+    session.commit()
+    session.refresh(db)
+    return db
+
 @app.delete("/api/seccion-turno/{id_seccion_turno}")
 def delete_seccion_turno(id_seccion_turno: int, session: Session = Depends(get_session)):
     db = session.get(SeccionTurno, id_seccion_turno)
@@ -461,6 +600,21 @@ def create_horario_final(hf: HorarioFinal, session: Session = Depends(get_sessio
     session.refresh(hf)
     return hf
 
+@app.put("/api/horario-final/{id_horario_final}", response_model=HorarioFinal)
+def update_horario_final(id_horario_final: int, hf_update: HorarioFinal, session: Session = Depends(get_session)):
+    db = session.get(HorarioFinal, id_horario_final)
+    if not db: raise HTTPException(status_code=404, detail="HorarioFinal no encontrado")
+    db.id_seccion = hf_update.id_seccion
+    db.id_dia = hf_update.id_dia
+    db.num_bloque = hf_update.num_bloque
+    db.id_curso = hf_update.id_curso
+    db.id_profesor = hf_update.id_profesor
+    db.id_turno = hf_update.id_turno
+    session.add(db)
+    session.commit()
+    session.refresh(db)
+    return db
+
 @app.delete("/api/horario-final/{id_horario_final}")
 def delete_horario_final(id_horario_final: int, session: Session = Depends(get_session)):
     db = session.get(HorarioFinal, id_horario_final)
@@ -480,6 +634,17 @@ def create_tutoria(tutoria: Tutoria, session: Session = Depends(get_session)):
     session.commit()
     session.refresh(tutoria)
     return tutoria
+
+@app.put("/api/tutorias/{id_tutoria}", response_model=Tutoria)
+def update_tutoria(id_tutoria: int, tutoria_update: Tutoria, session: Session = Depends(get_session)):
+    db = session.get(Tutoria, id_tutoria)
+    if not db: raise HTTPException(status_code=404, detail="Tutoría no encontrada")
+    db.id_seccion = tutoria_update.id_seccion
+    db.id_profesor = tutoria_update.id_profesor
+    session.add(db)
+    session.commit()
+    session.refresh(db)
+    return db
 
 @app.delete("/api/tutorias/{id_tutoria}")
 def delete_tutoria(id_tutoria: int, session: Session = Depends(get_session)):
@@ -502,6 +667,17 @@ def create_profesor_sede(ps: SedeProfesor, session: Session = Depends(get_sessio
     session.refresh(ps)
     return ps
 
+@app.put("/api/profesor-sedes/{id_sede_profesor}", response_model=SedeProfesor)
+def update_profesor_sede(id_sede_profesor: int, ps_update: SedeProfesor, session: Session = Depends(get_session)):
+    db = session.get(SedeProfesor, id_sede_profesor)
+    if not db: raise HTTPException(status_code=404, detail="Vínculo no encontrado")
+    db.id_profesor = ps_update.id_profesor
+    db.id_sede = ps_update.id_sede
+    session.add(db)
+    session.commit()
+    session.refresh(db)
+    return db
+
 @app.delete("/api/profesor-sedes/{id_sede_profesor}")
 def delete_profesor_sede(id_sede_profesor: int, session: Session = Depends(get_session)):
     db = session.get(SedeProfesor, id_sede_profesor)
@@ -521,6 +697,17 @@ def create_grado_profesor(gp: GradoProfesor, session: Session = Depends(get_sess
     session.commit()
     session.refresh(gp)
     return gp
+
+@app.put("/api/grado-profesor/{id_grado_profesor}", response_model=GradoProfesor)
+def update_grado_profesor(id_grado_profesor: int, gp_update: GradoProfesor, session: Session = Depends(get_session)):
+    db = session.get(GradoProfesor, id_grado_profesor)
+    if not db: raise HTTPException(status_code=404, detail="Vínculo no encontrado")
+    db.id_grado = gp_update.id_grado
+    db.id_profesor = gp_update.id_profesor
+    session.add(db)
+    session.commit()
+    session.refresh(db)
+    return db
 
 @app.delete("/api/grado-profesor/{id_grado_profesor}")
 def delete_grado_profesor(id_grado_profesor: int, session: Session = Depends(get_session)):
@@ -626,6 +813,20 @@ def create_profesor_disponibilidad(pd: ProfesorDisponibilidad, session: Session 
     session.refresh(pd)
     return pd
 
+@app.put("/api/profesor-disponibilidad/{id_disponibilidad}", response_model=ProfesorDisponibilidad)
+def update_profesor_disponibilidad(id_disponibilidad: int, pd_update: ProfesorDisponibilidad, session: Session = Depends(get_session)):
+    db = session.get(ProfesorDisponibilidad, id_disponibilidad)
+    if not db: raise HTTPException(status_code=404, detail="Disponibilidad no encontrada")
+    db.id_profesor = pd_update.id_profesor
+    db.id_dia = pd_update.id_dia
+    db.id_turno = pd_update.id_turno
+    db.id_sede = pd_update.id_sede
+    db.nro_bloque = pd_update.nro_bloque
+    session.add(db)
+    session.commit()
+    session.refresh(db)
+    return db
+
 @app.delete("/api/profesor-disponibilidad/{id_disponibilidad}")
 def delete_profesor_disponibilidad(id_disponibilidad: int, session: Session = Depends(get_session)):
     db = session.get(ProfesorDisponibilidad, id_disponibilidad)
@@ -645,6 +846,20 @@ def create_profesor_preferencia(pp: ProfesorPreferencia, session: Session = Depe
     session.commit()
     session.refresh(pp)
     return pp
+
+@app.put("/api/profesor-preferencia/{id_preferencia}", response_model=ProfesorPreferencia)
+def update_profesor_preferencia(id_preferencia: int, pp_update: ProfesorPreferencia, session: Session = Depends(get_session)):
+    db = session.get(ProfesorPreferencia, id_preferencia)
+    if not db: raise HTTPException(status_code=404, detail="Preferencia no encontrada")
+    db.id_profesor = pp_update.id_profesor
+    db.id_dia = pp_update.id_dia
+    db.id_turno = pp_update.id_turno
+    db.id_sede = pp_update.id_sede
+    db.nro_bloque = pp_update.nro_bloque
+    session.add(db)
+    session.commit()
+    session.refresh(db)
+    return db
 
 @app.delete("/api/profesor-preferencia/{id_preferencia}")
 def delete_profesor_preferencia(id_preferencia: int, session: Session = Depends(get_session)):
@@ -709,12 +924,38 @@ def cargar_horario_guardado(session: Session = Depends(get_session)):
             "horas": len(slots)
         })
     
+    snapshot = session.exec(select(HorarioSnapshot).where(HorarioSnapshot.is_active == True)).first()
+    if snapshot:
+        estado = snapshot.estado or "GUARDADO"
+        estadisticas = {
+            "tiempo_segundos": snapshot.tiempo_segundos or 0,
+            "ramas_exploradas": 0,
+            "conflictos": 0
+        }
+        if snapshot.json_data:
+            try:
+                snap_data = json.loads(snapshot.json_data)
+                if "estadisticas" in snap_data:
+                    estadisticas = snap_data["estadisticas"]
+            except Exception:
+                pass
+        all_snapshots = session.exec(select(HorarioSnapshot).order_by(HorarioSnapshot.created_at.asc())).all()
+        version = next((i + 1 for i, s in enumerate(all_snapshots) if s.id_snapshot == snapshot.id_snapshot), 1)
+        nombre_snapshot = snapshot.nombre
+    else:
+        estado = "GUARDADO"
+        estadisticas = {"tiempo_segundos": 0, "ramas_exploradas": 0, "conflictos": 0}
+        version = 0
+        nombre_snapshot = None
+
     return {
         "status": "success",
         "resultado": {
-            "estado": "GUARDADO",
+            "estado": estado,
             "mensaje": "Horario cargado desde la base de datos.",
-            "estadisticas": {"tiempo_segundos": 0, "ramas_exploradas": 0, "conflictos": 0},
+            "estadisticas": estadisticas,
+            "version": version,
+            "nombre": nombre_snapshot,
             "asignaciones": asignaciones
         }
     }
@@ -724,10 +965,13 @@ def cargar_horario_guardado(session: Session = Depends(get_session)):
 @app.get("/api/horario-snapshots")
 def get_snapshots(session: Session = Depends(get_session)):
     snapshots = session.exec(select(HorarioSnapshot).order_by(HorarioSnapshot.created_at.desc())).all()
+    all_snapshots_asc = session.exec(select(HorarioSnapshot).order_by(HorarioSnapshot.created_at.asc())).all()
+    version_map = {s.id_snapshot: i + 1 for i, s in enumerate(all_snapshots_asc)}
     return [
         {
             "id_snapshot": s.id_snapshot,
             "nombre": s.nombre,
+            "version": version_map.get(s.id_snapshot, 0),
             "descripcion": s.descripcion,
             "asignaciones_count": s.asignaciones_count,
             "estado": s.estado,

@@ -45,9 +45,19 @@ export default function ScheduleGrid({ result, selectedSeccion, setSelectedSecci
   return (
     <div style={{background: 'var(--bg-card)', padding: '2rem', borderRadius: 'var(--border-radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-color)'}}>
       <div className="schedule-stats-panel">
+        {result.version > 0 && (
+          <div className="stat-card">
+            <span className="stat-label">Versión</span>
+            <span className="stat-value" style={{color: 'var(--accent)', fontWeight: '700', fontSize: '1.1rem'}}>v{result.version}</span>
+          </div>
+        )}
         <div className="stat-card">
           <span className="stat-label">Estado</span>
           <span className={`stat-value status-${result.estado?.toLowerCase()}`}>{result.estado}</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-label">Clases</span>
+          <span className="stat-value">{result.asignaciones?.length || 0}</span>
         </div>
         <div className="stat-card">
           <span className="stat-label">Tiempo</span>
@@ -63,7 +73,7 @@ export default function ScheduleGrid({ result, selectedSeccion, setSelectedSecci
         </div>
       </div>
       <div className="schedule-header">
-        <h2>Malla Horaria</h2>
+        <h2>{result.nombre || 'Malla Horaria'}</h2>
         <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
           <span style={{color: 'var(--text-muted)', fontSize:'0.9rem'}}>Turno: <b>{Array.from(matrixData.turnosUsados).join(" + ")}</b></span>
           <select className="schedule-select" value={selectedSeccion} onChange={(e) => setSelectedSeccion(e.target.value)}>

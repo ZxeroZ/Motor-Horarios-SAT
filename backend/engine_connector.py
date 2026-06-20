@@ -364,6 +364,7 @@ def generar_horario_engine(session: Session, task_id: str = None) -> dict:
                 "message": "¡Horario generado!",
                 "resultado": dict_resultado
             }
+            logger.info("progress_store[%s] = done (asignaciones=%d)", task_id, len(dict_resultado.get("asignaciones", [])))
 
         return {
             "status": "success",
@@ -435,7 +436,9 @@ def _guardar_snapshot(session: Session, dict_resultado: dict):
         session.add(o)
 
     now = datetime.now()
-    nombre = f"Horario {now.strftime('%d/%m %H:%M')}"
+    existing_count = len(session.exec(select(HorarioSnapshot)).all())
+    version = existing_count + 1
+    nombre = f"Horario v{version} - {now.strftime('%d/%m %H:%M')}"
 
     snapshot = HorarioSnapshot(
         nombre=nombre,
@@ -449,3 +452,6 @@ def _guardar_snapshot(session: Session, dict_resultado: dict):
     session.add(snapshot)
     session.commit()
     logger.info("Snapshot guardado: %s", nombre)
+
+    dict_resultado["version"] = version
+    dict_resultado["nombre"] = nombre
