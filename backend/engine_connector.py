@@ -1,15 +1,55 @@
+import json
+import logging
+import uuid
+import threading
+from datetime import datetime
 from collections import defaultdict
 from sqlmodel import Session, select
 from backend.models import (
     Sedes, Dias, Areas, Cursos, Grado, Seccion, PlanEstudio, 
     Profesores, ProfesorCurso, GradoDiaConfig, SeccionTurno, Turno, Tutoria,
     ProfesorDisponibilidad, ProfesorPreferencia, Bloque, SedeProfesor,
-    GradoProfesor, BloqueReservado, BloqueGrado, BloqueOpcion, BloqueOpcionSlot
+    GradoProfesor, BloqueReservado, BloqueGrado, BloqueOpcion, BloqueOpcionSlot, HorarioSnapshot
 )
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
 from engine.solver import resolver_modelo
 from utils.validators import validar_todo
+from backend.exceptions import ValidationError, EngineError
+
+logger = logging.getLogger(__name__)
+
+# --- Progress Store ---
+progress_store = {}
+
+def get_progress(task_id: str) -> dict:
+    return progress_store.get(task_id, {"status": "not_found"})
+
+def _update_progress(task_id: str, step: str, percent: int, message: str):
+    if task_id:
+        progress_store[task_id] = {
+            "status": "running",
+            "step": step,
+            "percent": percent,
+            "message": message,
+        }
+
+def start_generation(db_engine) -> str:
+    """Lanza la generación en un thread aparte y devuelve task_id."""
+    task_id = str(uuid.uuid4())[:8]
+    progress_store[task_id] = {"status": "starting", "step": "init", "percent": 0, "message": "Iniciando..."}
+
+    def _run():
+        from sqlmodel import Session
+        with Session(db_engine) as session:
+            try:
+                generar_horario_engine(session, task_id)
+            except Exception as e:
+                progress_store[task_id] = {"status": "error", "message": str(e)}
+
+    thread = threading.Thread(target=_run, daemon=True)
+    thread.start()
+    return task_id
 
 def build_json_from_db(session: Session) -> dict:
     """Extrae datos de SQLite y construye el formato EXACTO que el motor CP-SAT espera."""
@@ -284,30 +324,58 @@ def build_json_from_db(session: Session) -> dict:
         
     return datos
 
-def generar_horario_engine(session: Session) -> dict:
-    """Proceso completo: Extrae DB -> Valida -> Preprocesa -> Construye Modelo -> Resuelve -> Guarda."""
+def generar_horario_engine(session: Session, task_id: str = None) -> dict:
+    """Proceso completo con reporte de progreso."""
+    logger.info("Iniciando generación de horario...")
+
+    _update_progress(task_id, "extracting", 10, "Leyendo base de datos...")
+    datos = build_json_from_db(session)
+
+    _update_progress(task_id, "validating", 20, "Validando integridad...")
+    errores = validar_todo(datos)
+    if errores:
+        if task_id:
+            progress_store[task_id] = {"status": "error", "message": "Error de validación", "errors": errores}
+        raise ValidationError(errors=errores)
+
     try:
-        datos = build_json_from_db(session)
-        
-        errores = validar_todo(datos)
-        if errores:
-            return {"status": "error", "errores": errores}
-            
+        _update_progress(task_id, "preprocessing", 35, "Construyendo estructuras...")
         datos_procesados = preprocesar(datos)
+
+        _update_progress(task_id, "modeling", 50, "Generando restricciones CP-SAT...")
         modelo, variables_x = construir_modelo(datos_procesados)
+
+        _update_progress(task_id, "solving", 65, "Buscando solución óptima...")
         dict_resultado = resolver_modelo(modelo, variables_x)
-        
+
         if dict_resultado.get("estado") in ("OPTIMAL", "FEASIBLE") and dict_resultado.get("asignaciones"):
+            _update_progress(task_id, "saving", 90, "Persistiendo horario...")
             _guardar_horario(session, dict_resultado["asignaciones"])
-        
+            _guardar_snapshot(session, dict_resultado)
+        else:
+            logger.warning("Solver no encontró solución: %s", dict_resultado.get("estado"))
+
+        # Escritura atómica: status + resultado juntos
+        if task_id:
+            progress_store[task_id] = {
+                "status": "done",
+                "step": "done",
+                "percent": 100,
+                "message": "¡Horario generado!",
+                "resultado": dict_resultado
+            }
+
         return {
-            "status": "success", 
+            "status": "success",
             "resultado": dict_resultado
         }
+    except ValidationError:
+        raise
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return {"status": "error", "errores": [str(e)]}
+        logger.exception("Error inesperado durante la generación")
+        if task_id:
+            progress_store[task_id] = {"status": "error", "message": str(e)}
+        raise EngineError(message=f"Error durante la ejecución del motor: {str(e)}")
 
 
 def _guardar_horario(session: Session, asignaciones: list):
@@ -357,3 +425,27 @@ def _guardar_horario(session: Session, asignaciones: list):
             ))
     
     session.commit()
+
+
+def _guardar_snapshot(session: Session, dict_resultado: dict):
+    """Guarda un snapshot del horario generado."""
+    old_active = session.exec(select(HorarioSnapshot).where(HorarioSnapshot.is_active == True)).all()
+    for o in old_active:
+        o.is_active = False
+        session.add(o)
+
+    now = datetime.now()
+    nombre = f"Horario {now.strftime('%d/%m %H:%M')}"
+
+    snapshot = HorarioSnapshot(
+        nombre=nombre,
+        json_data=json.dumps(dict_resultado, ensure_ascii=False),
+        asignaciones_count=len(dict_resultado.get("asignaciones", [])),
+        estado=dict_resultado.get("estado"),
+        tiempo_segundos=dict_resultado.get("estadisticas", {}).get("tiempo_segundos"),
+        is_active=True,
+        created_at=now.isoformat()
+    )
+    session.add(snapshot)
+    session.commit()
+    logger.info("Snapshot guardado: %s", nombre)

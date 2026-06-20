@@ -1,9 +1,15 @@
+import json
+import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlmodel import Session, select
 from typing import List
 from pydantic import BaseModel
 
+from backend.config import settings
+from backend.logging_config import setup_logging
+from backend.exceptions import AppError
 from backend.database import create_db_and_tables, get_session, engine
 
 from backend.models import (
@@ -11,9 +17,12 @@ from backend.models import (
     Cursos, Profesores, Seccion, GradoDiaConfig, PlanEstudio, 
     ProfesorCurso, SeccionTurno, HorarioFinal, Tutoria,
     SedeProfesor, ProfesorDisponibilidad, ProfesorPreferencia,
-    GradoProfesor, BloqueReservado, BloqueGrado, BloqueOpcion, BloqueOpcionSlot
+    GradoProfesor, BloqueReservado, BloqueGrado, BloqueOpcion, BloqueOpcionSlot,
+    HorarioSnapshot, SnapshotUpdate
 )
 from fastapi.middleware.cors import CORSMiddleware
+
+logger = logging.getLogger(__name__)
 
 class LoginRequest(BaseModel):
     email: str
@@ -21,24 +30,44 @@ class LoginRequest(BaseModel):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    setup_logging()
+    logger.info("Iniciando %s v%s [%s]", settings.APP_NAME, settings.APP_VERSION, settings.ENVIRONMENT)
     create_db_and_tables()
     with Session(engine) as session:
         admin = session.exec(select(Usuario).where(Usuario.email == "admin@colegio.com")).first()
         if not admin:
             session.add(Usuario(email="admin@colegio.com", nombre="Administrador"))
             session.commit()
+            logger.info("Usuario admin creado")
     yield
+    logger.info("Aplicación finalizada")
 
 app = FastAPI(
-    title="Timetable Engine API",
+    title=settings.APP_NAME,
     description="Backend refactorizado para el nuevo esquema de BD",
-    version="2.0.0",
+    version=settings.APP_VERSION,
     lifespan=lifespan
 )
 
+@app.exception_handler(AppError)
+async def app_error_handler(request: Request, exc: AppError):
+    logger.warning("Error controlado [%s]: %s", exc.status_code, exc.message)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"status": "error", "detail": exc.message, "errors": exc.errors}
+    )
+
+@app.exception_handler(Exception)
+async def unhandled_error_handler(request: Request, exc: Exception):
+    logger.exception("Error no controlado en %s %s", request.method, request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"status": "error", "detail": "Error interno del servidor"}
+    )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -626,12 +655,27 @@ def delete_profesor_preferencia(id_preferencia: int, session: Session = Depends(
     return {"message": "Preferencia borrada"}
 
 # --- Endpoints del Motor ---
-from backend.engine_connector import generar_horario_engine
+from backend.engine_connector import generar_horario_engine, start_generation, get_progress
 
 @app.post("/api/generar-horario")
 def desencadenar_motor(session: Session = Depends(get_session)):
-    resultado = generar_horario_engine(session)
-    return resultado
+    try:
+        resultado = generar_horario_engine(session)
+        return resultado
+    except AppError as e:
+        return {"status": "error", "errores": e.errors}
+
+@app.post("/api/generar-horario/start")
+def start_generar_horario():
+    """Lanza la generación en background y devuelve task_id."""
+    from backend.database import engine
+    task_id = start_generation(engine)
+    return {"task_id": task_id}
+
+@app.get("/api/horario-progress/{task_id}")
+def horario_progress(task_id: str):
+    """Devuelve el progreso actual de la generación."""
+    return get_progress(task_id)
 
 @app.get("/api/cargar-horario")
 def cargar_horario_guardado(session: Session = Depends(get_session)):
@@ -674,3 +718,116 @@ def cargar_horario_guardado(session: Session = Depends(get_session)):
             "asignaciones": asignaciones
         }
     }
+
+
+# --- Snapshots (Historial) ---
+@app.get("/api/horario-snapshots")
+def get_snapshots(session: Session = Depends(get_session)):
+    snapshots = session.exec(select(HorarioSnapshot).order_by(HorarioSnapshot.created_at.desc())).all()
+    return [
+        {
+            "id_snapshot": s.id_snapshot,
+            "nombre": s.nombre,
+            "descripcion": s.descripcion,
+            "asignaciones_count": s.asignaciones_count,
+            "estado": s.estado,
+            "tiempo_segundos": s.tiempo_segundos,
+            "is_active": s.is_active,
+            "created_at": s.created_at,
+        }
+        for s in snapshots
+    ]
+
+@app.get("/api/horario-snapshots/{id_snapshot}")
+def get_snapshot(id_snapshot: int, session: Session = Depends(get_session)):
+    snapshot = session.get(HorarioSnapshot, id_snapshot)
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Snapshot no encontrado")
+    return {
+        "id_snapshot": snapshot.id_snapshot,
+        "nombre": snapshot.nombre,
+        "descripcion": snapshot.descripcion,
+        "json_data": json.loads(snapshot.json_data),
+        "asignaciones_count": snapshot.asignaciones_count,
+        "estado": snapshot.estado,
+        "tiempo_segundos": snapshot.tiempo_segundos,
+        "is_active": snapshot.is_active,
+        "created_at": snapshot.created_at,
+    }
+
+@app.put("/api/horario-snapshots/{id_snapshot}")
+def update_snapshot(id_snapshot: int, update: SnapshotUpdate, session: Session = Depends(get_session)):
+    snapshot = session.get(HorarioSnapshot, id_snapshot)
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Snapshot no encontrado")
+    if update.nombre is not None:
+        snapshot.nombre = update.nombre
+    if update.descripcion is not None:
+        snapshot.descripcion = update.descripcion
+    session.add(snapshot)
+    session.commit()
+    session.refresh(snapshot)
+    return {"message": "Snapshot actualizado"}
+
+@app.delete("/api/horario-snapshots/{id_snapshot}")
+def delete_snapshot(id_snapshot: int, session: Session = Depends(get_session)):
+    snapshot = session.get(HorarioSnapshot, id_snapshot)
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Snapshot no encontrado")
+    session.delete(snapshot)
+    session.commit()
+    return {"message": "Snapshot eliminado"}
+
+@app.post("/api/horario-snapshots/{id_snapshot}/load")
+def load_snapshot(id_snapshot: int, session: Session = Depends(get_session)):
+    """Carga un snapshot como horario activo (reescribe horario_final)."""
+    snapshot = session.get(HorarioSnapshot, id_snapshot)
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Snapshot no encontrado")
+
+    data = json.loads(snapshot.json_data)
+    asignaciones = data.get("asignaciones", [])
+    if not asignaciones:
+        raise HTTPException(status_code=400, detail="El snapshot no tiene asignaciones")
+
+    old = session.exec(select(HorarioFinal)).all()
+    for o in old:
+        session.delete(o)
+    session.commit()
+
+    all_snapshots = session.exec(select(HorarioSnapshot)).all()
+    for s in all_snapshots:
+        s.is_active = False
+        session.add(s)
+
+    snapshot.is_active = True
+    session.add(snapshot)
+
+    dias_db = {d.nombre_dia: d.id_dia for d in session.exec(select(Dias)).all()}
+    turno_db = {t.nombre: t.id_turno for t in session.exec(select(Turno)).all()}
+
+    for asig in asignaciones:
+        sec_id = int(asig["seccion_id"].replace("SEC_", ""))
+        if asig["curso_id"] == "TUT1":
+            tut_curso = session.exec(select(Cursos).where(Cursos.nombre_curso.like("%Tutoría%"))).first()
+            cur_id = tut_curso.id_curso if tut_curso else 18
+        else:
+            cur_id = int(asig["curso_id"].replace("CUR_", ""))
+        prof_id = int(asig["profesor_id"].replace("PROF_", ""))
+        id_dia = dias_db.get(asig["dia"])
+        id_turno = turno_db.get(asig.get("turno", "Mañana"))
+        slot_inicio = asig.get("slot_inicio", 0)
+        horas = asig.get("horas", 1)
+
+        for i in range(horas):
+            session.add(HorarioFinal(
+                id_seccion=sec_id,
+                id_dia=id_dia,
+                num_bloque=slot_inicio + i + 1,
+                id_turno=id_turno,
+                id_curso=cur_id,
+                id_profesor=prof_id
+            ))
+
+    session.commit()
+    return {"message": f"Snapshot '{snapshot.nombre}' cargado como horario activo"}

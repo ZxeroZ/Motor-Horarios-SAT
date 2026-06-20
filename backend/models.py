@@ -1,6 +1,7 @@
 from typing import Optional, List
 from sqlmodel import Field, SQLModel, Relationship
-from datetime import time
+from datetime import time, datetime
+from pydantic import BaseModel
 
 # --- 1. Tablas Maestras (Independientes) ---
 class Colegio(SQLModel, table=True):
@@ -286,3 +287,22 @@ class HorarioFinal(SQLModel, table=True):
     curso: Optional[Cursos] = Relationship(back_populates="horarios_finales")
     profesor: Optional[Profesores] = Relationship(back_populates="horarios_finales")
     turno: Optional[Turno] = Relationship(back_populates="horarios_finales")
+
+
+# --- 7. Historial de Horarios ---
+class HorarioSnapshot(SQLModel, table=True):
+    __tablename__ = "horario_snapshot"
+    id_snapshot: Optional[int] = Field(default=None, primary_key=True)
+    nombre: str
+    descripcion: Optional[str] = None
+    json_data: str  # JSON completo del resultado del motor
+    asignaciones_count: int = 0
+    estado: Optional[str] = None
+    tiempo_segundos: Optional[float] = None
+    is_active: bool = False
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+class SnapshotUpdate(BaseModel):
+    nombre: Optional[str] = None
+    descripcion: Optional[str] = None
