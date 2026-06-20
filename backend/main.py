@@ -108,11 +108,21 @@ def delete_sede(id_sede: int, session: Session = Depends(get_session)):
 @app.get("/api/grados", response_model=List[Grado])
 def get_grados(session: Session = Depends(get_session)):
     return session.exec(select(Grado)).all()
+
 @app.post("/api/grados", response_model=Grado)
 def create_grado(grado: Grado, session: Session = Depends(get_session)):
     session.add(grado)
     session.commit()
     return grado
+
+@app.delete("/api/grados/{id_grado}")
+def delete_grado(id_grado: int, session: Session = Depends(get_session)):
+    db_grado = session.get(Grado, id_grado)
+    if not db_grado:
+        raise HTTPException(status_code=404, detail="Grado no encontrado")
+    session.delete(db_grado)
+    session.commit()
+    return {"message": "Grado borrado"}
 
 # --- Endpoints: Grado-Día Config ---
 @app.get("/api/grado-dia-config", response_model=List[GradoDiaConfig])
@@ -128,6 +138,20 @@ def create_grado_dia_config(config: GradoDiaConfig, session: Session = Depends(g
     session.commit()
     session.refresh(config)
     return config
+
+@app.put("/api/grado-dia-config/{id_config}", response_model=GradoDiaConfig)
+def update_grado_dia_config(id_config: int, config_update: GradoDiaConfig, session: Session = Depends(get_session)):
+    db_config = session.get(GradoDiaConfig, id_config)
+    if not db_config: raise HTTPException(status_code=404, detail="Config no encontrada")
+    
+    if config_update.bloques_dia is not None and config_update.bloques_dia <= 0:
+        raise HTTPException(status_code=400, detail="otra vez no leiste los cambios no envies 0 >:/")
+        
+    db_config.bloques_dia = config_update.bloques_dia
+    session.add(db_config)
+    session.commit()
+    session.refresh(db_config)
+    return db_config
 
 @app.delete("/api/grado-dia-config/{id_config}")
 def delete_grado_dia_config(id_config: int, session: Session = Depends(get_session)):
@@ -302,6 +326,14 @@ def create_profesor_curso(pc: ProfesorCurso, session: Session = Depends(get_sess
     session.commit()
     session.refresh(pc)
     return pc
+
+@app.delete("/api/profesor-curso/{id_profesor_curso}")
+def delete_profesor_curso(id_profesor_curso: int, session: Session = Depends(get_session)):
+    db = session.get(ProfesorCurso, id_profesor_curso)
+    if not db: raise HTTPException(status_code=404, detail="ProfesorCurso no encontrado")
+    session.delete(db)
+    session.commit()
+    return {"message": "ProfesorCurso borrado"}
 
 # --- Endpoints Administrativos: Secciones ---
 @app.get("/api/secciones", response_model=List[Seccion])
