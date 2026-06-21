@@ -1,5 +1,8 @@
 import json
 import logging
+import os
+import urllib.request
+import urllib.error
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -1139,3 +1142,116 @@ def load_snapshot(id_snapshot: int, session: Session = Depends(get_session)):
 
     session.commit()
     return {"message": f"Snapshot '{snapshot.nombre}' cargado como horario activo"}
+
+
+# --- Análisis con IA (Google Gemini) ---
+
+def build_ai_prompt(summary: dict, analysis: dict) -> str:
+    """Construye el prompt para enviar a Gemini."""
+    metricas = summary.get("metricas", {})
+    problemas = analysis.get("problemas_detectados", [])
+    sugerencias = analysis.get("sugerencias", [])
+    explicaciones = analysis.get("explicaciones_metricas", [])
+
+    top_profs = summary.get("profesores", [])[:5]
+    prof_lines = "\n".join(
+        f"  - {p['nombre']}: {p['horas_semana']}h/semana, dicta {', '.join(p['cursos'][:3])}"
+        for p in top_profs
+    )
+
+    carga_dia = summary.get("carga_por_dia", {})
+    dia_lines = "\n".join(f"  - {d}: {h}h" for d, h in carga_dia.items())
+
+    problemas_texto = "\n".join(f"  - {p}" for p in problemas) if problemas else "  - No se detectaron problemas"
+    sugerencias_texto = "\n".join(f"  - {s}" for s in sugerencias[:5]) if sugerencias else "  - No hay sugerencias"
+    explicaciones_texto = "\n".join(f"  - {e}" for e in explicaciones) if explicaciones else "  - N/A"
+
+    return f"""Sos un consultor educativo experto en gestión de horarios escolares. Analizá los siguientes datos de un horario escolar y explicá los resultados a un director de colegio en lenguaje claro, simple y accionable.
+
+DATOS DEL HORARIO:
+- Estado: {metricas.get('estado', 'N/A')}
+- Total de clases programadas: {metricas.get('total_clases', 0)} bloques
+- Total de horas-semana: {sum(carga_dia.values()) if carga_dia else 0}h
+- Profesores: {metricas.get('total_profesores', 0)}
+- Secciones: {metricas.get('total_secciones', 0)}
+- Tiempo de cálculo: {metricas.get('tiempo_segundos', 0)}s
+
+CARGA POR DÍA:
+{dia_lines}
+
+TOP 5 PROFESORES POR CARGA:
+{prof_lines}
+
+PROBLEMAS DETECTADOS:
+{problemas_texto}
+
+SUGERENCIAS:
+{sugerencias_texto}
+
+EXPLICACIONES TÉCNICAS:
+{explicaciones_texto}
+
+INSTRUCCIONES:
+1. Explicá el estado general del horario en 1-2 oraciones
+2. Si hay problemas, explicá cada uno en lenguaje simple (qué significa, por qué es importante, qué hacer)
+3. Si todo está bien, felicitá al equipo
+4. Terminá con 2-3 recomendaciones priorizadas
+5. Usá un tono profesional pero amigable
+6. No uses jerga técnica, explicá como si le hablaras a alguien sin conocimientos de tecnología
+7. Respondé en español"""
+
+
+@app.post("/api/horario-ai-analysis")
+async def api_horario_ai_analysis(session: Session = Depends(get_session)):
+    """Envía el análisis del horario a Google Gemini y retorna la respuesta de la IA."""
+    api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    if not api_key or api_key == "tu_api_key_aqui":
+        raise HTTPException(
+            status_code=400,
+            detail="No se configuró la API key de Google Gemini. Editá el archivo backend/.env y agregá tu GEMINI_API_KEY."
+        )
+
+    from backend.engine_connector import build_horario_summary, build_horario_analysis
+    summary = build_horario_summary(session)
+    analysis = build_horario_analysis(session)
+
+    if "error" in summary:
+        raise HTTPException(status_code=400, detail=summary["error"])
+
+    prompt = build_ai_prompt(summary, analysis)
+
+    payload = json.dumps({
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 2048
+        }
+    }).encode("utf-8")
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
+
+    req = urllib.request.Request(
+        url,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            response_data = json.loads(resp.read().decode("utf-8"))
+            text = response_data["candidates"][0]["content"]["parts"][0]["text"]
+            return {"success": True, "analisis": text}
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8", errors="replace")
+        logger.error(f"Gemini API error {e.code}: {error_body}")
+        raise HTTPException(
+            status_code=502,
+            detail=f"Error de la API de Gemini ({e.code}). Verificá que la API key sea válida."
+        )
+    except Exception as e:
+        logger.error(f"Gemini call failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error al conectar con Gemini: {str(e)}"
+        )
