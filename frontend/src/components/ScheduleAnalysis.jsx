@@ -219,7 +219,7 @@ export default function ScheduleAnalysis() {
             })}
           </div>
           <p className="distribution-note">
-            {esMax && esMin
+            {maxDia[1] > minDia[1] * 2
               ? `${maxDia[0]} es el día más cargado (${maxDia[1]}h) y ${minDia[0]} tiene muy poca actividad (${minDia[1]}h). Podría considerar redistribuir.`
               : `${maxDia[0]} es el día más cargado con ${maxDia[1]} horas.`
             }
