@@ -1,14 +1,19 @@
-import json
+﻿import json
 import logging
 import os
 import urllib.request
 import urllib.error
+from dotenv import load_dotenv
 from contextlib import asynccontextmanager
+
+load_dotenv()
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from sqlmodel import Session, select
 from typing import List
 from pydantic import BaseModel
+from dotenv import load_dotenv
+load_dotenv()
 
 from backend.config import settings
 from backend.logging_config import setup_logging
