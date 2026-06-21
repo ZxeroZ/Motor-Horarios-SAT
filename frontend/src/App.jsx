@@ -6,6 +6,7 @@ import Sidebar from './components/Sidebar';
 import ScheduleGrid from './components/ScheduleGrid';
 import HistoryPanel from './components/HistoryPanel';
 import EditPreviewModal from './components/EditPreviewModal';
+import ScheduleAnalysis from './components/ScheduleAnalysis';
 
 function App() {
   // --- Estado: Autenticación ---
@@ -675,7 +676,7 @@ function App() {
       <main className="dashboard-main">
         <header className="dashboard-header">
            <div className="header-title">
-             <h1>{activeTab === 'horarios' ? 'Control de Horarios' : activeTab === 'historial' ? 'Historial de Horarios' : activeTab === 'dev-tools' ? 'Herramientas de Desarrollador' : 'Ajustes Académicos'}</h1>
+             <h1>{activeTab === 'horarios' ? 'Control de Horarios' : activeTab === 'historial' ? 'Historial de Horarios' : activeTab === 'analisis' ? 'Análisis del Horario' : activeTab === 'dev-tools' ? 'Herramientas de Desarrollador' : 'Ajustes Académicos'}</h1>
              <p className="header-subtitle">Optimización impulsada por CP-SAT</p>
            </div>
            {activeTab === 'horarios' && (
@@ -782,6 +783,13 @@ function App() {
               setSnapshotName={setSnapshotName} setEditingSnapshot={setEditingSnapshot}
               onLoad={loadSnapshot} onRename={renameSnapshot} onDelete={deleteSnapshot}
             />
+          </div>
+        )}
+
+        {/* --- PESTAÑA: ANÁLISIS --- */}
+        {activeTab === 'analisis' && (
+          <div className="tab-pane">
+            <ScheduleAnalysis />
           </div>
         )}
 
