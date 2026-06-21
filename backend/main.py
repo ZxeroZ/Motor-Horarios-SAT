@@ -1,19 +1,26 @@
 ﻿import json
 import logging
 import os
+import time
 import urllib.request
 import urllib.error
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
 
-load_dotenv()
+
+ruta_actual = Path(__file__).resolve()
+
+raiz_proyecto = ruta_actual.parent.parent if "backend" in ruta_actual.parts else ruta_actual.parent
+
+load_dotenv(dotenv_path=raiz_proyecto / ".env")
+
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
 from typing import List
 from pydantic import BaseModel
-from dotenv import load_dotenv
-load_dotenv()
 
 from backend.config import settings
 from backend.logging_config import setup_logging
@@ -28,7 +35,7 @@ from backend.models import (
     GradoProfesor, BloqueReservado, BloqueGrado, BloqueOpcion, BloqueOpcionSlot,
     HorarioSnapshot, SnapshotUpdate
 )
-from fastapi.middleware.cors import CORSMiddleware
+
 
 logger = logging.getLogger(__name__)
 
@@ -1150,7 +1157,6 @@ def load_snapshot(id_snapshot: int, session: Session = Depends(get_session)):
 
 
 # --- Análisis con IA (Google Gemini) ---
-
 def build_ai_prompt(summary: dict, analysis: dict) -> str:
     """Construye el prompt para enviar a Gemini."""
     metricas = summary.get("metricas", {})
@@ -1209,11 +1215,18 @@ INSTRUCCIONES:
 @app.post("/api/horario-ai-analysis")
 async def api_horario_ai_analysis(session: Session = Depends(get_session)):
     """Envía el análisis del horario a Google Gemini y retorna la respuesta de la IA."""
+    # Volvemos a asegurar la carga por si el contexto limpio la memoria
+    load_dotenv()
+    
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    
+    # Imprime en la consola de tu terminal para verificar si lo lee o no
+    print(f"--- DEBUG: API KEY ENCONTRADA -> '{api_key[:6]}...' (Total caracteres: {len(api_key)}) ---")
+
     if not api_key or api_key == "tu_api_key_aqui":
         raise HTTPException(
             status_code=400,
-            detail="No se configuró la API key de Google Gemini. Editá el archivo backend/.env y agregá tu GEMINI_API_KEY."
+            detail="No se configuró la API key de Google Gemini. Verifica el archivo .env en la raíz del proyecto."
         )
 
     from backend.engine_connector import build_horario_summary, build_horario_analysis
@@ -1243,17 +1256,41 @@ async def api_horario_ai_analysis(session: Session = Depends(get_session)):
     )
 
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            response_data = json.loads(resp.read().decode("utf-8"))
-            text = response_data["candidates"][0]["content"]["parts"][0]["text"]
-            return {"success": True, "analisis": text}
+        for attempt in range(2):
+            try:
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    response_data = json.loads(resp.read().decode("utf-8"))
+                    text = response_data["candidates"][0]["content"]["parts"][0]["text"]
+                    return {"success": True, "analisis": text}
+            except urllib.error.HTTPError as e:
+                if e.code == 429 and attempt == 0:
+                    logger.warning("Gemini 429 - retrying in 3s")
+                    time.sleep(3)
+                    continue
+                raise
     except urllib.error.HTTPError as e:
         error_body = e.read().decode("utf-8", errors="replace")
         logger.error(f"Gemini API error {e.code}: {error_body}")
-        raise HTTPException(
-            status_code=502,
-            detail=f"Error de la API de Gemini ({e.code}). Verificá que la API key sea válida."
-        )
+        if e.code == 429:
+            raise HTTPException(
+                status_code=429,
+                detail="Límite de solicitudes alcanzado. Esperá un momento y volvé a intentar."
+            )
+        elif e.code == 403:
+            raise HTTPException(
+                status_code=403,
+                detail="API key sin permisos. Verificá que esté habilitada en Google AI Studio."
+            )
+        elif e.code == 400:
+            raise HTTPException(
+                status_code=400,
+                detail="Solicitud inválida. Verificá la configuración de la API."
+            )
+        else:
+            raise HTTPException(
+                status_code=502,
+                detail=f"Error de la API de Gemini (HTTP {e.code}). Intentá de nuevo."
+            )
     except Exception as e:
         logger.error(f"Gemini call failed: {e}")
         raise HTTPException(
