@@ -1,9 +1,6 @@
 # Motor de optimización
 ortools==9.15.6755
 
-# Entorno
-python-dotenv==1.2.2
-
 # Testing
 pytest==8.3.5
 pytest-cov==6.1.0

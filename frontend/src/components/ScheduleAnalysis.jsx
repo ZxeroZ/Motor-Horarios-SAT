@@ -5,9 +5,6 @@ export default function ScheduleAnalysis() {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [aiAnalysis, setAiAnalysis] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -33,26 +30,6 @@ export default function ScheduleAnalysis() {
       setError('No se pudo conectar al servidor. Verificá que el backend esté activo.');
     }
     setLoading(false);
-  };
-
-  const handleAIAnalysis = async () => {
-    setAiLoading(true);
-    setAiError(null);
-    setAiAnalysis(null);
-    try {
-      const res = await fetch('http://localhost:8000/api/horario-ai-analysis', {
-        method: 'POST'
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setAiAnalysis(data.analisis);
-      } else {
-        setAiError(data.detail || 'Error al obtener análisis de la IA');
-      }
-    } catch {
-      setAiError('No se pudo conectar con el servidor. Verificá que el backend esté activo.');
-    }
-    setAiLoading(false);
   };
 
   if (loading) {
@@ -167,46 +144,6 @@ export default function ScheduleAnalysis() {
             }
           </p>
         </div>
-      </div>
-
-      {/* AI Analysis Button */}
-      <div className="ai-section">
-        <button
-          className="ai-button"
-          onClick={handleAIAnalysis}
-          disabled={aiLoading}
-        >
-          {aiLoading ? (
-            <>
-              <span className="material-icons-outlined spinning">hourglass_empty</span>
-              Analizando con IA...
-            </>
-          ) : (
-            <>
-              <span className="material-icons-outlined">auto_awesome</span>
-              Analizar con IA
-            </>
-          )}
-        </button>
-        {aiError && (
-          <div className="ai-error">
-            <span className="material-icons-outlined">error_outline</span>
-            <p>{aiError}</p>
-          </div>
-        )}
-        {aiAnalysis && (
-          <div className="ai-response">
-            <div className="ai-response-header">
-              <span className="material-icons-outlined">auto_awesome</span>
-              <h3>Análisis de Inteligencia Artificial</h3>
-            </div>
-            <div className="ai-response-content">
-              {aiAnalysis.split('\n').map((line, i) => (
-                <p key={i}>{line || '\u00A0'}</p>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Stats Cards */}
