@@ -34,6 +34,9 @@ export default function Sidebar({ activeTab, setActiveTab, user, isDevUnlocked, 
         <button className={`nav-item ${activeTab === 'historial' ? 'active' : ''}`} onClick={() => setActiveTab('historial')}>
           <span className="material-icons-outlined">history</span> Historial
         </button>
+        <button className={`nav-item ${activeTab === 'analisis' ? 'active' : ''}`} onClick={() => setActiveTab('analisis')}>
+          <span className="material-icons-outlined">analytics</span> Análisis
+        </button>
         <button className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>
           <span className="material-icons-outlined">settings</span> Configuración
         </button>

@@ -300,6 +300,7 @@ class HorarioSnapshot(SQLModel, table=True):
     estado: Optional[str] = None
     tiempo_segundos: Optional[float] = None
     is_active: bool = False
+    es_editada: bool = False
     created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
 
 

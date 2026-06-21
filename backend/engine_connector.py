@@ -9,7 +9,8 @@ from backend.models import (
     Sedes, Dias, Areas, Cursos, Grado, Seccion, PlanEstudio, 
     Profesores, ProfesorCurso, GradoDiaConfig, SeccionTurno, Turno, Tutoria,
     ProfesorDisponibilidad, ProfesorPreferencia, Bloque, SedeProfesor,
-    GradoProfesor, BloqueReservado, BloqueGrado, BloqueOpcion, BloqueOpcionSlot, HorarioSnapshot
+    GradoProfesor, BloqueReservado, BloqueGrado, BloqueOpcion, BloqueOpcionSlot, HorarioSnapshot,
+    HorarioFinal
 )
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
@@ -428,7 +429,7 @@ def _guardar_horario(session: Session, asignaciones: list):
     session.commit()
 
 
-def _guardar_snapshot(session: Session, dict_resultado: dict):
+def _guardar_snapshot(session: Session, dict_resultado: dict, es_editada: bool = False):
     """Guarda un snapshot del horario generado."""
     old_active = session.exec(select(HorarioSnapshot).where(HorarioSnapshot.is_active == True)).all()
     for o in old_active:
@@ -438,7 +439,10 @@ def _guardar_snapshot(session: Session, dict_resultado: dict):
     now = datetime.now()
     existing_count = len(session.exec(select(HorarioSnapshot)).all())
     version = existing_count + 1
-    nombre = f"Horario v{version} - {now.strftime('%d/%m %H:%M')}"
+    if es_editada:
+        nombre = f"Horario Editado v{version} - {now.strftime('%d/%m %H:%M')}"
+    else:
+        nombre = f"Horario v{version} - {now.strftime('%d/%m %H:%M')}"
 
     snapshot = HorarioSnapshot(
         nombre=nombre,
@@ -447,6 +451,7 @@ def _guardar_snapshot(session: Session, dict_resultado: dict):
         estado=dict_resultado.get("estado"),
         tiempo_segundos=dict_resultado.get("estadisticas", {}).get("tiempo_segundos"),
         is_active=True,
+        es_editada=es_editada,
         created_at=now.isoformat()
     )
     session.add(snapshot)
@@ -455,3 +460,655 @@ def _guardar_snapshot(session: Session, dict_resultado: dict):
 
     dict_resultado["version"] = version
     dict_resultado["nombre"] = nombre
+
+
+def _detect_gaps(session: Session, seccion_id: int, dia_id: int, turno_id: int) -> list:
+    """Detecta huecos (bloques vacíos entre ocupados) en un día para una sección."""
+    rows = session.exec(
+        select(HorarioFinal).where(
+            HorarioFinal.id_seccion == seccion_id,
+            HorarioFinal.id_dia == dia_id,
+            HorarioFinal.id_turno == turno_id
+        ).order_by(HorarioFinal.num_bloque)
+    ).all()
+    if not rows:
+        return []
+    bloques = sorted(set(r.num_bloque for r in rows))
+    if len(bloques) < 2:
+        return []
+    gaps = []
+    for i in range(bloques[0], bloques[-1] + 1):
+        if i not in bloques:
+            gaps.append(i)
+    return gaps
+
+
+def _get_profesor_name(session: Session, profesor_id: int) -> str:
+    prof = session.get(Profesores, profesor_id)
+    return prof.nombre_profesor if prof else f"Profesor {profesor_id}"
+
+
+def _get_seccion_name(session: Session, seccion_id: int) -> str:
+    sec = session.get(Seccion, seccion_id)
+    return sec.nombre if sec else f"Sección {seccion_id}"
+
+
+def _get_dia_name(session: Session, dia_id: int) -> str:
+    dia = session.get(Dias, dia_id)
+    return dia.nombre_dia if dia else f"Día {dia_id}"
+
+
+def _get_turno_name(session: Session, turno_id: int) -> str:
+    turno = session.get(Turno, turno_id)
+    return turno.nombre if turno else f"Turno {turno_id}"
+
+
+def _getCurso_name(session: Session, curso_id: int) -> str:
+    if curso_id == 0:
+        return "Tutoría"
+    curso = session.get(Cursos, curso_id)
+    return curso.nombre_curso if curso else f"Curso {curso_id}"
+
+
+def validate_move(session: Session, data: dict) -> dict:
+    """
+    Valida un movimiento propuesto de una asignación.
+    Soporta swaps: si el destino está ocupado, verifica si la asignación
+    que está ahí puede ir al origen (intercambio).
+    Retorna { valid, conflicts, warnings, isSwap, swapInfo }
+    """
+    sec_id = data["seccion_id"]
+    cur_id = data["curso_id"]
+    prof_id = data["profesor_id"]
+    dia_origen_id = data["dia_origen_id"]
+    turno_origen_id = data["turno_origen_id"]
+    slot_origen = data["slot_inicio_origen"]
+    horas_origen = data["horas_origen"]
+    dia_destino_id = data["dia_destino_id"]
+    turno_destino_id = data["turno_destino_id"]
+    slot_destino = data["slot_inicio_destino"]
+    horas_destino = data["horas_destino"]
+
+    conflicts = []
+    warnings = []
+    is_swap = False
+    swap_info = None
+
+    prof_name = _get_profesor_name(session, prof_id)
+    sec_name = _get_seccion_name(session, sec_id)
+    dia_orig_name = _get_dia_name(session, dia_origen_id)
+    dia_dest_name = _get_dia_name(session, dia_destino_id)
+    turno_dest_name = _get_turno_name(session, turno_destino_id)
+
+    existing_at_dest = []
+    for i in range(horas_destino):
+        bloque_dest = slot_destino + i + 1
+        exist = session.exec(
+            select(HorarioFinal).where(
+                HorarioFinal.id_dia == dia_destino_id,
+                HorarioFinal.id_turno == turno_destino_id,
+                HorarioFinal.num_bloque == bloque_dest
+            )
+        ).all()
+        for ex in exist:
+            if ex.id_seccion == sec_id and ex.id_curso == cur_id and ex.id_profesor == prof_id:
+                continue
+            if ex.id_seccion != sec_id:
+                continue
+            existing_at_dest.append(ex)
+
+    if existing_at_dest:
+        dest_assignment = existing_at_dest[0]
+        swap_sec = session.get(Seccion, dest_assignment.id_seccion)
+        swap_curso = session.get(Cursos, dest_assignment.id_curso)
+        swap_prof = session.get(Profesores, dest_assignment.id_profesor)
+        swap_dia = session.get(Dias, dest_assignment.id_dia)
+        swap_turno = session.get(Turno, dest_assignment.id_turno)
+
+        swap_conflicts = []
+
+        for i in range(horas_origen):
+            bloque_orig = slot_origen + i + 1
+            prof_swap_at_orig = session.exec(
+                select(HorarioFinal).where(
+                    HorarioFinal.id_profesor == dest_assignment.id_profesor,
+                    HorarioFinal.id_dia == dia_origen_id,
+                    HorarioFinal.id_turno == turno_origen_id,
+                    HorarioFinal.num_bloque == bloque_orig
+                )
+            ).first()
+            if prof_swap_at_orig and not (
+                prof_swap_at_orig.id_seccion == sec_id and
+                prof_swap_at_orig.id_curso == cur_id and
+                prof_swap_at_orig.id_profesor == prof_id
+            ):
+                conflict_sec = session.get(Seccion, prof_swap_at_orig.id_seccion)
+                conflict_curso = session.get(Cursos, prof_swap_at_orig.id_curso)
+                swap_conflicts.append(
+                    f"{swap_prof.nombre_profesor if swap_prof else '?'} ya tiene clase de "
+                    f"{conflict_curso.nombre_curso if conflict_curso else '?'} con "
+                    f"{conflict_sec.nombre if conflict_sec else '?'} en "
+                    f"{dia_orig_name} Bloque {bloque_orig}"
+                )
+
+        sec_swap_at_orig = session.exec(
+            select(HorarioFinal).where(
+                HorarioFinal.id_seccion == dest_assignment.id_seccion,
+                HorarioFinal.id_dia == dia_origen_id,
+                HorarioFinal.id_turno == turno_origen_id,
+                HorarioFinal.num_bloque >= slot_origen + 1,
+                HorarioFinal.num_bloque <= slot_origen + horas_origen
+            )
+        ).first()
+        if sec_swap_at_orig and not (
+            sec_swap_at_orig.id_curso == cur_id and
+            sec_swap_at_orig.id_profesor == prof_id
+        ):
+            conflict_curso_sec = session.get(Cursos, sec_swap_at_orig.id_curso)
+            swap_conflicts.append(
+                f"{swap_sec.nombre if swap_sec else '?'} ya tiene clase de "
+                f"{conflict_curso_sec.nombre_curso if conflict_curso_sec else '?'} en "
+                f"{dia_orig_name} Bloque {sec_swap_at_orig.num_bloque}"
+            )
+
+        for i in range(horas_destino):
+            bloque_dest = slot_destino + i + 1
+            prof_orig_at_dest = session.exec(
+                select(HorarioFinal).where(
+                    HorarioFinal.id_profesor == prof_id,
+                    HorarioFinal.id_dia == dia_destino_id,
+                    HorarioFinal.id_turno == turno_destino_id,
+                    HorarioFinal.num_bloque == bloque_dest
+                )
+            ).first()
+            if prof_orig_at_dest and not (
+                prof_orig_at_dest.id_seccion == sec_id and
+                prof_orig_at_dest.id_curso == cur_id and
+                prof_orig_at_dest.id_profesor == prof_id
+            ):
+                conflict_sec_dest = session.get(Seccion, prof_orig_at_dest.id_seccion)
+                conflict_curso_dest = session.get(Cursos, prof_orig_at_dest.id_curso)
+                swap_conflicts.append(
+                    f"{prof_name} ya tiene clase de "
+                    f"{conflict_curso_dest.nombre_curso if conflict_curso_dest else '?'} con "
+                    f"{conflict_sec_dest.nombre if conflict_sec_dest else '?'} en "
+                    f"{dia_dest_name} Bloque {bloque_dest}"
+                )
+
+        if not swap_conflicts:
+            is_swap = True
+            swap_info = {
+                "swap_seccion_id": dest_assignment.id_seccion,
+                "swap_curso_id": dest_assignment.id_curso,
+                "swap_profesor_id": dest_assignment.id_profesor,
+                "swap_dia_id": dest_assignment.id_dia,
+                "swap_turno_id": dest_assignment.id_turno,
+                "swap_slot": dest_assignment.num_bloque - 1,
+                "swap_horas": len(set(e.num_bloque for e in existing_at_dest)),
+                "swap_seccion_nombre": swap_sec.nombre if swap_sec else "?",
+                "swap_curso_nombre": swap_curso.nombre_curso if swap_curso else "?",
+                "swap_profesor_nombre": swap_prof.nombre_profesor if swap_prof else "?",
+                "swap_dia_nombre": swap_dia.nombre_dia if swap_dia else "?",
+                "swap_turno_nombre": swap_turno.nombre if swap_turno else "?",
+            }
+        else:
+            for c in swap_conflicts:
+                conflicts.append(c)
+    else:
+        for i in range(horas_destino):
+            bloque_dest = slot_destino + i + 1
+            exist_prof = session.exec(
+                select(HorarioFinal).where(
+                    HorarioFinal.id_profesor == prof_id,
+                    HorarioFinal.id_dia == dia_destino_id,
+                    HorarioFinal.id_turno == turno_destino_id,
+                    HorarioFinal.num_bloque == bloque_dest
+                )
+            ).first()
+            if exist_prof and not (
+                exist_prof.id_seccion == sec_id and
+                exist_prof.id_curso == cur_id
+            ):
+                sec_orig = session.get(Seccion, exist_prof.id_seccion)
+                curso_conflict = session.get(Cursos, exist_prof.id_curso)
+                conflicts.append(
+                    f"{prof_name} ya tiene clase de {curso_conflict.nombre_curso if curso_conflict else '?'} "
+                    f"con {sec_orig.nombre if sec_orig else '?'} en "
+                    f"{dia_dest_name} {turno_dest_name} Bloque {bloque_dest}"
+                )
+
+            exist_sec = session.exec(
+                select(HorarioFinal).where(
+                    HorarioFinal.id_seccion == sec_id,
+                    HorarioFinal.id_dia == dia_destino_id,
+                    HorarioFinal.id_turno == turno_destino_id,
+                    HorarioFinal.num_bloque == bloque_dest
+                )
+            ).first()
+            if exist_sec and not (
+                exist_sec.id_curso == cur_id and
+                exist_sec.id_profesor == prof_id
+            ):
+                curso_exist = session.get(Cursos, exist_sec.id_curso)
+                conflicts.append(
+                    f"{sec_name} ya tiene {curso_exist.nombre_curso if curso_exist else '?'} "
+                    f"en {dia_dest_name} {turno_dest_name} Bloque {bloque_dest}"
+                )
+
+    disp = session.exec(
+        select(ProfesorDisponibilidad).where(
+            ProfesorDisponibilidad.id_profesor == prof_id,
+            ProfesorDisponibilidad.id_dia == dia_destino_id,
+            ProfesorDisponibilidad.id_turno == turno_destino_id
+        )
+    ).all()
+    bloques_disp = set(d.nro_bloque for d in disp)
+    for i in range(horas_destino):
+        bloque_dest = slot_destino + i + 1
+        if bloques_disp and bloque_dest not in bloques_disp:
+            warnings.append(
+                f"{prof_name} no tiene disponibilidad en {dia_dest_name} {turno_dest_name} Bloque {bloque_dest}"
+            )
+            break
+
+    vinculo = session.exec(
+        select(ProfesorCurso).where(
+            ProfesorCurso.id_profesor == prof_id,
+            ProfesorCurso.id_curso == cur_id
+        )
+    ).first()
+    if not vinculo:
+        curso_name = _getCurso_name(session, cur_id)
+        warnings.append(f"{prof_name} no está vinculado al curso {curso_name}")
+
+    gaps_origen = _detect_gaps(session, sec_id, dia_origen_id, turno_origen_id)
+    if gaps_origen:
+        warnings.append(
+            f"Se detecta(n) hueco(s) en {dia_orig_name} para {sec_name}: Bloque(s) {', '.join(str(g) for g in gaps_origen)}"
+        )
+
+    if dia_destino_id != dia_origen_id:
+        gaps_destino = _detect_gaps(session, sec_id, dia_destino_id, turno_destino_id)
+        if gaps_destino:
+            warnings.append(
+                f"Se detecta(n) hueco(s) en {dia_dest_name} para {sec_name}: Bloque(s) {', '.join(str(g) for g in gaps_destino)}"
+            )
+
+    all_prof_rows = session.exec(
+        select(HorarioFinal).where(HorarioFinal.id_profesor == prof_id)
+    ).all()
+    dias_db_map = {d.id_dia: d.nombre_dia for d in session.exec(select(Dias)).all()}
+    carga_por_dia = {}
+    for r in all_prof_rows:
+        nombre_dia = dias_db_map.get(r.id_dia, f"Dia_{r.id_dia}")
+        carga_por_dia[nombre_dia] = carga_por_dia.get(nombre_dia, 0) + 1
+    carga_por_dia[dia_orig_name] = carga_por_dia.get(dia_orig_name, 0) - horas_origen
+    carga_por_dia[dia_dest_name] = carga_por_dia.get(dia_dest_name, 0) + horas_destino
+    carga_por_dia = {d: h for d, h in carga_por_dia.items() if h > 0}
+    if carga_por_dia:
+        promedio = sum(carga_por_dia.values()) / len(carga_por_dia)
+        for dia_carga, horas_dia in carga_por_dia.items():
+            if promedio > 0 and horas_dia > promedio * 1.5 and horas_dia > 3:
+                warnings.append(
+                    f"{prof_name} quedaría con {horas_dia}h en {dia_carga} "
+                    f"(promedio: {promedio:.1f}h/día) — carga desbalanceada"
+                )
+
+    return {
+        "valid": len(conflicts) == 0,
+        "conflicts": conflicts,
+        "warnings": warnings,
+        "isSwap": is_swap,
+        "swapInfo": swap_info
+    }
+
+
+def build_horario_summary(session: Session) -> dict:
+    """Genera un resumen condensado del horario activo (~50-100 líneas)."""
+    all_rows = session.exec(select(HorarioFinal)).all()
+    if not all_rows:
+        return {"error": "No hay horario generado"}
+
+    dias_db = {d.id_dia: d.nombre_dia for d in session.exec(select(Dias)).all()}
+    turnos_db = {t.id_turno: t.nombre for t in session.exec(select(Turno)).all()}
+    cursos_db = {c.id_curso: c.nombre_curso for c in session.exec(select(Cursos)).all()}
+    profs_db = {p.id_profesor: p.nombre_profesor for p in session.exec(select(Profesores)).all()}
+    secs_db = {s.id_seccion: s.nombre for s in session.exec(select(Seccion)).all()}
+
+    snapshot = session.exec(select(HorarioSnapshot).where(HorarioSnapshot.is_active == True)).first()
+    metricas = {"estado": "N/A", "tiempo_segundos": 0, "ramas_exploradas": 0, "conflictos": 0}
+    if snapshot and snapshot.json_data:
+        try:
+            snap = json.loads(snapshot.json_data)
+            metricas = snap.get("estadisticas", metricas)
+            metricas["estado"] = snap.get("estado", snapshot.estado or "N/A")
+        except Exception:
+            metricas["estado"] = snapshot.estado or "N/A"
+            metricas["tiempo_segundos"] = snapshot.tiempo_segundos or 0
+
+    from collections import defaultdict
+    carga_prof = defaultdict(lambda: {"total": 0, "dias": defaultdict(int), "cursos": set(), "secciones": set()})
+    carga_sec = defaultdict(lambda: {"total": 0, "dias": defaultdict(int), "cursos": set()})
+    carga_dia = defaultdict(int)
+    carga_turno = defaultdict(int)
+
+    for r in all_rows:
+        d_name = dias_db.get(r.id_dia, f"D{r.id_dia}")
+        t_name = turnos_db.get(r.id_turno, f"T{r.id_turno}")
+        c_name = cursos_db.get(r.id_curso, f"C{r.id_curso}")
+        p_name = profs_db.get(r.id_profesor, f"P{r.id_profesor}")
+        s_name = secs_db.get(r.id_seccion, f"S{r.id_seccion}")
+
+        carga_prof[p_name]["total"] += 1
+        carga_prof[p_name]["dias"][d_name] += 1
+        carga_prof[p_name]["cursos"].add(c_name)
+        carga_prof[p_name]["secciones"].add(s_name)
+        carga_sec[s_name]["total"] += 1
+        carga_sec[s_name]["dias"][d_name] += 1
+        carga_sec[s_name]["cursos"].add(c_name)
+        carga_dia[d_name] += 1
+        carga_turno[t_name] += 1
+
+    resumen_profesores = []
+    for p_name, data in sorted(carga_prof.items(), key=lambda x: -x[1]["total"]):
+        resumen_profesores.append({
+            "nombre": p_name,
+            "horas_semana": data["total"],
+            "dias": dict(data["dias"]),
+            "cursos": list(data["cursos"]),
+            "secciones": list(data["secciones"])
+        })
+
+    resumen_secciones = []
+    for s_name, data in sorted(carga_sec.items(), key=lambda x: -x[1]["total"]):
+        resumen_secciones.append({
+            "nombre": s_name,
+            "clases": data["total"],
+            "dias": dict(data["dias"]),
+            "cursos": list(data["cursos"])
+        })
+
+    return {
+        "metricas": {
+            "estado": metricas.get("estado", "N/A"),
+            "tiempo_segundos": round(metricas.get("tiempo_segundos", 0), 2),
+            "ramas_exploradas": metricas.get("ramas_exploradas", 0),
+            "conflictos": metricas.get("conflictos", 0),
+            "total_clases": len(all_rows),
+            "total_profesores": len(carga_prof),
+            "total_secciones": len(carga_sec)
+        },
+        "carga_por_dia": dict(carga_dia),
+        "carga_por_turno": dict(carga_turno),
+        "profesores": resumen_profesores,
+        "secciones": resumen_secciones
+    }
+
+
+def build_horario_analysis(session: Session) -> dict:
+    """Genera análisis del horario con métricas explicadas, problemas y sugerencias."""
+    summary = build_horario_summary(session)
+    if "error" in summary:
+        return {"error": summary["error"]}
+
+    metricas = summary["metricas"]
+    explicaciones_metricas = []
+
+    if metricas["estado"] == "OPTIMAL":
+        explicaciones_metricas.append(
+            "OPTIMAL: El solver encontró la mejor solución posible. "
+            "No existe otro horario que satisfaga mejor todas las restricciones."
+        )
+    elif metricas["estado"] == "FEASIBLE":
+        explicaciones_metricas.append(
+            "FEASIBLE: Se encontró una solución válida, pero no se puede garantizar "
+            "que sea la mejor posible. El solver podría mejorarla con más tiempo."
+        )
+    elif metricas["estado"] == "INFEASIBLE":
+        explicaciones_metricas.append(
+            "INFEASIBLE: Las restricciones son contradictorias. "
+            "No es posible generar un horario válido con las condiciones actuales."
+        )
+    elif metricas["estado"] == "UNKNOWN":
+        explicaciones_metricas.append(
+            "UNKNOWN: El solver no encontró solución antes del límite de tiempo."
+        )
+
+    if metricas["tiempo_segundos"] > 0:
+        explicaciones_metricas.append(
+            f"Tiempo de cálculo: {metricas['tiempo_segundos']}s. "
+            f"{'Rápido' if metricas['tiempo_segundos'] < 5 else 'Moderado' if metricas['tiempo_segundos'] < 30 else 'Lento'} "
+            f"para el tamaño del problema."
+        )
+
+    if metricas["ramas_exploradas"] > 0:
+        explicaciones_metricas.append(
+            f"El algoritmo exploró {metricas['ramas_exploradas']:,} alternativas antes de encontrar la solución. "
+            f"{'Pocas alternativas (problema simple)' if metricas['ramas_exploradas'] < 100 else 'Cantidad moderada' if metricas['ramas_exploradas'] < 1000 else 'Muchas alternativas (problema complejo)'}."
+        )
+
+    problemas = []
+    sugerencias = []
+
+    for prof in summary["profesores"]:
+        dias = prof["dias"]
+        if dias:
+            promedio = prof["horas_semana"] / len(dias)
+            for dia, horas in dias.items():
+                if promedio > 0 and horas > promedio * 1.5 and horas > 3:
+                    problemas.append(
+                        f"{prof['nombre']}: {horas}h en {dia} (promedio {promedio:.1f}h/día)"
+                    )
+                    sugerencias.append(
+                        f"Mover 1-2 horas de {prof['nombre']} desde {dia} a otro día con menos carga"
+                    )
+
+    for sec in summary["secciones"]:
+        dias = sec["dias"]
+        if dias:
+            promedio_sec = sec["clases"] / len(dias)
+            for dia, horas in dias.items():
+                if promedio_sec > 0 and horas > promedio_sec * 1.3 and horas > 8:
+                    problemas.append(
+                        f"{sec['nombre']}: {horas}h en {dia} (promedio {promedio_sec:.1f}h/día)"
+                    )
+                    sugerencias.append(
+                        f"Redistribuir materias de {sec['nombre']} en {dia} a otros días"
+                    )
+
+    if len(summary["profesores"]) > 0:
+        max_prof = summary["profesores"][0]
+        min_prof = summary["profesores"][-1]
+        if max_prof["horas_semana"] > min_prof["horas_semana"] * 2.5:
+            problemas.append(
+                f"Desequilibrio entre profesores: {max_prof['nombre']} ({max_prof['horas_semana']}h) "
+                f"vs {min_prof['nombre']} ({min_prof['horas_semana']}h)"
+            )
+            sugerencias.append(
+                f"Evaluar si se pueden redistribuir clases de {max_prof['nombre']} "
+                f"a otros profesores disponibles"
+            )
+
+    return {
+        "metricas": metricas,
+        "explicaciones_metricas": explicaciones_metricas,
+        "problemas_detectados": problemas,
+        "sugerencias": list(dict.fromkeys(sugerencias)),
+        "resumen_rapido": {
+            "total_clases": metricas["total_clases"],
+            "profesor_mas_cargado": summary["profesores"][0]["nombre"] if summary["profesores"] else "N/A",
+            "seccion_con_mas_clases": summary["secciones"][0]["nombre"] if summary["secciones"] else "N/A",
+            "dia_mas_ocupado": max(summary["carga_por_dia"], key=summary["carga_por_dia"].get) if summary["carga_por_dia"] else "N/A"
+        }
+    }
+
+
+def build_current_state(session: Session) -> dict:
+    """Lee horario_final de la BD y construye el dict resultado actual."""
+    all_rows = session.exec(select(HorarioFinal)).all()
+    dias_db = {d.id_dia: d.nombre_dia for d in session.exec(select(Dias)).all()}
+    turnos_db = {t.id_turno: t.nombre for t in session.exec(select(Turno)).all()}
+
+    from collections import defaultdict
+    grupos = defaultdict(list)
+    for r in all_rows:
+        key = (r.id_seccion, r.id_curso, r.id_profesor, r.id_dia, r.id_turno)
+        grupos[key].append(r.num_bloque)
+
+    asignaciones = []
+    for (s_id, c_id, p_id, d_id, t_id), bloques in grupos.items():
+        bloques_ord = sorted(bloques)
+        if not bloques_ord:
+            continue
+        groups = []
+        current_group = [bloques_ord[0]]
+        for i in range(1, len(bloques_ord)):
+            if bloques_ord[i] == current_group[-1] + 1:
+                current_group.append(bloques_ord[i])
+            else:
+                groups.append(current_group)
+                current_group = [bloques_ord[i]]
+        groups.append(current_group)
+
+        for group in groups:
+            slot_inicio = group[0] - 1
+            horas = len(group)
+            cid_str = "TUT1" if c_id == 0 else f"CUR_{c_id}"
+            asignaciones.append({
+                "seccion_id": f"SEC_{s_id}",
+                "curso_id": cid_str,
+                "profesor_id": f"PROF_{p_id}",
+                "dia": dias_db.get(d_id, f"Dia_{d_id}"),
+                "turno": turnos_db.get(t_id, "Manana"),
+                "slot_inicio": slot_inicio,
+                "horas": horas
+            })
+
+    return {
+        "estado": "EDITADO",
+        "mensaje": "Horario editado manualmente",
+        "estadisticas": {"tiempo_segundos": 0, "ramas_exploradas": 0, "conflictos": 0},
+        "asignaciones": asignaciones
+    }
+
+
+def apply_move(session: Session, data: dict) -> dict:
+    """
+    Aplica un movimiento validado: borra filas viejas, crea filas nuevas, crea snapshot.
+    Soporta swaps.
+    """
+    sec_id = data["seccion_id"]
+    cur_id = data["curso_id"]
+    prof_id = data["profesor_id"]
+    dia_origen_id = data["dia_origen_id"]
+    turno_origen_id = data["turno_origen_id"]
+    slot_origen = data["slot_inicio_origen"]
+    horas_origen = data["horas_origen"]
+    dia_destino_id = data["dia_destino_id"]
+    turno_destino_id = data["turno_destino_id"]
+    slot_destino = data["slot_inicio_destino"]
+    horas_destino = data["horas_destino"]
+
+    old_rows = session.exec(
+        select(HorarioFinal).where(
+            HorarioFinal.id_seccion == sec_id,
+            HorarioFinal.id_dia == dia_origen_id,
+            HorarioFinal.id_turno == turno_origen_id,
+            HorarioFinal.id_curso == cur_id,
+            HorarioFinal.id_profesor == prof_id,
+            HorarioFinal.num_bloque >= slot_origen + 1,
+            HorarioFinal.num_bloque <= slot_origen + horas_origen
+        )
+    ).all()
+    for row in old_rows:
+        session.delete(row)
+
+    if data.get("isSwap") and data.get("swapInfo"):
+        sw = data["swapInfo"]
+        swap_rows = session.exec(
+            select(HorarioFinal).where(
+                HorarioFinal.id_seccion == sw["swap_seccion_id"],
+                HorarioFinal.id_dia == sw["swap_dia_id"],
+                HorarioFinal.id_turno == sw["swap_turno_id"],
+                HorarioFinal.id_curso == sw["swap_curso_id"],
+                HorarioFinal.id_profesor == sw["swap_profesor_id"],
+                HorarioFinal.num_bloque >= sw["swap_slot"] + 1,
+                HorarioFinal.num_bloque <= sw["swap_slot"] + sw["swap_horas"]
+            )
+        ).all()
+        for row in swap_rows:
+            session.delete(row)
+        session.flush()
+
+        for i in range(sw["swap_horas"]):
+            num_bloque = slot_origen + i + 1
+            session.add(HorarioFinal(
+                id_seccion=sw["swap_seccion_id"],
+                id_dia=dia_origen_id,
+                num_bloque=num_bloque,
+                id_curso=sw["swap_curso_id"],
+                id_profesor=sw["swap_profesor_id"],
+                id_turno=turno_origen_id
+            ))
+    else:
+        session.flush()
+
+    for i in range(horas_destino):
+        num_bloque = slot_destino + i + 1
+        session.add(HorarioFinal(
+            id_seccion=sec_id,
+            id_dia=dia_destino_id,
+            num_bloque=num_bloque,
+            id_curso=cur_id,
+            id_profesor=prof_id,
+            id_turno=turno_destino_id
+        ))
+    session.commit()
+
+    all_rows = session.exec(select(HorarioFinal)).all()
+    dias_db = {d.id_dia: d.nombre_dia for d in session.exec(select(Dias)).all()}
+    turnos_db = {t.id_turno: t.nombre for t in session.exec(select(Turno)).all()}
+
+    from collections import defaultdict
+    grupos = defaultdict(list)
+    for r in all_rows:
+        key = (r.id_seccion, r.id_curso, r.id_profesor, r.id_dia, r.id_turno)
+        grupos[key].append(r.num_bloque)
+
+    asignaciones = []
+    for (s_id, c_id, p_id, d_id, t_id), bloques in grupos.items():
+        bloques_ord = sorted(bloques)
+        if not bloques_ord:
+            continue
+        groups = []
+        current_group = [bloques_ord[0]]
+        for i in range(1, len(bloques_ord)):
+            if bloques_ord[i] == current_group[-1] + 1:
+                current_group.append(bloques_ord[i])
+            else:
+                groups.append(current_group)
+                current_group = [bloques_ord[i]]
+        groups.append(current_group)
+
+        for group in groups:
+            slot_inicio = group[0] - 1
+            horas = len(group)
+            cid_str = "TUT1" if c_id == 0 else f"CUR_{c_id}"
+            asignaciones.append({
+                "seccion_id": f"SEC_{s_id}",
+                "curso_id": cid_str,
+                "profesor_id": f"PROF_{p_id}",
+                "dia": dias_db.get(d_id, f"Dia_{d_id}"),
+                "turno": turnos_db.get(t_id, "Manana"),
+                "slot_inicio": slot_inicio,
+                "horas": horas
+            })
+
+    dict_resultado = {
+        "estado": "EDITADO",
+        "mensaje": "Horario editado manualmente",
+        "estadisticas": {"tiempo_segundos": 0, "ramas_exploradas": 0, "conflictos": 0},
+        "asignaciones": asignaciones
+    }
+
+    return dict_resultado

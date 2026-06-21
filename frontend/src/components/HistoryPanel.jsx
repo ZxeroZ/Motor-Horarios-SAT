@@ -30,6 +30,7 @@ export default function HistoryPanel({ snapshots, editingSnapshot, snapshotName,
                     <span style={{fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '8px'}}>
                       {s.asignaciones_count} clases | {s.tiempo_segundos?.toFixed(1) || 0}s
                     </span>
+                    {s.es_editada && <span style={{fontSize: '0.7rem', color: '#fff', background: '#8b5cf6', padding: '2px 8px', borderRadius: '10px', marginLeft: '8px', fontWeight: '600'}}>EDITADA</span>}
                     {s.is_active && <span style={{fontSize: '0.75rem', color: 'var(--accent)', marginLeft: '8px', fontWeight: '600'}}>ACTIVO</span>}
                   </div>
                 )}

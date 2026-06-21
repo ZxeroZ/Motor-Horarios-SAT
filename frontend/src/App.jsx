@@ -5,6 +5,8 @@ import LoginForm from './components/LoginForm';
 import Sidebar from './components/Sidebar';
 import ScheduleGrid from './components/ScheduleGrid';
 import HistoryPanel from './components/HistoryPanel';
+import EditPreviewModal from './components/EditPreviewModal';
+import ScheduleAnalysis from './components/ScheduleAnalysis';
 
 function App() {
   // --- Estado: Autenticación ---
@@ -32,6 +34,8 @@ function App() {
   const [fakeSearch, setFakeSearch] = useState("");
   const [isDevUnlocked, setIsDevUnlocked] = useState(false);
   const [progress, setProgress] = useState(null);
+  const [pendingEdit, setPendingEdit] = useState(null);
+  const [editValidation, setEditValidation] = useState(null);
 
   const handleFakeSearch = (e) => {
     const val = e.target.value;
@@ -82,6 +86,7 @@ function App() {
   const [snapshots, setSnapshots] = useState([]);
   const [editingSnapshot, setEditingSnapshot] = useState(null);
   const [snapshotName, setSnapshotName] = useState("");
+  const [editMode, setEditMode] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -428,6 +433,92 @@ function App() {
     }
   };
 
+  const handleMoveAssignment = async (moveData) => {
+    try {
+      const res = await fetch('http://localhost:8000/api/horario-final/validate-move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          seccion_id: parseInt(String(moveData.seccionId).replace(/\D/g, '')),
+          curso_id: moveData.cursoId === 'TUT1' ? 0 : parseInt(String(moveData.cursoId).replace(/\D/g, '')),
+          profesor_id: parseInt(String(moveData.profesorId).replace(/\D/g, '')),
+          dia_origen_id: moveData.diaOrigenId,
+          turno_origen_id: moveData.turnoOrigenId,
+          slot_inicio_origen: moveData.slotOrigen,
+          horas_origen: moveData.horasOrigen,
+          dia_destino_id: moveData.diaDestinoId,
+          turno_destino_id: moveData.turnoDestinoId,
+          slot_inicio_destino: moveData.slotDestino,
+          horas_destino: moveData.horasDestino
+        })
+      });
+      const data = await res.json();
+      setPendingEdit(moveData);
+      setEditValidation(data);
+    } catch {
+      addToast("Error al validar movimiento", "error");
+    }
+  };
+
+  const handleConfirmMove = async (moveData) => {
+    try {
+      const res = await fetch('http://localhost:8000/api/horario-final/apply-move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          seccion_id: parseInt(String(moveData.seccionId).replace(/\D/g, '')),
+          curso_id: moveData.cursoId === 'TUT1' ? 0 : parseInt(String(moveData.cursoId).replace(/\D/g, '')),
+          profesor_id: parseInt(String(moveData.profesorId).replace(/\D/g, '')),
+          dia_origen_id: moveData.diaOrigenId,
+          turno_origen_id: moveData.turnoOrigenId,
+          slot_inicio_origen: moveData.slotOrigen,
+          horas_origen: moveData.horasOrigen,
+          dia_destino_id: moveData.diaDestinoId,
+          turno_destino_id: moveData.turnoDestinoId,
+          slot_inicio_destino: moveData.slotDestino,
+          horas_destino: moveData.horasDestino
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        addToast(`Movimiento aplicado. ${data.snapshot?.nombre || 'Snapshot creado'}`);
+        const horarioRes = await fetch("http://localhost:8000/api/cargar-horario?t=" + Date.now());
+        const horarioData = await horarioRes.json();
+        if (horarioData.status === "success" && horarioData.resultado?.asignaciones?.length > 0) {
+          setResult(horarioData.resultado);
+        }
+      } else {
+        addToast("Error al aplicar movimiento", "error");
+      }
+    } catch {
+      addToast("Error de conexión", "error");
+    }
+    setPendingEdit(null);
+    setEditValidation(null);
+  };
+
+  const handleCancelMove = () => {
+    setPendingEdit(null);
+    setEditValidation(null);
+  };
+
+  const handleSaveEdits = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/horario-final/save-edits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success) {
+        addToast(`Cambios guardados. ${data.snapshot?.nombre || 'Snapshot creado'}`);
+        setEditMode(false);
+        await loadSnapshots();
+      }
+    } catch {
+      addToast("Error al guardar cambios", "error");
+    }
+  };
+
   // --- Lookups para nombres ---
   const cursoNombre = useMemo(() => {
     const m = {};
@@ -585,7 +676,7 @@ function App() {
       <main className="dashboard-main">
         <header className="dashboard-header">
            <div className="header-title">
-             <h1>{activeTab === 'horarios' ? 'Control de Horarios' : activeTab === 'historial' ? 'Historial de Horarios' : activeTab === 'dev-tools' ? 'Herramientas de Desarrollador' : 'Ajustes Académicos'}</h1>
+             <h1>{activeTab === 'horarios' ? 'Control de Horarios' : activeTab === 'historial' ? 'Historial de Horarios' : activeTab === 'analisis' ? 'Análisis del Horario' : activeTab === 'dev-tools' ? 'Herramientas de Desarrollador' : 'Ajustes Académicos'}</h1>
              <p className="header-subtitle">Optimización impulsada por CP-SAT</p>
            </div>
            {activeTab === 'horarios' && (
@@ -631,10 +722,54 @@ function App() {
                 </div>
             )}
             {result && matrixData && result.asignaciones.length > 0 && (
-              <ScheduleGrid 
-                result={result} selectedSeccion={selectedSeccion} setSelectedSeccion={setSelectedSeccion}
-                seccionesOptions={seccionesOptions} seccionInfo={seccionInfo}
-                cursoNombre={cursoNombre} profNombre={profNombre}
+              <>
+                <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1rem', flexWrap: 'wrap'}}>
+                  <button
+                    className={`btn-save ${editMode ? 'btn-accent' : ''}`}
+                    style={{padding: '8px 18px', fontSize: '0.85rem', fontWeight: '600'}}
+                    onClick={() => setEditMode(!editMode)}
+                  >
+                    <span className="material-icons-outlined" style={{fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px'}}>
+                      {editMode ? 'edit_off' : 'edit'}
+                    </span>
+                    {editMode ? 'Salir de Edición' : 'Modo Edición'}
+                  </button>
+                  {editMode && (
+                    <button
+                      className="btn-save btn-accent"
+                      style={{padding: '8px 18px', fontSize: '0.85rem', fontWeight: '600'}}
+                      onClick={handleSaveEdits}
+                    >
+                      <span className="material-icons-outlined" style={{fontSize: '1rem', verticalAlign: 'middle', marginRight: '4px'}}>
+                        save
+                      </span>
+                      Guardar Cambios
+                    </button>
+                  )}
+                  {editMode && (
+                    <span style={{fontSize: '0.8rem', color: 'var(--accent)', fontWeight: '500'}}>
+                      Los cambios no se guardan en el historial hasta que hagas clic en "Guardar Cambios"
+                    </span>
+                  )}
+                </div>
+                <ScheduleGrid 
+                  result={result} selectedSeccion={selectedSeccion} setSelectedSeccion={setSelectedSeccion}
+                  seccionesOptions={seccionesOptions} seccionInfo={seccionInfo}
+                  cursoNombre={cursoNombre} profNombre={profNombre}
+                  onMoveAssignment={handleMoveAssignment}
+                  editMode={editMode}
+                />
+              </>
+            )}
+            {pendingEdit && editValidation && (
+              <EditPreviewModal
+                moveData={pendingEdit}
+                validation={editValidation}
+                cursoNombre={cursoNombre}
+                profNombre={profNombre}
+                seccionInfo={seccionInfo}
+                onConfirm={handleConfirmMove}
+                onCancel={handleCancelMove}
               />
             )}
           </div>
@@ -648,6 +783,13 @@ function App() {
               setSnapshotName={setSnapshotName} setEditingSnapshot={setEditingSnapshot}
               onLoad={loadSnapshot} onRename={renameSnapshot} onDelete={deleteSnapshot}
             />
+          </div>
+        )}
+
+        {/* --- PESTAÑA: ANÁLISIS --- */}
+        {activeTab === 'analisis' && (
+          <div className="tab-pane">
+            <ScheduleAnalysis />
           </div>
         )}
 
