@@ -623,6 +623,58 @@ def delete_horario_final(id_horario_final: int, session: Session = Depends(get_s
     session.commit()
     return {"message": "Borrado"}
 
+# --- Endpoints: Edición de Horarios ---
+class MoveAssignmentRequest(BaseModel):
+    seccion_id: int
+    curso_id: int
+    profesor_id: int
+    dia_origen_id: int
+    turno_origen_id: int
+    slot_inicio_origen: int
+    horas_origen: int
+    dia_destino_id: int
+    turno_destino_id: int
+    slot_inicio_destino: int
+    horas_destino: int
+
+@app.post("/api/horario-final/validate-move")
+def api_validate_move(req: MoveAssignmentRequest, session: Session = Depends(get_session)):
+    """Valida un movimiento propuesto sin aplicarlo."""
+    result = validate_move(session, req.model_dump())
+    return result
+
+@app.post("/api/horario-final/apply-move")
+def api_apply_move(req: MoveAssignmentRequest, session: Session = Depends(get_session)):
+    """Aplica un movimiento validado sin crear snapshot."""
+    validation = validate_move(session, req.model_dump())
+    if not validation["valid"]:
+        raise HTTPException(status_code=400, detail={"conflicts": validation["conflicts"], "warnings": validation["warnings"]})
+    move_data = req.model_dump()
+    move_data["isSwap"] = validation.get("isSwap", False)
+    move_data["swapInfo"] = validation.get("swapInfo")
+    resultado = apply_move(session, move_data)
+    return {"success": True, "resultado": resultado, "isSwap": validation.get("isSwap", False)}
+
+@app.post("/api/horario-final/save-edits")
+def api_save_edits(session: Session = Depends(get_session)):
+    """Guarda el estado actual del horario como un snapshot editado."""
+    from backend.engine_connector import build_current_state, _guardar_snapshot
+    dict_resultado = build_current_state(session)
+    _guardar_snapshot(session, dict_resultado, es_editada=True)
+    return {"success": True, "snapshot": dict_resultado}
+
+@app.get("/api/horario-summary")
+def api_horario_summary(session: Session = Depends(get_session)):
+    """Retorna un resumen condensado del horario activo (~50-100 líneas)."""
+    from backend.engine_connector import build_horario_summary
+    return build_horario_summary(session)
+
+@app.get("/api/horario-analysis")
+def api_horario_analysis(session: Session = Depends(get_session)):
+    """Retorna análisis del horario: métricas explicadas, problemas y sugerencias."""
+    from backend.engine_connector import build_horario_analysis
+    return build_horario_analysis(session)
+
 # --- Tutorías ---
 @app.get("/api/tutorias")
 def get_tutorias(session: Session = Depends(get_session)):
@@ -870,7 +922,7 @@ def delete_profesor_preferencia(id_preferencia: int, session: Session = Depends(
     return {"message": "Preferencia borrada"}
 
 # --- Endpoints del Motor ---
-from backend.engine_connector import generar_horario_engine, start_generation, get_progress
+from backend.engine_connector import generar_horario_engine, start_generation, get_progress, validate_move, apply_move
 
 @app.post("/api/generar-horario")
 def desencadenar_motor(session: Session = Depends(get_session)):
@@ -914,15 +966,26 @@ def cargar_horario_guardado(session: Session = Depends(get_session)):
     asignaciones = []
     for (sec, cur, prof, dia_id, turno), slots in grupos.items():
         slots.sort()
-        asignaciones.append({
-            "seccion_id": f"SEC_{sec}",
-            "curso_id": f"CUR_{cur}",
-            "profesor_id": f"PROF_{prof}",
-            "dia": dias_db.get(dia_id, ""),
-            "turno": turno,
-            "slot_inicio": slots[0] - 1,
-            "horas": len(slots)
-        })
+        groups = []
+        current_group = [slots[0]]
+        for i in range(1, len(slots)):
+            if slots[i] == current_group[-1] + 1:
+                current_group.append(slots[i])
+            else:
+                groups.append(current_group)
+                current_group = [slots[i]]
+        groups.append(current_group)
+
+        for group in groups:
+            asignaciones.append({
+                "seccion_id": f"SEC_{sec}",
+                "curso_id": f"CUR_{cur}",
+                "profesor_id": f"PROF_{prof}",
+                "dia": dias_db.get(dia_id, ""),
+                "turno": turno,
+                "slot_inicio": group[0] - 1,
+                "horas": len(group)
+            })
     
     snapshot = session.exec(select(HorarioSnapshot).where(HorarioSnapshot.is_active == True)).first()
     if snapshot:
@@ -977,6 +1040,7 @@ def get_snapshots(session: Session = Depends(get_session)):
             "estado": s.estado,
             "tiempo_segundos": s.tiempo_segundos,
             "is_active": s.is_active,
+            "es_editada": s.es_editada,
             "created_at": s.created_at,
         }
         for s in snapshots
