@@ -100,6 +100,9 @@ class Bloque(SQLModel, table=True):
     numero_bloque: Optional[int] = None
     hora_inicio: Optional[time] = None
     hora_final: Optional[time] = None
+    es_recreo: Optional[bool] = Field(default=False)
+    despues_de_bloque: Optional[int] = None
+    duracion_minutos: Optional[int] = None
     
     turno: Optional[Turno] = Relationship(back_populates="bloques")
 
