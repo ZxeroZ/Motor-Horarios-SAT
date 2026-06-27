@@ -1,4 +1,4 @@
-﻿import json
+import json
 import logging
 from contextlib import asynccontextmanager
 
@@ -12,6 +12,7 @@ from pydantic import BaseModel
 
 from backend.config import settings
 from backend.logging_config import setup_logging
+from datetime import time, timedelta
 from backend.exceptions import AppError
 from backend.database import create_db_and_tables, get_session, engine
 
@@ -349,6 +350,72 @@ def delete_bloque(id_bloque: int, session: Session = Depends(get_session)):
     session.commit()
     return {"message": "Bloque borrado"}
 
+class RecreoConfig(BaseModel):
+    despuesDeBloque: int
+    duracion: int
+
+class ConfigurarTiemposRequest(BaseModel):
+    horaInicio: str
+    duracionBloque: int
+    recreos: List[RecreoConfig] = []
+
+def _parse_time_td(t_str: str) -> timedelta:
+    h, m = map(int, t_str.split(':'))
+    return timedelta(hours=h, minutes=m)
+
+def _format_time_td(td: timedelta) -> time:
+    total_seconds = int(td.total_seconds())
+    hours = (total_seconds // 3600) % 24
+    minutes = (total_seconds % 3600) // 60
+    return time(hour=hours, minute=minutes)
+
+@app.post("/api/configurar-tiempos/{id_turno}")
+def configurar_tiempos(id_turno: int, req: ConfigurarTiemposRequest, session: Session = Depends(get_session)):
+    bloques_existentes = session.exec(select(Bloque).where(Bloque.id_turno == id_turno)).all()
+    for b in bloques_existentes:
+        session.delete(b)
+    
+    MAX_BLOQUES = 12
+    current_time = _parse_time_td(req.horaInicio)
+    duracion_td = timedelta(minutes=req.duracionBloque)
+    
+    for i in range(1, MAX_BLOQUES + 1):
+        hora_inicio = current_time
+        current_time += duracion_td
+        hora_final = current_time
+        
+        b = Bloque(
+            id_turno=id_turno,
+            numero_bloque=i,
+            hora_inicio=_format_time_td(hora_inicio),
+            hora_final=_format_time_td(hora_final),
+            es_recreo=False,
+            duracion_minutos=req.duracionBloque
+        )
+        session.add(b)
+        
+        recreo = next((r for r in req.recreos if r.despuesDeBloque == i), None)
+        if recreo:
+            recreo_td = timedelta(minutes=recreo.duracion)
+            r_inicio = current_time
+            current_time += recreo_td
+            r_final = current_time
+            
+            r_b = Bloque(
+                id_turno=id_turno,
+                numero_bloque=None,
+                hora_inicio=_format_time_td(r_inicio),
+                hora_final=_format_time_td(r_final),
+                es_recreo=True,
+                despues_de_bloque=i,
+                duracion_minutos=recreo.duracion
+            )
+            session.add(r_b)
+            
+    session.commit()
+    return {"message": "Tiempos configurados correctamente"}
+
+
 # --- Endpoints Administrativos: Áreas ---
 @app.get("/api/areas", response_model=List[Areas])
 def get_areas(session: Session = Depends(get_session)):
@@ -401,6 +468,7 @@ def update_curso(id_curso: int, curso_update: Cursos, session: Session = Depends
     if not db_curso: raise HTTPException(status_code=404, detail="Curso no encontrado")
     db_curso.nombre_curso = curso_update.nombre_curso
     db_curso.id_area = curso_update.id_area
+    db_curso.requiere_espacio_unico = curso_update.requiere_espacio_unico
     session.add(db_curso)
     session.commit()
     session.refresh(db_curso)
