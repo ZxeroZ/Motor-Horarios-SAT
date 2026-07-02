@@ -12,7 +12,7 @@ class Settings:
     DATABASE_ECHO: bool = os.getenv("DATABASE_ECHO", "false").lower() == "true"
 
     # CORS
-    CORS_ORIGINS: list[str] = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")
+    CORS_ORIGINS: list[str] = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,http://localhost:4321,http://127.0.0.1:4321").split(",")
 
     @property
     def is_production(self) -> bool:

@@ -24,7 +24,7 @@ export default function EditPreviewModal({ moveData, validation, cursoNombre, pr
     <div className="modal-overlay" onClick={onCancel}>
       <div className="modal-content edit-preview-modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3>{isSwap ? 'Intercambiar Asignaciones' : 'Mover Asignación'}</h3>
+          <h3>{isSwap ? 'Intercambiar Asignaciones' : 'Mover Asignacion'}</h3>
           <button className="modal-close" onClick={onCancel}>&times;</button>
         </div>
 
@@ -48,7 +48,7 @@ export default function EditPreviewModal({ moveData, validation, cursoNombre, pr
                 </div>
               </div>
               <div className="move-info">
-                <span>{validation.swapInfo.swap_seccion_nombre} — {validation.swapInfo.swap_profesor_nombre}</span>
+                <span>{validation.swapInfo.swap_seccion_nombre} &mdash; {validation.swapInfo.swap_profesor_nombre}</span>
               </div>
             </>
           ) : (
@@ -71,10 +71,10 @@ export default function EditPreviewModal({ moveData, validation, cursoNombre, pr
                 </div>
               </div>
               <div className="move-info">
-                <span><b>{cursoName}</b> — {profName} — {secName}</span>
+                <span><b>{cursoName}</b> &mdash; {profName} &mdash; {secName}</span>
               </div>
               <div className="move-duration">
-                <label>Duración destino (bloques):</label>
+                <label>Duracion destino (bloques):</label>
                 <div className="duration-buttons">
                   {[1, 2, 3, 4].map(h => (
                     <button

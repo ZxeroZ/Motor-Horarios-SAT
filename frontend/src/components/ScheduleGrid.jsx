@@ -8,6 +8,7 @@ const REVERSE_TURNO = { 1: "Mañana", 2: "Tarde" };
 export default function ScheduleGrid({ result, selectedSeccion, setSelectedSeccion, seccionesOptions, seccionInfo, cursoNombre, profNombre, onMoveAssignment, editMode }) {
   const [dragged, setDragged] = useState(null);
   const [overCell, setOverCell] = useState(null);
+  const [hoveredCard, setHoveredCard] = useState(null);
 
   const matrixData = useMemo(() => {
     if (!result?.asignaciones || !selectedSeccion) return null;
@@ -139,12 +140,12 @@ export default function ScheduleGrid({ result, selectedSeccion, setSelectedSecci
   if (!matrixData) return null;
 
   return (
-    <div style={{background: 'var(--bg-card)', padding: '2rem', borderRadius: 'var(--border-radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-color)'}}>
+    <div style={{background: '#ffffff', padding: '1.75rem', borderRadius: 'var(--border-radius-lg)', boxShadow: 'var(--shadow-sm)', border: '1px solid var(--border-color)'}}>
       <div className="schedule-stats-panel">
         {result.version > 0 && (
           <div className="stat-card">
-            <span className="stat-label">Versión</span>
-            <span className="stat-value" style={{color: 'var(--accent)', fontWeight: '700', fontSize: '1.1rem'}}>v{result.version}</span>
+            <span className="stat-label">Version</span>
+            <span className="stat-value" style={{color: 'var(--accent)', fontWeight: '700', fontSize: '1.05rem'}}>v{result.version}</span>
           </div>
         )}
         <div className="stat-card">
@@ -171,7 +172,7 @@ export default function ScheduleGrid({ result, selectedSeccion, setSelectedSecci
       <div className="schedule-header">
         <h2>{result.nombre || 'Malla Horaria'}</h2>
         <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
-          <span style={{color: 'var(--text-muted)', fontSize:'0.9rem'}}>Turno: <b>{Array.from(matrixData.turnosUsados).join(" + ")}</b></span>
+          <span style={{color: 'var(--text-muted)', fontSize:'0.85rem'}}>Turno: <b style={{color: 'var(--text-main)'}}>{Array.from(matrixData.turnosUsados).join(" + ")}</b></span>
           <select className="schedule-select" value={selectedSeccion} onChange={(e) => setSelectedSeccion(e.target.value)}>
             {seccionesOptions.map(sec => (
               <option key={sec} value={sec}>{seccionInfo[sec] || sec}</option>
@@ -181,16 +182,27 @@ export default function ScheduleGrid({ result, selectedSeccion, setSelectedSecci
       </div>
       <table className="calendar-grid">
         <thead>
-          <tr><th>Hora</th>{matrixData.exactDias.map(d => <th key={d}>{d}</th>)}</tr>
+          <tr><th style={{minWidth: '90px'}}>Hora</th>{matrixData.exactDias.map(d => <th key={d}>{d}</th>)}</tr>
         </thead>
         <tbody>
           {matrixData.SLOTS.map(slot => {
-            const shift = slot > 6 ? "Tarde" : "Mañana";
+            const shift = slot > 6 ? "Tarde" : "Manana";
             const localSlot = slot > 6 ? slot - 6 : slot;
+            const isShiftBoundary = slot === 7;
             return (
             <tr key={slot}>
-              <td style={{background: 'var(--bg-panel-light)', borderRadius: '12px', textAlign: 'center', minWidth: '80px'}}>
-                Bloque {localSlot}<br/><small style={{color: 'var(--text-muted)'}}>{shift}</small>
+              {isShiftBoundary && <>
+                <td colSpan={matrixData.exactDias.length + 1} style={{background: 'transparent', height: '8px', border: 'none', padding: 0}}></td>
+              </>}
+              {!isShiftBoundary && <>
+              <td style={{
+                background: slot > 6 ? 'rgba(91, 95, 199, 0.04)' : 'var(--bg-panel-light)',
+                borderRadius: '10px',
+                textAlign: 'center',
+                minWidth: '90px'
+              }}>
+                <div style={{fontWeight: '600', fontSize: '0.82rem', color: 'var(--text-main)'}}>Bloque {localSlot}</div>
+                <div style={{fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px'}}>{shift}</div>
               </td>
               {matrixData.exactDias.map(dia => {
                 const clase = matrixData.mat[slot][dia];
@@ -209,26 +221,52 @@ export default function ScheduleGrid({ result, selectedSeccion, setSelectedSecci
                     onDrop={(e) => handleDrop(e, slot, dia)}
                   >
                     {clase ? (
-                      <div
-                        className={`class-card ${getCourseColor(clase.curso_id)} ${clase.curso_id === 'TUT1' ? 'tutoria-card' : ''}`}
-                        draggable={editMode ? "true" : "false"}
-                        onDragStart={(e) => { if (!editMode) { e.preventDefault(); return; } handleDragStart(e, slot, dia); }}
-                        onDragEnd={handleDragEnd}
-                      >
-                        <strong className="course-name">{cursoNombre[clase.curso_id] || clase.curso_id}</strong>
-                        <span className="prof-name">{profNombre[clase.profesor_id] || clase.profesor_id}</span>
+                      <div style={{position: 'relative'}}>
+                        <div
+                          className={`class-card ${getCourseColor(clase.curso_id)} ${clase.curso_id === 'TUT1' ? 'tutoria-card' : ''}`}
+                          draggable={editMode ? "true" : "false"}
+                          onDragStart={(e) => { if (!editMode) { e.preventDefault(); return; } handleDragStart(e, slot, dia); }}
+                          onDragEnd={handleDragEnd}
+                          onMouseEnter={() => setHoveredCard(`${slot}-${dia}`)}
+                          onMouseLeave={() => setHoveredCard(null)}
+                        >
+                          <strong className="course-name">{cursoNombre[clase.curso_id] || clase.curso_id}</strong>
+                          <span className="prof-name">{profNombre[clase.profesor_id] || clase.profesor_id}</span>
+                        </div>
+                        {hoveredCard === `${slot}-${dia}` && (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: 'calc(100% + 6px)',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            background: '#1a1d2e',
+                            color: '#ffffff',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '0.75rem',
+                            whiteSpace: 'nowrap',
+                            zIndex: 100,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                            pointerEvents: 'none'
+                          }}>
+                            <div style={{fontWeight: '600', marginBottom: '2px'}}>{cursoNombre[clase.curso_id] || clase.curso_id}</div>
+                            <div style={{opacity: 0.8}}>{profNombre[clase.profesor_id] || clase.profesor_id}</div>
+                            <div style={{opacity: 0.6, fontSize: '0.7rem', marginTop: '2px'}}>{clase.dia} | Bloque {(clase.slot_inicio || 0) + 1} | {clase.turno}</div>
+                          </div>
+                        )}
                       </div>
-                    ) : <span className="empty-text">—</span>}
+                    ) : <span className="empty-text">&mdash;</span>}
                   </td>
                 )
               })}
+              </>}
             </tr>
           )})}
         </tbody>
       </table>
       <div className="drag-hint">
-        <span className="material-icons-outlined" style={{fontSize: '0.9rem', verticalAlign: 'middle'}}>info</span>
-        {editMode ? 'Arrastrá una clase a otra celda para moverla' : 'Activá el Modo Edición para poder mover bloques'}
+        <span className="material-icons-outlined" style={{fontSize: '0.9rem', verticalAlign: 'middle', marginRight: '4px'}}>info</span>
+        {editMode ? 'Arrastra una clase a otra celda para moverla' : 'Activa el Modo Edicion para poder mover bloques'}
       </div>
     </div>
   );

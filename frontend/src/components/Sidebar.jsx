@@ -7,7 +7,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, isDevUnlocked, 
       </div>
       <div className="sidebar-user">
         <div className="user-avatar">{user?.nombre?.charAt(0) || 'U'}</div>
-        <div className="user-info">
+        <div>
           <div className="user-name">{user?.nombre}</div>
           <div className="user-role">Administrador</div>
         </div>
@@ -20,10 +20,13 @@ export default function Sidebar({ activeTab, setActiveTab, user, isDevUnlocked, 
           value={fakeSearch}
           onChange={onFakeSearch}
           style={{
-            width: '100%', padding: '0.8rem', borderRadius: '12px', 
-            background: 'var(--bg-panel-light)', border: '1px solid var(--border-color)', 
-            color: 'var(--text-main)', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box'
+            width: '100%', padding: '0.7rem 0.9rem', borderRadius: '10px', 
+            background: 'var(--bg-panel-light)', border: '1.5px solid var(--border-color)', 
+            color: 'var(--text-main)', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box',
+            transition: 'border-color 0.15s ease'
           }}
+          onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+          onBlur={e => e.target.style.borderColor = 'var(--border-color)'}
         />
       </div>
 
@@ -35,10 +38,10 @@ export default function Sidebar({ activeTab, setActiveTab, user, isDevUnlocked, 
           <span className="material-icons-outlined">history</span> Historial
         </button>
         <button className={`nav-item ${activeTab === 'analisis' ? 'active' : ''}`} onClick={() => setActiveTab('analisis')}>
-          <span className="material-icons-outlined">analytics</span> Análisis
+          <span className="material-icons-outlined">analytics</span> Analisis
         </button>
         <button className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`} onClick={() => setActiveTab('admin')}>
-          <span className="material-icons-outlined">settings</span> Configuración
+          <span className="material-icons-outlined">settings</span> Configuracion
         </button>
         {isDevUnlocked && (
           <button className={`nav-item ${activeTab === 'dev-tools' ? 'active' : ''}`} onClick={() => setActiveTab('dev-tools')}>
@@ -47,7 +50,7 @@ export default function Sidebar({ activeTab, setActiveTab, user, isDevUnlocked, 
         )}
         <div className="nav-spacer"></div>
         <button className="nav-item text-danger" onClick={onLogout}>
-          <span className="material-icons-outlined">logout</span> Cerrar Sesión
+          <span className="material-icons-outlined">logout</span> Cerrar Sesion
         </button>
       </nav>
     </aside>

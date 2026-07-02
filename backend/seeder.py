@@ -128,7 +128,7 @@ def run_seeder():
 
         print("7. Creando Profesores...")
         for p in datos["profesores"]:
-            prof_obj = Profesores(nombre_profesor=p["nombre"])
+            prof_obj = Profesores(nombre_profesor=p["nombre"], horas_minimas=p.get("horas_minimas", 6))
             session.add(prof_obj)
             session.commit()
             session.refresh(prof_obj)

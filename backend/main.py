@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
     with Session(engine) as session:
         admin = session.exec(select(Usuario).where(Usuario.email == "admin@colegio.com")).first()
         if not admin:
-            session.add(Usuario(email="admin@colegio.com", nombre="Administrador"))
+            session.add(Usuario(email="admin@colegio.com", nombre="Administrador", password="Administrador"))
             session.commit()
             logger.info("Usuario admin creado")
     yield
@@ -93,7 +93,7 @@ def _reject_if_dependents(session: Session, parent_name: str, checks: list):
 @app.post("/api/login")
 def login(req: LoginRequest, session: Session = Depends(get_session)):
     user = session.exec(select(Usuario).where(Usuario.email == req.email)).first()
-    if not user:
+    if not user or user.password != req.password:
         raise HTTPException(status_code=401, detail="Credenciales incorrectas")
     return {"status": "success", "user": {"nombre": user.nombre, "email": user.email}}
 

@@ -494,6 +494,74 @@ def validar_cobertura(
     return errores
  
  
+def validar_horas_minimas(
+    profesores: list[dict],
+    secciones: list[dict],
+    grados: list[dict]
+) -> list[str]:
+    errores = []
+    
+    mapa_grados = {g["id"]: g for g in grados}
+    
+    # 1. Total de demanda global
+    demanda_total = 0
+    for seccion in secciones:
+        grado = mapa_grados.get(seccion.get("grado", ""), {})
+        for req in grado.get("cursos_requeridos", []):
+            demanda_total += req.get("horas_semanales", 0)
+            
+    # 2. Total de minimos exigidos
+    minimos_totales = sum(p.get("horas_minimas", 6) for p in profesores)
+    
+    if minimos_totales > demanda_total:
+        errores.append(
+            f"[horas_minimas] La sumatoria global de horas mínimas exigidas por todos "
+            f"los docentes ({minimos_totales}) supera la demanda total de horas de "
+            f"todas las secciones ({demanda_total}). El escenario es matemáticamente imposible."
+        )
+        
+    for idx, p in enumerate(profesores):
+        p_id = p.get("id", f"INDEX_{idx}")
+        horas_min = p.get("horas_minimas", 6)
+        
+        # Validación fisica
+        slots_fisicos = 0
+        disponibilidad = p.get("disponibilidad", {})
+        if isinstance(disponibilidad, dict):
+            for dia, turnos_dict in disponibilidad.items():
+                for turno, sedes_dict in turnos_dict.items():
+                    for sede, slots in sedes_dict.items():
+                        if isinstance(slots, list):
+                            slots_fisicos += len(slots)
+                
+        if horas_min > slots_fisicos:
+            errores.append(
+                f"[horas_minimas][{p_id}] Exige {horas_min} horas mínimas pero su "
+                f"disponibilidad física solo suma {slots_fisicos} slots."
+            )
+            
+        # Validación curricular (horas máximas que podría dictar)
+        horas_curriculares_potenciales = 0
+        cursos_hab = set(p.get("cursos_habilitados", []))
+        grados_hab = set(p.get("grados_habilitados", []))
+        
+        for seccion in secciones:
+            grado_id = seccion.get("grado", "")
+            if grado_id in grados_hab:
+                grado = mapa_grados.get(grado_id, {})
+                for req in grado.get("cursos_requeridos", []):
+                    if req.get("curso_id") in cursos_hab:
+                        horas_curriculares_potenciales += req.get("horas_semanales", 0)
+                        
+        if horas_min > horas_curriculares_potenciales:
+            errores.append(
+                f"[horas_minimas][{p_id}] Exige {horas_min} horas mínimas pero por su "
+                f"habilitación curricular (cursos y grados permitidos) solo podría "
+                f"enseñar un máximo de {horas_curriculares_potenciales} horas teóricas."
+            )
+            
+    return errores
+
 def validar_todo(datos: dict) -> list[str]:
     """
     Ejecuta todas las validaciones en orden y retorna la lista completa
@@ -543,6 +611,8 @@ def validar_todo(datos: dict) -> list[str]:
     ids_secciones = {s["id"] for s in secciones if "id" in s}
     ids_profesores = {p["id"] for p in profesores if "id" in p}
     errores += validar_tutorias(tutorias, ids_secciones, ids_profesores)
+    
+    errores += validar_horas_minimas(profesores, secciones, grados)
     
     errores += validar_bloques_reservados(bloques_reservados, sedes_validas, dias_validos, turnos_validos, ids_grados)
     

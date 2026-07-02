@@ -261,7 +261,8 @@ def build_json_from_db(session: Session) -> dict:
             "nombre": p.nombre_profesor,
             "cursos_habilitados": ["TUT1" if pc.id_curso == tutoria_id_bd else f"CUR_{pc.id_curso}" for pc in pcs],
             "grados_habilitados": grados_habilitados,
-            "disponibilidad": disponibilidad
+            "disponibilidad": disponibilidad,
+            "horas_minimas": p.horas_minimas or 6
         }
         
         if pref_records:

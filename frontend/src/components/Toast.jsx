@@ -4,10 +4,14 @@ export default function Toast({ toasts }) {
       {toasts.map(t => (
         <div key={t.id} style={{
           padding:'12px 20px', borderRadius:'10px', color:'white', fontWeight:'600',
-          fontSize:'0.9rem', boxShadow:'0 4px 12px rgba(0,0,0,0.15)',
+          fontSize:'0.88rem', boxShadow:'0 4px 16px rgba(0,0,0,0.15)',
           animation:'toastIn 0.3s ease', minWidth:'200px',
-          background: t.type === 'error' ? '#ef4444' : t.type === 'info' ? '#3b82f6' : '#10b981'
+          display: 'flex', alignItems: 'center', gap: '8px',
+          background: t.type === 'error' ? '#d94452' : t.type === 'info' ? '#5b5fc7' : '#3aaf6c'
         }}>
+          <span className="material-icons-outlined" style={{fontSize: '1.1rem'}}>
+            {t.type === 'error' ? 'error' : t.type === 'info' ? 'info' : 'check_circle'}
+          </span>
           {t.message}
         </div>
       ))}

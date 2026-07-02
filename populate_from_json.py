@@ -140,7 +140,7 @@ def poblar_desde_json():
         # --- Profesores, ProfesorCurso, SedeProfesor, ProfesorDisponibilidad ---
         profes_map = {}
         for p in datos.get("profesores", []):
-            prof = Profesores(nombre_profesor=p["nombre"])
+            prof = Profesores(nombre_profesor=p["nombre"], horas_minimas=p.get("horas_minimas", 6))
             s.add(prof)
             s.commit()
             s.refresh(prof)

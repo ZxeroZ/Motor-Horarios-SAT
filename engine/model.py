@@ -49,7 +49,7 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
     limite_dia_categoria_sec = collections.defaultdict(list)  
     presencia_profesor_sede = collections.defaultdict(list)
     curso_espacio_unico_vars = collections.defaultdict(list)
-    presencia_profesor_sede = collections.defaultdict(list)
+    carga_por_profesor = collections.defaultdict(list)
     
     # Almacenaremos los Z clasificados para las reservas: (s_id, dia, turno, slot) -> [var, var...]
     vars_por_slot = collections.defaultdict(list)
@@ -150,6 +150,7 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
                                         
                                         z_vars_sub.append(var)
                                         z_vars_by_day[dia].append(var)
+                                        carga_por_profesor[p_id].append(var * sub_H)
                                         
                                         # El bloque ocupa simultáneamente sub_H slots, los sumamos al conflicto
                                         for k in range(sub_H):
@@ -266,6 +267,16 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
                 
         # El solver DEBE elegir exactamente una opción de reserva
         model.AddExactlyOne(y_vars)
+
+    # [I] Horas mínimas por profesor
+    for p_id, p_info in datos_procesados["profesores"].items():
+        horas_minimas = p_info.get("horas_minimas", 6)
+        if horas_minimas > 0:
+            if p_id in carga_por_profesor:
+                model.Add(sum(carga_por_profesor[p_id]) >= horas_minimas)
+            else:
+                # Si el profesor no tiene ninguna clase asignable matemáticamente y exige horas mínimas, el modelo es inviable
+                model.Add(0 >= horas_minimas)
 
     # 3. FUNCIÓN OBJETIVO
     # Maximizar las recompensas: +10000 por cobertura, +100 por no fragmentar, +10 por fragmentar.

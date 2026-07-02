@@ -78,42 +78,45 @@
   },
   "profesores": {
     "P001": {
-      "total_horas_semanales": 5,
-      "cantidad_secciones": 2,
-      "cantidad_cursos": 3,
+      "total_horas_semanales": 8,
+      "cantidad_secciones": 3,
+      "cantidad_cursos": 4,
       "secciones_asignadas": [
         "A_1A",
+        "A_4",
         "A_5A"
       ],
       "cursos_dictados": [
+        "GEO1",
         "RM1",
         "TRI1",
         "TUT1"
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_5A"
-        ],
-        "Martes": [
           "A_1A",
           "A_5A"
         ],
-        "Miercoles": [],
+        "Martes": [],
+        "Miercoles": [
+          "A_4"
+        ],
         "Jueves": [],
-        "Viernes": []
+        "Viernes": [
+          "A_4"
+        ]
       }
     },
     "P002": {
-      "total_horas_semanales": 20,
-      "cantidad_secciones": 6,
+      "total_horas_semanales": 10,
+      "cantidad_secciones": 5,
       "cantidad_cursos": 3,
       "secciones_asignadas": [
-        "A_1A",
         "A_1B",
-        "A_5A",
-        "A_5B",
-        "B_1A",
-        "B_1B"
+        "A_2B",
+        "A_4",
+        "B_3",
+        "B_5"
       ],
       "cursos_dictados": [
         "LIT1",
@@ -122,39 +125,37 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_5B",
-          "B_1A"
+          "A_1B",
+          "A_2B"
         ],
         "Martes": [
-          "B_1B"
+          "B_3",
+          "B_5"
         ],
-        "Miercoles": [
-          "A_1A"
-        ],
+        "Miercoles": [],
         "Jueves": [
-          "A_1B"
+          "B_3"
         ],
         "Viernes": [
-          "A_1B",
-          "A_5A"
+          "B_5"
         ]
       }
     },
     "P003": {
-      "total_horas_semanales": 35,
-      "cantidad_secciones": 7,
-      "cantidad_cursos": 5,
+      "total_horas_semanales": 20,
+      "cantidad_secciones": 8,
+      "cantidad_cursos": 4,
       "secciones_asignadas": [
-        "A_1A",
+        "A_1B",
         "A_2A",
         "A_2B",
-        "A_3",
-        "A_4",
-        "A_5A",
-        "A_5B"
+        "B_1A",
+        "B_2",
+        "B_3",
+        "B_4",
+        "B_5"
       ],
       "cursos_dictados": [
-        "ANA1",
         "BIO1",
         "FE1",
         "QUI1",
@@ -162,29 +163,26 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_2A",
-          "A_4"
+          "A_1B",
+          "A_2A"
         ],
         "Martes": [
-          "A_2A",
-          "A_3",
-          "A_5B"
+          "B_1A",
+          "B_2",
+          "B_3"
         ],
         "Miercoles": [
-          "A_1A",
-          "A_2B",
-          "A_5A",
-          "A_5B"
+          "B_1A",
+          "B_5"
         ],
         "Jueves": [
-          "A_1A",
-          "A_2A",
-          "A_5B"
+          "A_2B",
+          "B_2",
+          "B_3"
         ],
         "Viernes": [
-          "A_2A",
-          "A_3",
-          "A_5B"
+          "B_2",
+          "B_4"
         ]
       }
     },
@@ -195,10 +193,10 @@
       "secciones_asignadas": [
         "A_1B",
         "A_2B",
-        "A_3",
         "A_4",
+        "A_5A",
         "A_5B",
-        "B_3"
+        "B_5"
       ],
       "cursos_dictados": [
         "ECO1",
@@ -207,73 +205,68 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_4"
-        ],
-        "Martes": [
-          "A_1B",
+          "A_2B",
+          "A_4",
           "A_5B"
         ],
+        "Martes": [],
         "Miercoles": [
-          "A_3"
+          "B_5"
         ],
         "Jueves": [
-          "A_2B"
+          "A_1B"
         ],
         "Viernes": [
-          "B_3"
+          "A_1B",
+          "A_4",
+          "A_5A"
         ]
       }
     },
     "P005": {
-      "total_horas_semanales": 15,
-      "cantidad_secciones": 8,
-      "cantidad_cursos": 3,
-      "secciones_asignadas": [
-        "A_1B",
-        "A_2A",
-        "A_3",
-        "A_5A",
-        "A_5B",
-        "B_1A",
-        "B_3",
-        "B_4"
-      ],
-      "cursos_dictados": [
-        "DPC1",
-        "FIL1",
-        "TUT1"
-      ],
-      "carga_diaria": {
-        "Lunes": [],
-        "Martes": [
-          "B_1A"
-        ],
-        "Miercoles": [
-          "A_3",
-          "B_3"
-        ],
-        "Jueves": [
-          "A_2A",
-          "A_5B",
-          "B_4"
-        ],
-        "Viernes": [
-          "A_1B"
-        ]
-      }
-    },
-    "P006": {
       "total_horas_semanales": 11,
-      "cantidad_secciones": 7,
+      "cantidad_secciones": 5,
       "cantidad_cursos": 2,
       "secciones_asignadas": [
         "A_1B",
         "A_2B",
+        "A_3",
+        "B_1B",
+        "B_2"
+      ],
+      "cursos_dictados": [
+        "DPC1",
+        "TUT1"
+      ],
+      "carga_diaria": {
+        "Lunes": [
+          "A_2B"
+        ],
+        "Martes": [],
+        "Miercoles": [
+          "A_1B",
+          "B_2"
+        ],
+        "Jueves": [
+          "B_1B"
+        ],
+        "Viernes": [
+          "A_3"
+        ]
+      }
+    },
+    "P006": {
+      "total_horas_semanales": 12,
+      "cantidad_secciones": 7,
+      "cantidad_cursos": 2,
+      "secciones_asignadas": [
+        "A_1A",
+        "A_2B",
+        "A_3",
         "A_4",
-        "A_5A",
-        "A_5B",
         "B_1A",
-        "B_4"
+        "B_1B",
+        "B_5"
       ],
       "cursos_dictados": [
         "ING1",
@@ -281,20 +274,22 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_5B"
+          "A_2B",
+          "B_5"
         ],
         "Martes": [
-          "B_1A"
+          "B_1A",
+          "B_1B"
         ],
         "Miercoles": [
-          "B_4"
+          "A_2B",
+          "A_3",
+          "A_4"
         ],
         "Jueves": [
-          "A_1B"
+          "A_1A"
         ],
-        "Viernes": [
-          "A_2B"
-        ]
+        "Viernes": []
       }
     },
     "P007": {
@@ -303,10 +298,10 @@
       "cantidad_cursos": 2,
       "secciones_asignadas": [
         "A_1A",
-        "A_1B",
-        "A_2A",
-        "A_3",
-        "A_5A"
+        "A_2B",
+        "A_5A",
+        "B_1B",
+        "B_3"
       ],
       "cursos_dictados": [
         "EFI1",
@@ -314,37 +309,34 @@
       ],
       "carga_diaria": {
         "Lunes": [
+          "B_1B",
+          "B_3"
+        ],
+        "Martes": [
           "A_1A",
+          "A_2B"
+        ],
+        "Miercoles": [
           "A_5A"
         ],
-        "Martes": [],
-        "Miercoles": [
-          "A_1B",
-          "A_2A"
-        ],
         "Jueves": [],
-        "Viernes": [
-          "A_3"
-        ]
+        "Viernes": []
       }
     },
     "P008": {
-      "total_horas_semanales": 33,
-      "cantidad_secciones": 12,
+      "total_horas_semanales": 22,
+      "cantidad_secciones": 9,
       "cantidad_cursos": 3,
       "secciones_asignadas": [
-        "A_1A",
         "A_1B",
         "A_2A",
         "A_2B",
         "A_3",
-        "A_4",
         "A_5A",
         "A_5B",
         "B_1A",
-        "B_2",
-        "B_3",
-        "B_4"
+        "B_1B",
+        "B_5"
       ],
       "cursos_dictados": [
         "ALG1",
@@ -353,33 +345,33 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_1B",
-          "A_5A",
-          "B_1A"
+          "A_2A",
+          "A_3"
         ],
         "Martes": [
           "A_1B",
-          "A_3",
-          "A_5B"
+          "A_2A",
+          "A_2B",
+          "A_3"
         ],
         "Miercoles": [
-          "A_3",
-          "B_2"
+          "B_1B"
         ],
         "Jueves": [
-          "A_2A",
-          "B_3"
+          "A_2B",
+          "A_3",
+          "A_5B"
         ],
         "Viernes": [
-          "A_1A",
-          "A_2B",
-          "A_5B"
+          "B_1A",
+          "B_1B",
+          "B_5"
         ]
       }
     },
     "P009": {
-      "total_horas_semanales": 28,
-      "cantidad_secciones": 11,
+      "total_horas_semanales": 25,
+      "cantidad_secciones": 10,
       "cantidad_cursos": 3,
       "secciones_asignadas": [
         "A_1A",
@@ -387,12 +379,11 @@
         "A_2A",
         "A_2B",
         "A_3",
-        "A_4",
-        "A_5B",
         "B_1A",
         "B_1B",
         "B_2",
-        "B_3"
+        "B_3",
+        "B_4"
       ],
       "cursos_dictados": [
         "ALG1",
@@ -401,32 +392,30 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_2A",
           "A_3",
-          "A_5B",
-          "B_1A"
+          "B_1B"
         ],
         "Martes": [
-          "A_1B",
-          "A_2B"
+          "B_2"
         ],
         "Miercoles": [
           "A_1A",
-          "B_1B"
+          "A_1B",
+          "A_2A"
         ],
         "Jueves": [
           "A_2B",
-          "B_1A"
+          "B_1A",
+          "B_2"
         ],
         "Viernes": [
-          "A_4",
-          "B_2",
+          "B_1A",
           "B_3"
         ]
       }
     },
     "P010": {
-      "total_horas_semanales": 22,
+      "total_horas_semanales": 27,
       "cantidad_secciones": 13,
       "cantidad_cursos": 3,
       "secciones_asignadas": [
@@ -435,7 +424,7 @@
         "A_2A",
         "A_2B",
         "A_3",
-        "A_4",
+        "A_5A",
         "A_5B",
         "B_1A",
         "B_1B",
@@ -451,50 +440,50 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_1B",
-          "A_3",
-          "B_1B"
+          "B_1A",
+          "B_1B",
+          "B_2",
+          "B_3"
         ],
         "Martes": [
           "A_1A",
           "A_2A",
-          "A_2B"
+          "A_3",
+          "A_5B"
         ],
         "Miercoles": [
-          "B_1A",
-          "B_1B",
-          "B_2"
+          "A_2B",
+          "B_2",
+          "B_5"
         ],
         "Jueves": [
           "A_5B",
           "B_1B",
-          "B_4",
-          "B_5"
-        ],
-        "Viernes": [
-          "A_2A",
-          "A_4",
           "B_3",
           "B_4"
+        ],
+        "Viernes": [
+          "A_1A",
+          "A_1B",
+          "A_2B",
+          "A_5A"
         ]
       }
     },
     "P011": {
       "total_horas_semanales": 26,
-      "cantidad_secciones": 11,
+      "cantidad_secciones": 9,
       "cantidad_cursos": 3,
       "secciones_asignadas": [
         "A_1A",
         "A_1B",
-        "A_2A",
         "A_2B",
         "A_3",
         "A_4",
-        "A_5B",
-        "B_1A",
         "B_1B",
         "B_2",
-        "B_3"
+        "B_3",
+        "B_5"
       ],
       "cursos_dictados": [
         "ALG1",
@@ -503,40 +492,47 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_2B"
+          "A_3",
+          "B_1B",
+          "B_3"
         ],
         "Martes": [
+          "A_3",
+          "A_4",
+          "B_2",
+          "B_5"
+        ],
+        "Miercoles": [
+          "A_1B",
+          "B_1B"
+        ],
+        "Jueves": [
           "A_1A",
           "B_3"
         ],
-        "Miercoles": [
-          "A_4",
-          "A_5B",
-          "B_1A",
-          "B_2"
-        ],
-        "Jueves": [
-          "A_3",
-          "B_1B"
-        ],
         "Viernes": [
-          "A_1B",
-          "A_2A"
+          "A_1A",
+          "A_2B",
+          "B_3"
         ]
       }
     },
     "P012": {
-      "total_horas_semanales": 22,
-      "cantidad_secciones": 8,
+      "total_horas_semanales": 27,
+      "cantidad_secciones": 12,
       "cantidad_cursos": 3,
       "secciones_asignadas": [
+        "A_1A",
+        "A_1B",
         "A_2A",
-        "A_2B",
         "A_3",
+        "A_4",
         "A_5A",
+        "A_5B",
+        "B_1A",
         "B_1B",
+        "B_2",
         "B_3",
-        "B_4",
         "B_5"
       ],
       "cursos_dictados": [
@@ -546,35 +542,40 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_3",
-          "B_4"
+          "A_2A",
+          "B_2"
         ],
         "Martes": [
-          "A_2A"
+          "A_1A",
+          "A_1B",
+          "B_3"
         ],
         "Miercoles": [
-          "A_2B",
-          "B_1B"
-        ],
-        "Jueves": [
-          "A_2B",
           "A_5A"
         ],
+        "Jueves": [
+          "A_1A",
+          "A_4",
+          "A_5A",
+          "B_1A",
+          "B_2"
+        ],
         "Viernes": [
-          "B_3",
-          "B_5"
+          "A_3",
+          "A_5B",
+          "B_1A",
+          "B_1B"
         ]
       }
     },
     "P013": {
-      "total_horas_semanales": 19,
-      "cantidad_secciones": 7,
+      "total_horas_semanales": 15,
+      "cantidad_secciones": 6,
       "cantidad_cursos": 3,
       "secciones_asignadas": [
         "A_2A",
-        "A_3",
-        "A_4",
-        "B_1A",
+        "A_2B",
+        "A_5A",
         "B_2",
         "B_3",
         "B_4"
@@ -586,36 +587,36 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_2A"
+          "B_4"
         ],
         "Martes": [
-          "B_1A",
-          "B_3"
+          "A_2B",
+          "B_4"
         ],
         "Miercoles": [
-          "A_4",
-          "B_4"
+          "A_2A"
         ],
-        "Jueves": [
-          "A_3",
-          "A_4",
-          "B_2"
-        ],
+        "Jueves": [],
         "Viernes": [
-          "B_4"
+          "A_5A",
+          "B_2",
+          "B_3"
         ]
       }
     },
     "P014": {
-      "total_horas_semanales": 21,
-      "cantidad_secciones": 8,
+      "total_horas_semanales": 27,
+      "cantidad_secciones": 11,
       "cantidad_cursos": 3,
       "secciones_asignadas": [
+        "A_1A",
         "A_1B",
+        "A_2A",
+        "A_3",
+        "A_4",
         "A_5A",
-        "B_1A",
+        "A_5B",
         "B_1B",
-        "B_2",
         "B_3",
         "B_4",
         "B_5"
@@ -627,41 +628,47 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_1B",
-          "B_4"
+          "A_3",
+          "A_4",
+          "A_5A"
         ],
         "Martes": [
-          "B_2",
+          "A_1A",
+          "A_5A",
+          "B_1B",
           "B_4"
         ],
         "Miercoles": [
-          "B_1A",
-          "B_3"
+          "B_3",
+          "B_4"
         ],
         "Jueves": [
+          "A_2A",
           "A_5A",
+          "A_5B",
           "B_1B",
           "B_5"
         ],
         "Viernes": [
-          "B_5"
+          "A_1A",
+          "A_1B"
         ]
       }
     },
     "P015": {
-      "total_horas_semanales": 24,
+      "total_horas_semanales": 29,
       "cantidad_secciones": 10,
       "cantidad_cursos": 2,
       "secciones_asignadas": [
+        "A_1A",
         "A_1B",
+        "A_2A",
+        "A_2B",
         "A_3",
         "A_4",
         "A_5A",
-        "B_1A",
+        "A_5B",
         "B_1B",
-        "B_2",
-        "B_3",
-        "B_4",
         "B_5"
       ],
       "cursos_dictados": [
@@ -670,38 +677,42 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "B_1B"
+          "A_2A",
+          "A_4",
+          "B_5"
         ],
         "Martes": [
           "A_3",
-          "A_5A",
-          "B_5"
+          "A_5A"
         ],
         "Miercoles": [
-          "A_1B"
+          "A_1A",
+          "A_2B",
+          "A_5B"
         ],
         "Jueves": [
-          "B_1A",
-          "B_3"
+          "A_1B",
+          "A_2A",
+          "B_1B"
         ],
         "Viernes": [
-          "A_4",
-          "B_1A",
-          "B_2",
-          "B_4"
+          "A_2A",
+          "A_2B",
+          "A_3",
+          "B_1B"
         ]
       }
     },
     "P016": {
-      "total_horas_semanales": 25,
+      "total_horas_semanales": 29,
       "cantidad_secciones": 10,
       "cantidad_cursos": 2,
       "secciones_asignadas": [
         "A_1A",
-        "A_1B",
-        "A_2B",
         "A_4",
         "A_5A",
+        "A_5B",
+        "B_1A",
         "B_1B",
         "B_2",
         "B_3",
@@ -714,38 +725,42 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_2B",
-          "A_4",
-          "B_5"
+          "A_1A",
+          "A_5B",
+          "B_1A"
         ],
         "Martes": [
+          "A_4",
           "B_1B",
-          "B_3",
-          "B_4"
-        ],
-        "Miercoles": [
-          "A_1B",
           "B_5"
         ],
+        "Miercoles": [
+          "A_5A",
+          "B_2",
+          "B_3"
+        ],
         "Jueves": [
-          "A_4"
+          "A_4",
+          "B_1B",
+          "B_4"
         ],
         "Viernes": [
-          "A_1A",
-          "A_5A",
-          "B_2"
+          "A_5B",
+          "B_5"
         ]
       }
     },
     "P017": {
       "total_horas_semanales": 18,
-      "cantidad_secciones": 6,
+      "cantidad_secciones": 8,
       "cantidad_cursos": 2,
       "secciones_asignadas": [
         "A_2A",
+        "A_2B",
         "A_4",
-        "A_5A",
-        "B_1A",
+        "A_5B",
+        "B_1B",
+        "B_3",
         "B_4",
         "B_5"
       ],
@@ -755,67 +770,73 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_5A",
+          "A_4",
+          "B_4",
           "B_5"
         ],
         "Martes": [
           "A_4",
-          "B_4"
+          "A_5B",
+          "B_3"
         ],
         "Miercoles": [
-          "A_2A"
+          "A_2B"
         ],
         "Jueves": [
-          "B_1A",
-          "B_4"
+          "A_2A"
         ],
         "Viernes": [
-          "A_5A"
+          "B_1B",
+          "B_4"
         ]
       }
     },
     "P018": {
-      "total_horas_semanales": 10,
-      "cantidad_secciones": 5,
-      "cantidad_cursos": 1,
+      "total_horas_semanales": 12,
+      "cantidad_secciones": 6,
+      "cantidad_cursos": 2,
       "secciones_asignadas": [
         "A_1A",
-        "A_2B",
-        "A_3",
-        "B_1B",
-        "B_2"
+        "A_2A",
+        "A_4",
+        "A_5B",
+        "B_1A",
+        "B_3"
       ],
       "cursos_dictados": [
-        "DPC1"
+        "DPC1",
+        "FIL1"
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_1A"
+          "A_5B",
+          "B_3"
         ],
         "Martes": [
-          "A_2B",
-          "B_1B"
+          "A_2A",
+          "B_3"
         ],
         "Miercoles": [
-          "B_2"
+          "B_1A"
         ],
-        "Jueves": [
-          "A_3"
-        ],
-        "Viernes": []
+        "Jueves": [],
+        "Viernes": [
+          "A_1A",
+          "A_4"
+        ]
       }
     },
     "P019": {
-      "total_horas_semanales": 14,
+      "total_horas_semanales": 16,
       "cantidad_secciones": 7,
       "cantidad_cursos": 2,
       "secciones_asignadas": [
         "A_1A",
-        "A_2B",
-        "A_4",
-        "A_5B",
-        "B_1B",
+        "A_3",
+        "A_5A",
+        "B_1A",
         "B_2",
+        "B_4",
         "B_5"
       ],
       "cursos_dictados": [
@@ -824,77 +845,80 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "A_1A",
-          "A_2B"
+          "B_1A",
+          "B_2"
         ],
-        "Martes": [],
-        "Miercoles": [],
+        "Martes": [
+          "A_5A",
+          "B_2"
+        ],
+        "Miercoles": [
+          "A_1A",
+          "A_3"
+        ],
         "Jueves": [
-          "A_4",
-          "B_2",
+          "A_5A",
           "B_5"
         ],
         "Viernes": [
-          "A_5B",
-          "B_1B"
+          "B_4"
         ]
       }
     },
     "P020": {
-      "total_horas_semanales": 9,
-      "cantidad_secciones": 5,
+      "total_horas_semanales": 7,
+      "cantidad_secciones": 4,
       "cantidad_cursos": 1,
       "secciones_asignadas": [
+        "A_1B",
         "A_2A",
         "A_4",
-        "B_1B",
-        "B_2",
-        "B_5"
+        "A_5A"
       ],
       "cursos_dictados": [
         "ING1"
       ],
       "carga_diaria": {
         "Lunes": [
-          "B_1B"
+          "A_5A"
         ],
         "Martes": [
-          "A_4"
+          "A_1B"
         ],
         "Miercoles": [
-          "A_2A"
+          "A_2A",
+          "A_4"
         ],
-        "Jueves": [
-          "B_2"
-        ],
-        "Viernes": [
-          "B_5"
-        ]
+        "Jueves": [],
+        "Viernes": []
       }
     },
     "P021": {
-      "total_horas_semanales": 6,
-      "cantidad_secciones": 3,
+      "total_horas_semanales": 7,
+      "cantidad_secciones": 4,
       "cantidad_cursos": 1,
       "secciones_asignadas": [
-        "A_1A",
-        "A_3",
-        "B_3"
+        "A_5B",
+        "B_2",
+        "B_3",
+        "B_4"
       ],
       "cursos_dictados": [
         "ING1"
       ],
       "carga_diaria": {
-        "Lunes": [],
-        "Martes": [],
-        "Miercoles": [],
-        "Jueves": [
-          "A_1A",
-          "B_3"
+        "Lunes": [
+          "A_5B"
         ],
-        "Viernes": [
-          "A_3"
-        ]
+        "Martes": [],
+        "Miercoles": [
+          "B_3",
+          "B_4"
+        ],
+        "Jueves": [
+          "B_2"
+        ],
+        "Viernes": []
       }
     },
     "P022": {
@@ -902,8 +926,35 @@
       "cantidad_secciones": 3,
       "cantidad_cursos": 1,
       "secciones_asignadas": [
-        "B_1A",
-        "B_1B",
+        "A_1B",
+        "A_2A",
+        "B_1A"
+      ],
+      "cursos_dictados": [
+        "EFI1"
+      ],
+      "carga_diaria": {
+        "Lunes": [
+          "A_1B"
+        ],
+        "Martes": [],
+        "Miercoles": [],
+        "Jueves": [
+          "B_1A"
+        ],
+        "Viernes": [
+          "A_2A"
+        ]
+      }
+    },
+    "P023": {
+      "total_horas_semanales": 8,
+      "cantidad_secciones": 4,
+      "cantidad_cursos": 1,
+      "secciones_asignadas": [
+        "A_3",
+        "A_4",
+        "B_2",
         "B_4"
       ],
       "cursos_dictados": [
@@ -914,82 +965,66 @@
           "B_4"
         ],
         "Martes": [],
-        "Miercoles": [],
-        "Jueves": [],
-        "Viernes": [
-          "B_1A",
-          "B_1B"
-        ]
-      }
-    },
-    "P023": {
-      "total_horas_semanales": 8,
-      "cantidad_secciones": 4,
-      "cantidad_cursos": 1,
-      "secciones_asignadas": [
-        "A_2B",
-        "A_4",
-        "B_2",
-        "B_3"
-      ],
-      "cursos_dictados": [
-        "EFI1"
-      ],
-      "carga_diaria": {
-        "Lunes": [],
-        "Martes": [
-          "A_4",
-          "B_2"
-        ],
         "Miercoles": [
-          "B_3"
+          "A_3"
         ],
-        "Jueves": [],
+        "Jueves": [
+          "A_4"
+        ],
         "Viernes": [
-          "A_2B"
+          "B_2"
         ]
       }
     },
     "P024": {
-      "total_horas_semanales": 12,
-      "cantidad_secciones": 4,
+      "total_horas_semanales": 21,
+      "cantidad_secciones": 7,
       "cantidad_cursos": 1,
       "secciones_asignadas": [
         "A_1A",
-        "B_2",
-        "B_3",
-        "B_5"
+        "A_1B",
+        "A_3",
+        "A_5B",
+        "B_1A",
+        "B_1B",
+        "B_4"
       ],
       "cursos_dictados": [
         "RV1"
       ],
       "carga_diaria": {
         "Lunes": [
-          "B_2",
-          "B_3"
+          "A_1A"
         ],
         "Martes": [
-          "A_1A",
-          "B_5"
+          "B_1A",
+          "B_4"
         ],
-        "Miercoles": [],
-        "Jueves": [],
+        "Miercoles": [
+          "A_5B",
+          "B_1B"
+        ],
+        "Jueves": [
+          "A_1B",
+          "A_3"
+        ],
         "Viernes": [
-          "A_1A"
+          "B_1A"
         ]
       }
     },
     "P025": {
-      "total_horas_semanales": 26,
-      "cantidad_secciones": 8,
+      "total_horas_semanales": 32,
+      "cantidad_secciones": 9,
       "cantidad_cursos": 2,
       "secciones_asignadas": [
-        "A_1A",
+        "A_1B",
+        "A_2A",
         "A_5A",
+        "A_5B",
         "B_1A",
         "B_1B",
         "B_2",
-        "B_3",
         "B_4",
         "B_5"
       ],
@@ -999,23 +1034,28 @@
       ],
       "carga_diaria": {
         "Lunes": [
-          "B_2",
-          "B_3"
-        ],
-        "Martes": [
+          "A_1B",
+          "A_5A",
+          "B_1A",
           "B_2"
         ],
+        "Martes": [
+          "A_2A",
+          "A_5B",
+          "B_1B"
+        ],
         "Miercoles": [
-          "A_5A",
+          "B_1A",
+          "B_4"
+        ],
+        "Jueves": [
+          "B_1A",
           "B_4",
           "B_5"
         ],
-        "Jueves": [
-          "A_1A"
-        ],
         "Viernes": [
-          "B_1A",
-          "B_1B"
+          "A_1B",
+          "A_2A"
         ]
       }
     }
@@ -1031,9 +1071,8 @@
       ]
     },
     "ANA1": {
-      "cantidad_profesores": 3,
+      "cantidad_profesores": 2,
       "profesores_activos": [
-        "P003",
         "P014",
         "P016"
       ]
@@ -1083,13 +1122,14 @@
     "FIL1": {
       "cantidad_profesores": 2,
       "profesores_activos": [
-        "P005",
+        "P018",
         "P019"
       ]
     },
     "GEO1": {
-      "cantidad_profesores": 2,
+      "cantidad_profesores": 3,
       "profesores_activos": [
+        "P001",
         "P008",
         "P010"
       ]

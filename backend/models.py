@@ -60,6 +60,7 @@ class Profesores(SQLModel, table=True):
     __tablename__ = "profesores"
     id_profesor: Optional[int] = Field(default=None, primary_key=True)
     nombre_profesor: str
+    horas_minimas: Optional[int] = Field(default=6)
     
     profesor_cursos: List["ProfesorCurso"] = Relationship(back_populates="profesor")
     horarios_finales: List["HorarioFinal"] = Relationship(back_populates="profesor")
@@ -76,6 +77,7 @@ class Usuario(SQLModel, table=True):
     id_usuario: Optional[int] = Field(default=None, primary_key=True)
     email: str = Field(unique=True)
     nombre: str
+    password: Optional[str] = None
     id_colegio: Optional[int] = Field(default=None, foreign_key="colegio.id_colegio")
     
     colegio: Optional[Colegio] = Relationship(back_populates="usuarios")

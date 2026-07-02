@@ -671,7 +671,8 @@
             "grados_habilitados": [
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P002",
@@ -899,7 +900,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P003",
@@ -1109,7 +1111,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P004",
@@ -1317,7 +1320,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P005",
@@ -1545,7 +1549,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P006",
@@ -1772,7 +1777,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P007",
@@ -1979,7 +1985,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P008",
@@ -2207,7 +2214,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P009",
@@ -2435,7 +2443,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P010",
@@ -2643,7 +2652,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P011",
@@ -2851,7 +2861,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P012",
@@ -3079,7 +3090,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P013",
@@ -3287,7 +3299,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P014",
@@ -3495,7 +3508,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P015",
@@ -3703,7 +3717,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P016",
@@ -3911,7 +3926,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P017",
@@ -4119,7 +4135,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P018",
@@ -4327,7 +4344,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P019",
@@ -4535,7 +4553,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P020",
@@ -4742,7 +4761,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P021",
@@ -4949,7 +4969,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P022",
@@ -5156,7 +5177,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P023",
@@ -5363,7 +5385,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P024",
@@ -5570,7 +5593,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         },
         {
             "id": "P025",
@@ -5798,7 +5822,8 @@
                 "GRADO_3",
                 "GRADO_4",
                 "GRADO_5"
-            ]
+            ],
+            "horas_minimas": 6
         }
     ],
     "secciones": [
