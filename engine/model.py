@@ -268,15 +268,17 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
         # El solver DEBE elegir exactamente una opción de reserva
         model.AddExactlyOne(y_vars)
 
-    # [I] Horas mínimas por profesor
+    # [I] Horas mínimas por profesor (Soft Constraint)
     for p_id, p_info in datos_procesados["profesores"].items():
-        horas_minimas = p_info.get("horas_minimas", 6)
+        horas_minimas = p_info.get("horas_minimas", 1)
         if horas_minimas > 0:
             if p_id in carga_por_profesor:
-                model.Add(sum(carga_por_profesor[p_id]) >= horas_minimas)
-            else:
-                # Si el profesor no tiene ninguna clase asignable matemáticamente y exige horas mínimas, el modelo es inviable
-                model.Add(0 >= horas_minimas)
+                # Meta flexible para que no rompa el motor (INFEASIBLE)
+                cumple_min_horas = model.NewBoolVar(f"cumple_min_horas_{p_id}")
+                carga_total = sum(carga_por_profesor[p_id])
+                
+                model.Add(carga_total >= horas_minimas).OnlyEnforceIf(cumple_min_horas)
+                objetivo_recompensas.append((cumple_min_horas, 50000))
 
     # 3. FUNCIÓN OBJETIVO
     # Maximizar las recompensas: +10000 por cobertura, +100 por no fragmentar, +10 por fragmentar.

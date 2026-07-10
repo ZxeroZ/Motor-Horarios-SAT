@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete
 from typing import List
 from pydantic import BaseModel
 
@@ -504,6 +504,8 @@ def update_profesor(id_profesor: int, profesor_update: Profesores, session: Sess
     db_profesor = session.get(Profesores, id_profesor)
     if not db_profesor: raise HTTPException(status_code=404, detail="Profesor no encontrado")
     db_profesor.nombre_profesor = profesor_update.nombre_profesor
+    if hasattr(profesor_update, 'horas_minimas'):
+        db_profesor.horas_minimas = profesor_update.horas_minimas
     session.add(db_profesor)
     session.commit()
     session.refresh(db_profesor)
@@ -513,18 +515,21 @@ def update_profesor(id_profesor: int, profesor_update: Profesores, session: Sess
 def delete_profesor(id_profesor: int, session: Session = Depends(get_session)):
     db_profesor = session.get(Profesores, id_profesor)
     if not db_profesor: raise HTTPException(status_code=404, detail="Profesor no encontrado")
-    _reject_if_dependents(session, "el Profesor", [
-        (select(ProfesorCurso).where(ProfesorCurso.id_profesor == id_profesor), "Vínculos Profesor-Curso"),
-        (select(HorarioFinal).where(HorarioFinal.id_profesor == id_profesor), "Horarios Finales"),
-        (select(Tutoria).where(Tutoria.id_profesor == id_profesor), "Tutorías"),
-        (select(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_profesor == id_profesor), "Disponibilidades"),
-        (select(ProfesorPreferencia).where(ProfesorPreferencia.id_profesor == id_profesor), "Preferencias"),
-        (select(SedeProfesor).where(SedeProfesor.id_profesor == id_profesor), "Vínculos Profesor-Sede"),
-        (select(GradoProfesor).where(GradoProfesor.id_profesor == id_profesor), "Vínculos Grado-Profesor"),
-    ])
-    session.delete(db_profesor)
-    session.commit()
-    return {"message": "Profesor borrado"}
+    try:
+        session.exec(delete(ProfesorCurso).where(ProfesorCurso.id_profesor == id_profesor))
+        session.exec(delete(HorarioFinal).where(HorarioFinal.id_profesor == id_profesor))
+        session.exec(delete(Tutoria).where(Tutoria.id_profesor == id_profesor))
+        session.exec(delete(ProfesorDisponibilidad).where(ProfesorDisponibilidad.id_profesor == id_profesor))
+        session.exec(delete(ProfesorPreferencia).where(ProfesorPreferencia.id_profesor == id_profesor))
+        session.exec(delete(SedeProfesor).where(SedeProfesor.id_profesor == id_profesor))
+        session.exec(delete(GradoProfesor).where(GradoProfesor.id_profesor == id_profesor))
+        
+        session.delete(db_profesor)
+        session.commit()
+        return {"message": "Profesor borrado exitosamente junto con sus dependencias"}
+    except Exception as e:
+        session.rollback()
+        raise AppError([f"Error al eliminar el profesor: {str(e)}"])
 
 # --- Endpoints Administrativos: Asignación Profesor-Curso ---
 @app.get("/api/profesor-curso", response_model=List[ProfesorCurso])

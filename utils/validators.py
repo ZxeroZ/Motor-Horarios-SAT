@@ -195,6 +195,13 @@ def validar_profesores(
  
         if "nombre" not in profesor:
             errores.append(f"[profesores][{pid}] Falta el campo 'nombre'")
+
+        if "horas_minimas" not in profesor:
+            errores.append(f"[profesores][{pid}] Falta el campo 'horas_minimas'. Debe estar explicito en el JSON.")
+        else:
+            horas_min = profesor["horas_minimas"]
+            if not isinstance(horas_min, int) or horas_min < 1:
+                errores.append(f"[profesores][{pid}] El campo 'horas_minimas' debe ser un número entero mayor o igual a 1.")
  
         # Validar cursos habilitados
         if "cursos_habilitados" not in profesor:
@@ -511,7 +518,7 @@ def validar_horas_minimas(
             demanda_total += req.get("horas_semanales", 0)
             
     # 2. Total de minimos exigidos
-    minimos_totales = sum(p.get("horas_minimas", 6) for p in profesores)
+    minimos_totales = sum(p.get("horas_minimas", 1) for p in profesores)
     
     if minimos_totales > demanda_total:
         errores.append(
@@ -522,7 +529,7 @@ def validar_horas_minimas(
         
     for idx, p in enumerate(profesores):
         p_id = p.get("id", f"INDEX_{idx}")
-        horas_min = p.get("horas_minimas", 6)
+        horas_min = p.get("horas_minimas", 1)
         
         # Validación fisica
         slots_fisicos = 0
