@@ -12,11 +12,14 @@ def get_configs(H: int) -> list[list[int]]:
         return [[4], [2, 2]]
     return [[H]]
 
-def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
+def construir_modelo(datos_procesados: dict, modo_diagnostico: bool = False) -> tuple[cp_model.CpModel, dict, dict]:
     """
     Construye el modelo CP-SAT usando Bloques de Variables contiguas.
+    Si modo_diagnostico=True, relaja las restricciones de horas_minimas para detectar cuellos de botella.
+    Retorna: (modelo, dict_z, dict_diagnostico)
     """
     model = cp_model.CpModel()
+    dict_diagnostico = {}
     
     config = datos_procesados["configuracion"]
     cursos = datos_procesados["cursos"]
@@ -268,20 +271,29 @@ def construir_modelo(datos_procesados: dict) -> tuple[cp_model.CpModel, dict]:
         # El solver DEBE elegir exactamente una opción de reserva
         model.AddExactlyOne(y_vars)
 
-    # [I] Horas mínimas por profesor (Soft Constraint)
+    # [I] Horas mínimas por profesor
     for p_id, p_info in datos_procesados["profesores"].items():
         horas_minimas = p_info.get("horas_minimas", 1)
         if horas_minimas > 0:
             if p_id in carga_por_profesor:
-                # Meta flexible para que no rompa el motor (INFEASIBLE)
-                cumple_min_horas = model.NewBoolVar(f"cumple_min_horas_{p_id}")
-                carga_total = sum(carga_por_profesor[p_id])
-                
-                model.Add(carga_total >= horas_minimas).OnlyEnforceIf(cumple_min_horas)
-                objetivo_recompensas.append((cumple_min_horas, 50000))
+                if modo_diagnostico:
+                    falta_horas = model.NewIntVar(0, horas_minimas, f"falta_{p_id}")
+                    model.Add(sum(carga_por_profesor[p_id]) + falta_horas >= horas_minimas)
+                    objetivo_recompensas.append((falta_horas, -1000000))  # Fuerte penalización por hora faltante
+                    dict_diagnostico[p_id] = falta_horas
+                else:
+                    model.Add(sum(carga_por_profesor[p_id]) >= horas_minimas)
+            else:
+                if modo_diagnostico:
+                    falta_horas = model.NewIntVar(horas_minimas, horas_minimas, f"falta_{p_id}")
+                    dict_diagnostico[p_id] = falta_horas
+                    objetivo_recompensas.append((falta_horas, -1000000))
+                else:
+                    # Si el profesor no tiene ninguna clase asignable matemáticamente y exige horas mínimas, el modelo es inviable
+                    model.Add(0 >= horas_minimas)
 
     # 3. FUNCIÓN OBJETIVO
     # Maximizar las recompensas: +10000 por cobertura, +100 por no fragmentar, +10 por fragmentar.
     model.Maximize(sum(var * recompensa for var, recompensa in objetivo_recompensas))
         
-    return model, bloques_z
+    return model, bloques_z, dict_diagnostico

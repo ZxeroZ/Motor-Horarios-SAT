@@ -63,10 +63,45 @@ def main():
     print(f"  Total requerimientos (secciones): {len(datos_procesados['requerimientos_seccion'])}")
     
     print("\nConstruyendo el modelo CP-SAT...")
-    modelo, variables_x = construir_modelo(datos_procesados)
+    modelo, variables_x, _ = construir_modelo(datos_procesados, modo_diagnostico=False)
     print(f"  Número de variables declaradas: {len(variables_x)}")
     
     dict_resultado = resolver_modelo(modelo, variables_x)
+    
+    if dict_resultado["estado"] == "INFEASIBLE":
+        print("\n[ALERTA] Estado INFEASIBLE detectado. El modelo choca estructuralmente.")
+        print("Ejecutando el Validador de Cuellos de Botella Matemáticos (Modo Diagnóstico)...")
+        
+        modelo_diag, _, dict_diag = construir_modelo(datos_procesados, modo_diagnostico=True)
+        from ortools.sat.python import cp_model
+        solver_diag = cp_model.CpSolver()
+        solver_diag.parameters.max_time_in_seconds = 60
+        solver_diag.parameters.num_search_workers = 8
+        status_diag = solver_diag.Solve(modelo_diag)
+        
+        print("\n" + "="*60)
+        print(" REPORTE DE DIAGNÓSTICO: CUELLOS DE BOTELLA POR HORAS MÍNIMAS")
+        print("="*60)
+        if status_diag in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+            problemas_encontrados = False
+            for p_id, var_falta in dict_diag.items():
+                faltan = solver_diag.Value(var_falta)
+                if faltan > 0:
+                    problemas_encontrados = True
+                    nombre_prof = next(p["nombre"] for p in datos["profesores"] if p["id"] == p_id)
+                    horas_req = next(p.get("horas_minimas", 1) for p in datos["profesores"] if p["id"] == p_id)
+                    print(f" [x] {p_id} ({nombre_prof}):")
+                    print(f"    - Exige: {horas_req} horas mínimas.")
+                    print(f"    - Matemáticamente alcanzable: {horas_req - faltan} horas.")
+                    print(f"    - Faltan: {faltan} horas.")
+                    print(f"    -> Sugerencia: Bajar sus horas_minimas a {horas_req - faltan}, o aumentar su disponibilidad de turnos/días.\n")
+            if not problemas_encontrados:
+                print(" No se detectó un cuello de botella directo en profesores. Revise conflictos de unicidad o espacios.")
+        else:
+            print(" El conflicto es tan severo que ni siquiera flexibilizando las horas mínimas se resolvió.")
+        print("="*60)
+        sys.exit(1)
+
     print(f"  Estado del Solver: {dict_resultado['estado']}")
     print(f"  {dict_resultado['mensaje']}")
     print(f"  Clases asignadas exitosamente: {len(dict_resultado['asignaciones'])}")

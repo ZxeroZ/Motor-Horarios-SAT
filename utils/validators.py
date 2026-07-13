@@ -195,14 +195,15 @@ def validar_profesores(
  
         if "nombre" not in profesor:
             errores.append(f"[profesores][{pid}] Falta el campo 'nombre'")
-
+ 
+        # Validar horas mínimas
         if "horas_minimas" not in profesor:
-            errores.append(f"[profesores][{pid}] Falta el campo 'horas_minimas'. Debe estar explicito en el JSON.")
+            errores.append(f"[profesores][{pid}] Falta el campo 'horas_minimas'. Debe estar explícito en el JSON.")
         else:
             horas_min = profesor["horas_minimas"]
             if not isinstance(horas_min, int) or horas_min < 1:
                 errores.append(f"[profesores][{pid}] El campo 'horas_minimas' debe ser un número entero mayor o igual a 1.")
- 
+
         # Validar cursos habilitados
         if "cursos_habilitados" not in profesor:
             errores.append(f"[profesores][{pid}] Falta el campo 'cursos_habilitados'")
