@@ -751,6 +751,12 @@ def api_horario_analysis(session: Session = Depends(get_session)):
     from backend.engine_connector import build_horario_analysis
     return build_horario_analysis(session)
 
+@app.get("/api/horario-metricas-motor")
+def api_horario_metricas_motor(session: Session = Depends(get_session)):
+    """Retorna las métricas calculadas por el motor (resumen_slots, profesores, cursos)."""
+    from backend.engine_connector import calcular_metricas_motor
+    return calcular_metricas_motor(session)
+
 # --- Tutorías ---
 @app.get("/api/tutorias")
 def get_tutorias(session: Session = Depends(get_session)):

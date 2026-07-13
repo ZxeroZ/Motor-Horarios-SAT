@@ -15,6 +15,7 @@ from backend.models import (
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
 from engine.solver import resolver_modelo
+from engine.metrics import exportar_metricas as _calcular_metricas_motor
 from utils.validators import validar_todo
 from backend.exceptions import ValidationError, EngineError
 
@@ -326,6 +327,25 @@ def build_json_from_db(session: Session) -> dict:
         
     return datos
 
+def _aplanar_asignaciones(asignaciones: list) -> list:
+    """Convierte los bloques agrupados del solver en slots individuales (1 slot = 1 hora).
+    El módulo engine/metrics.py espera este formato plano."""
+    planas = []
+    for bloque in asignaciones:
+        start_slot = bloque.get("slot_inicio", 0)
+        horas = bloque.get("horas", 1)
+        for k in range(horas):
+            planas.append({
+                "seccion_id": bloque["seccion_id"],
+                "curso_id": bloque["curso_id"],
+                "profesor_id": bloque["profesor_id"],
+                "dia": bloque["dia"],
+                "turno": bloque.get("turno", "Mañana"),
+                "slot": start_slot + k + 1
+            })
+    return planas
+
+
 def generar_horario_engine(session: Session, task_id: str = None) -> dict:
     """Proceso completo con reporte de progreso."""
     logger.info("Iniciando generación de horario...")
@@ -345,15 +365,35 @@ def generar_horario_engine(session: Session, task_id: str = None) -> dict:
         datos_procesados = preprocesar(datos)
 
         _update_progress(task_id, "modeling", 50, "Generando restricciones CP-SAT...")
-        modelo, variables_x = construir_modelo(datos_procesados)
+        modelo, variables_x, dict_diagnostico = construir_modelo(datos_procesados)
 
         _update_progress(task_id, "solving", 65, "Buscando solución óptima...")
         dict_resultado = resolver_modelo(modelo, variables_x)
 
         if dict_resultado.get("estado") in ("OPTIMAL", "FEASIBLE") and dict_resultado.get("asignaciones"):
-            _update_progress(task_id, "saving", 90, "Persistiendo horario...")
+            _update_progress(task_id, "saving", 85, "Persistiendo horario...")
             _guardar_horario(session, dict_resultado["asignaciones"])
             _guardar_snapshot(session, dict_resultado)
+            
+            # --- Calcular métricas del motor ---
+            _update_progress(task_id, "metrics", 93, "Calculando métricas del motor...")
+            try:
+                asignaciones_planas = _aplanar_asignaciones(dict_resultado["asignaciones"])
+                # Usamos _calcular_metricas_motor en memoria (sin escribir a disco)
+                import collections
+                import tempfile, os
+                # Escribimos a un archivo temporal para reutilizar la función del motor tal cual
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, dir='/tmp') as tmp:
+                    tmp_path = tmp.name
+                _calcular_metricas_motor(asignaciones_planas, datos_procesados, tmp_path)
+                with open(tmp_path, 'r', encoding='utf-8') as f:
+                    metricas_motor = json.load(f)
+                os.unlink(tmp_path)
+                dict_resultado["metricas_motor"] = metricas_motor
+                logger.info("Métricas del motor calculadas exitosamente")
+            except Exception as e:
+                logger.warning("No se pudieron calcular las métricas del motor: %s", str(e))
+                dict_resultado["metricas_motor"] = None
         else:
             logger.warning("Solver no encontró solución: %s", dict_resultado.get("estado"))
 
@@ -379,7 +419,6 @@ def generar_horario_engine(session: Session, task_id: str = None) -> dict:
         if task_id:
             progress_store[task_id] = {"status": "error", "message": str(e)}
         raise EngineError(message=f"Error durante la ejecución del motor: {str(e)}")
-
 
 def _guardar_horario(session: Session, asignaciones: list):
     """Persiste las asignaciones del motor en la tabla horario_final."""
@@ -1113,3 +1152,74 @@ def apply_move(session: Session, data: dict) -> dict:
     }
 
     return dict_resultado
+
+
+def calcular_metricas_motor(session: Session) -> dict:
+    """Calcula las métricas del motor sobre el horario activo actual.
+    Lee las asignaciones de horario_final, las aplana, reconstruye datos_procesados
+    y ejecuta la función de métricas del motor."""
+    
+    all_rows = session.exec(select(HorarioFinal)).all()
+    if not all_rows:
+        return {"error": "No hay horario generado para calcular métricas"}
+    
+    # 1. Reconstruir asignaciones en formato motor (bloques agrupados)
+    dias_db = {d.id_dia: d.nombre_dia for d in session.exec(select(Dias)).all()}
+    turnos_db = {t.id_turno: t.nombre for t in session.exec(select(Turno)).all()}
+    
+    grupos = defaultdict(list)
+    for r in all_rows:
+        key = (r.id_seccion, r.id_curso, r.id_profesor, r.id_dia, r.id_turno)
+        grupos[key].append(r.num_bloque)
+    
+    asignaciones_bloques = []
+    for (s_id, c_id, p_id, d_id, t_id), bloques in grupos.items():
+        bloques_ord = sorted(bloques)
+        if not bloques_ord:
+            continue
+        groups = []
+        current_group = [bloques_ord[0]]
+        for i in range(1, len(bloques_ord)):
+            if bloques_ord[i] == current_group[-1] + 1:
+                current_group.append(bloques_ord[i])
+            else:
+                groups.append(current_group)
+                current_group = [bloques_ord[i]]
+        groups.append(current_group)
+        
+        for group in groups:
+            cid_str = "TUT1" if c_id == 0 else f"CUR_{c_id}"
+            asignaciones_bloques.append({
+                "seccion_id": f"SEC_{s_id}",
+                "curso_id": cid_str,
+                "profesor_id": f"PROF_{p_id}",
+                "dia": dias_db.get(d_id, f"Dia_{d_id}"),
+                "turno": turnos_db.get(t_id, "Manana"),
+                "slot_inicio": group[0] - 1,
+                "horas": len(group)
+            })
+    
+    # 2. Aplanar a slots individuales (formato que engine/metrics.py espera)
+    asignaciones_planas = _aplanar_asignaciones(asignaciones_bloques)
+    
+    # 3. Reconstruir datos_procesados desde la BD
+    try:
+        datos = build_json_from_db(session)
+        datos_procesados = preprocesar(datos)
+    except Exception as e:
+        logger.warning("No se pudo reconstruir datos_procesados: %s", str(e))
+        return {"error": f"No se pudieron reconstruir los datos procesados: {str(e)}"}
+    
+    # 4. Ejecutar métricas del motor (via archivo temporal)
+    try:
+        import tempfile, os
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, dir='/tmp') as tmp:
+            tmp_path = tmp.name
+        _calcular_metricas_motor(asignaciones_planas, datos_procesados, tmp_path)
+        with open(tmp_path, 'r', encoding='utf-8') as f:
+            metricas = json.load(f)
+        os.unlink(tmp_path)
+        return metricas
+    except Exception as e:
+        logger.exception("Error calculando métricas del motor")
+        return {"error": f"Error calculando métricas: {str(e)}"}
