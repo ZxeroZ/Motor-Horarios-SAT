@@ -301,6 +301,7 @@ class HorarioSnapshot(SQLModel, table=True):
     nombre: str
     descripcion: Optional[str] = None
     json_data: str  # JSON completo del resultado del motor
+    json_metricas: Optional[str] = None  # JSON de métricas calculadas por engine/metrics.py
     asignaciones_count: int = 0
     estado: Optional[str] = None
     tiempo_segundos: Optional[float] = None
