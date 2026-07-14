@@ -15,7 +15,7 @@ from backend.models import (
 from engine.preprocessor import preprocesar
 from engine.model import construir_modelo
 from engine.solver import resolver_modelo
-from engine.metrics import exportar_metricas as _calcular_metricas_motor
+from engine.metrics import calcular_metricas as _calcular_metricas_motor
 from utils.validators import validar_todo
 from backend.exceptions import ValidationError, EngineError
 
@@ -371,29 +371,21 @@ def generar_horario_engine(session: Session, task_id: str = None) -> dict:
         dict_resultado = resolver_modelo(modelo, variables_x)
 
         if dict_resultado.get("estado") in ("OPTIMAL", "FEASIBLE") and dict_resultado.get("asignaciones"):
-            _update_progress(task_id, "saving", 85, "Persistiendo horario...")
-            _guardar_horario(session, dict_resultado["asignaciones"])
-            _guardar_snapshot(session, dict_resultado)
-            
-            # --- Calcular métricas del motor ---
-            _update_progress(task_id, "metrics", 93, "Calculando métricas del motor...")
+            # --- Calcular métricas del motor (en memoria) ---
+            _update_progress(task_id, "metrics", 80, "Calculando métricas del motor...")
+            metricas_dict = None
             try:
                 asignaciones_planas = _aplanar_asignaciones(dict_resultado["asignaciones"])
-                # Usamos _calcular_metricas_motor en memoria (sin escribir a disco)
-                import collections
-                import tempfile, os
-                # Escribimos a un archivo temporal para reutilizar la función del motor tal cual
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, dir='/tmp') as tmp:
-                    tmp_path = tmp.name
-                _calcular_metricas_motor(asignaciones_planas, datos_procesados, tmp_path)
-                with open(tmp_path, 'r', encoding='utf-8') as f:
-                    metricas_motor = json.load(f)
-                os.unlink(tmp_path)
-                dict_resultado["metricas_motor"] = metricas_motor
+                metricas_dict = _calcular_metricas_motor(asignaciones_planas, datos_procesados)
+                dict_resultado["metricas_motor"] = metricas_dict
                 logger.info("Métricas del motor calculadas exitosamente")
             except Exception as e:
                 logger.warning("No se pudieron calcular las métricas del motor: %s", str(e))
                 dict_resultado["metricas_motor"] = None
+
+            _update_progress(task_id, "saving", 90, "Persistiendo horario...")
+            _guardar_horario(session, dict_resultado["asignaciones"])
+            _guardar_snapshot(session, dict_resultado, metricas_dict=metricas_dict)
         else:
             logger.warning("Solver no encontró solución: %s", dict_resultado.get("estado"))
 
@@ -469,8 +461,8 @@ def _guardar_horario(session: Session, asignaciones: list):
     session.commit()
 
 
-def _guardar_snapshot(session: Session, dict_resultado: dict, es_editada: bool = False):
-    """Guarda un snapshot del horario generado."""
+def _guardar_snapshot(session: Session, dict_resultado: dict, es_editada: bool = False, metricas_dict: dict = None):
+    """Guarda un snapshot del horario generado, opcionalmente con métricas."""
     old_active = session.exec(select(HorarioSnapshot).where(HorarioSnapshot.is_active == True)).all()
     for o in old_active:
         o.is_active = False
@@ -487,6 +479,7 @@ def _guardar_snapshot(session: Session, dict_resultado: dict, es_editada: bool =
     snapshot = HorarioSnapshot(
         nombre=nombre,
         json_data=json.dumps(dict_resultado, ensure_ascii=False),
+        json_metricas=json.dumps(metricas_dict, ensure_ascii=False) if metricas_dict else None,
         asignaciones_count=len(dict_resultado.get("asignaciones", [])),
         estado=dict_resultado.get("estado"),
         tiempo_segundos=dict_resultado.get("estadisticas", {}).get("tiempo_segundos"),
@@ -804,7 +797,11 @@ def validate_move(session: Session, data: dict) -> dict:
 
 
 def build_horario_summary(session: Session) -> dict:
-    """Genera un resumen condensado del horario activo (~50-100 líneas)."""
+    """Genera un resumen condensado del horario activo, consumiendo métricas del motor."""
+    engine_metrics = calcular_metricas_motor(session)
+    if "error" in engine_metrics:
+        return {"error": engine_metrics["error"]}
+        
     all_rows = session.exec(select(HorarioFinal)).all()
     if not all_rows:
         return {"error": "No hay horario generado"}
@@ -827,37 +824,58 @@ def build_horario_summary(session: Session) -> dict:
             metricas["tiempo_segundos"] = snapshot.tiempo_segundos or 0
 
     from collections import defaultdict
-    carga_prof = defaultdict(lambda: {"total": 0, "dias": defaultdict(int), "cursos": set(), "secciones": set()})
     carga_sec = defaultdict(lambda: {"total": 0, "dias": defaultdict(int), "cursos": set()})
-    carga_dia = defaultdict(int)
     carga_turno = defaultdict(int)
 
+    # Solo agrupamos secciones y turnos desde DB, profesores y dias vienen del engine
     for r in all_rows:
         d_name = dias_db.get(r.id_dia, f"D{r.id_dia}")
         t_name = turnos_db.get(r.id_turno, f"T{r.id_turno}")
         c_name = cursos_db.get(r.id_curso, f"C{r.id_curso}")
-        p_name = profs_db.get(r.id_profesor, f"P{r.id_profesor}")
         s_name = secs_db.get(r.id_seccion, f"S{r.id_seccion}")
 
-        carga_prof[p_name]["total"] += 1
-        carga_prof[p_name]["dias"][d_name] += 1
-        carga_prof[p_name]["cursos"].add(c_name)
-        carga_prof[p_name]["secciones"].add(s_name)
         carga_sec[s_name]["total"] += 1
         carga_sec[s_name]["dias"][d_name] += 1
         carga_sec[s_name]["cursos"].add(c_name)
-        carga_dia[d_name] += 1
         carga_turno[t_name] += 1
 
+    # Construir resumen de profesores desde las métricas del motor
     resumen_profesores = []
-    for p_name, data in sorted(carga_prof.items(), key=lambda x: -x[1]["total"]):
+    for p_id_str, p_data in engine_metrics.get("profesores", {}).items():
+        try:
+            p_id = int(p_id_str.split('_')[1])
+            p_name = profs_db.get(p_id, p_id_str)
+        except Exception:
+            p_name = p_id_str
+
+        dias = {d: len(secs) for d, secs in p_data.get("carga_diaria", {}).items() if len(secs) > 0}
+        
+        cursos_nombres = []
+        for c in p_data.get("cursos_dictados", []):
+            if c == "TUT1":
+                cursos_nombres.append("Tutoría")
+            elif c.startswith("CUR_"):
+                try:
+                    cursos_nombres.append(cursos_db.get(int(c.split('_')[1]), c))
+                except Exception:
+                    cursos_nombres.append(c)
+
+        secciones_nombres = []
+        for s in p_data.get("secciones_asignadas", []):
+            try:
+                secciones_nombres.append(secs_db.get(int(s.split('_')[1]), s))
+            except Exception:
+                secciones_nombres.append(s)
+
         resumen_profesores.append({
             "nombre": p_name,
-            "horas_semana": data["total"],
-            "dias": dict(data["dias"]),
-            "cursos": list(data["cursos"]),
-            "secciones": list(data["secciones"])
+            "horas_semana": p_data.get("total_horas_semanales", 0),
+            "dias": dias,
+            "cursos": cursos_nombres,
+            "secciones": secciones_nombres
         })
+        
+    resumen_profesores.sort(key=lambda x: -x["horas_semana"])
 
     resumen_secciones = []
     for s_name, data in sorted(carga_sec.items(), key=lambda x: -x[1]["total"]):
@@ -868,17 +886,23 @@ def build_horario_summary(session: Session) -> dict:
             "cursos": list(data["cursos"])
         })
 
+    carga_dia = {}
+    if "kpis" in engine_metrics and "utilizacion" in engine_metrics["kpis"]:
+        for d, data in engine_metrics["kpis"]["utilizacion"]["densidad_diaria"].items():
+            if data["slots_ocupados"] > 0:
+                carga_dia[d] = data["slots_ocupados"]
+
     return {
         "metricas": {
             "estado": metricas.get("estado", "N/A"),
             "tiempo_segundos": round(metricas.get("tiempo_segundos", 0), 2),
             "ramas_exploradas": metricas.get("ramas_exploradas", 0),
             "conflictos": metricas.get("conflictos", 0),
-            "total_clases": len(all_rows),
-            "total_profesores": len(carga_prof),
-            "total_secciones": len(carga_sec)
+            "total_clases": engine_metrics.get("resumen_slots", {}).get("total_ocupados", len(all_rows)),
+            "total_profesores": len(resumen_profesores),
+            "total_secciones": len(resumen_secciones)
         },
-        "carga_por_dia": dict(carga_dia),
+        "carga_por_dia": carga_dia,
         "carga_por_turno": dict(carga_turno),
         "profesores": resumen_profesores,
         "secciones": resumen_secciones
@@ -1155,15 +1179,23 @@ def apply_move(session: Session, data: dict) -> dict:
 
 
 def calcular_metricas_motor(session: Session) -> dict:
-    """Calcula las métricas del motor sobre el horario activo actual.
-    Lee las asignaciones de horario_final, las aplana, reconstruye datos_procesados
-    y ejecuta la función de métricas del motor."""
+    """Obtiene las métricas del motor sobre el horario activo actual.
+    Primero intenta leer del snapshot persistido (json_metricas).
+    Si no existe (snapshots pre-migración), recalcula en memoria."""
     
+    # 1. Intentar leer del snapshot activo
+    snapshot = session.exec(select(HorarioSnapshot).where(HorarioSnapshot.is_active == True)).first()
+    if snapshot and snapshot.json_metricas:
+        try:
+            return json.loads(snapshot.json_metricas)
+        except Exception:
+            logger.warning("json_metricas corrupto en snapshot %s, recalculando...", snapshot.id_snapshot)
+    
+    # 2. Fallback: recalcular en memoria (snapshots antiguos sin json_metricas)
     all_rows = session.exec(select(HorarioFinal)).all()
     if not all_rows:
         return {"error": "No hay horario generado para calcular métricas"}
     
-    # 1. Reconstruir asignaciones en formato motor (bloques agrupados)
     dias_db = {d.id_dia: d.nombre_dia for d in session.exec(select(Dias)).all()}
     turnos_db = {t.id_turno: t.nombre for t in session.exec(select(Turno)).all()}
     
@@ -1199,10 +1231,8 @@ def calcular_metricas_motor(session: Session) -> dict:
                 "horas": len(group)
             })
     
-    # 2. Aplanar a slots individuales (formato que engine/metrics.py espera)
     asignaciones_planas = _aplanar_asignaciones(asignaciones_bloques)
     
-    # 3. Reconstruir datos_procesados desde la BD
     try:
         datos = build_json_from_db(session)
         datos_procesados = preprocesar(datos)
@@ -1210,16 +1240,10 @@ def calcular_metricas_motor(session: Session) -> dict:
         logger.warning("No se pudo reconstruir datos_procesados: %s", str(e))
         return {"error": f"No se pudieron reconstruir los datos procesados: {str(e)}"}
     
-    # 4. Ejecutar métricas del motor (via archivo temporal)
     try:
-        import tempfile, os
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, dir='/tmp') as tmp:
-            tmp_path = tmp.name
-        _calcular_metricas_motor(asignaciones_planas, datos_procesados, tmp_path)
-        with open(tmp_path, 'r', encoding='utf-8') as f:
-            metricas = json.load(f)
-        os.unlink(tmp_path)
+        metricas = _calcular_metricas_motor(asignaciones_planas, datos_procesados)
         return metricas
     except Exception as e:
         logger.exception("Error calculando métricas del motor")
         return {"error": f"Error calculando métricas: {str(e)}"}
+

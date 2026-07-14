@@ -1106,6 +1106,20 @@ def cargar_horario_guardado(session: Session = Depends(get_session)):
     }
 
 
+@app.get("/api/kpis/{id_snapshot}")
+def get_snapshot_kpis(id_snapshot: int, session: Session = Depends(get_session)):
+    """Retorna los KPIs específicos (extendidos) de un snapshot."""
+    snapshot = session.get(HorarioSnapshot, id_snapshot)
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Snapshot no encontrado")
+    if not snapshot.json_metricas:
+        return {"error": "Este snapshot no tiene métricas generadas"}
+    try:
+        metricas = json.loads(snapshot.json_metricas)
+        return metricas.get("kpis", {})
+    except Exception:
+        raise HTTPException(status_code=500, detail="Métricas corruptas")
+
 # --- Snapshots (Historial) ---
 @app.get("/api/horario-snapshots")
 def get_snapshots(session: Session = Depends(get_session)):
@@ -1124,6 +1138,7 @@ def get_snapshots(session: Session = Depends(get_session)):
             "is_active": s.is_active,
             "es_editada": s.es_editada,
             "created_at": s.created_at,
+            "tiene_metricas": bool(s.json_metricas),
         }
         for s in snapshots
     ]
@@ -1138,6 +1153,7 @@ def get_snapshot(id_snapshot: int, session: Session = Depends(get_session)):
         "nombre": snapshot.nombre,
         "descripcion": snapshot.descripcion,
         "json_data": json.loads(snapshot.json_data),
+        "metricas": json.loads(snapshot.json_metricas) if snapshot.json_metricas else None,
         "asignaciones_count": snapshot.asignaciones_count,
         "estado": snapshot.estado,
         "tiempo_segundos": snapshot.tiempo_segundos,
