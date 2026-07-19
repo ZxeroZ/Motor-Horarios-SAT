@@ -4,3 +4,7 @@ ortools==9.15.6755
 # Testing
 pytest==8.3.5
 pytest-cov==6.1.0
+
+# LLM Reporting
+openai>=1.0.0
+python-dotenv>=1.0.0
