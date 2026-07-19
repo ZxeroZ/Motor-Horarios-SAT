@@ -313,3 +313,27 @@ class HorarioSnapshot(SQLModel, table=True):
 class SnapshotUpdate(BaseModel):
     nombre: Optional[str] = None
     descripcion: Optional[str] = None
+
+
+# --- 8. Módulo de Reportes LLM ---
+class ReporteLLM(SQLModel, table=True):
+    __tablename__ = "reporte_llm"
+    id_reporte: Optional[int] = Field(default=None, primary_key=True)
+    id_snapshot: int = Field(foreign_key="horario_snapshot.id_snapshot")
+    provider: str  # "openrouter" o "groq"
+    modelo: str  # Modelo exacto que generó la respuesta
+    prompt_enviado: str  # JSON string
+    respuesta_llm: str  # JSON string cruda
+    reporte_estructurado: str  # JSON string validado
+    tokens_usados: Optional[int] = None
+    tiempo_respuesta_ms: Optional[int] = None
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+
+class ConfiguracionIA(SQLModel, table=True):
+    __tablename__ = "configuracion_ia"
+    id_config: Optional[int] = Field(default=None, primary_key=True)
+    campos_habilitados: str = '{"contexto_escenario": true, "kpis.cobertura": true, "kpis.balance_docente": true, "kpis.fragmentacion": true, "kpis.utilizacion": true, "kpis.saturacion_cursos": false, "anomalias": true}'
+    activo: bool = True
+    updated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+

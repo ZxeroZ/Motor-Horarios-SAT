@@ -22,8 +22,13 @@ from backend.models import (
     ProfesorCurso, SeccionTurno, HorarioFinal, Tutoria,
     SedeProfesor, ProfesorDisponibilidad, ProfesorPreferencia,
     GradoProfesor, BloqueReservado, BloqueGrado, BloqueOpcion, BloqueOpcionSlot,
-    HorarioSnapshot, SnapshotUpdate
+    HorarioSnapshot, SnapshotUpdate, ReporteLLM, ConfiguracionIA
 )
+
+from backend.reporting.report_builder import construir_payload
+from backend.reporting.llm_client import generar_reporte
+from backend.reporting.prompt_templates import get_system_prompt
+from backend.reporting.config import llm_settings
 
 
 logger = logging.getLogger(__name__)
@@ -43,6 +48,12 @@ async def lifespan(app: FastAPI):
             session.add(Usuario(email="admin@colegio.com", nombre="Administrador", password="Administrador"))
             session.commit()
             logger.info("Usuario admin creado")
+            
+        config = session.exec(select(ConfiguracionIA)).first()
+        if not config:
+            session.add(ConfiguracionIA())
+            session.commit()
+            logger.info("Configuración IA por defecto creada")
     yield
     logger.info("Aplicación finalizada")
 
@@ -1237,3 +1248,97 @@ def load_snapshot(id_snapshot: int, session: Session = Depends(get_session)):
 
     session.commit()
     return {"message": f"Snapshot '{snapshot.nombre}' cargado como horario activo"}
+
+# --- Reportes LLM ---
+
+@app.post("/api/reportes/generar/{id_snapshot}")
+def endpoint_generar_reporte(id_snapshot: int, session: Session = Depends(get_session)):
+    snapshot = session.get(HorarioSnapshot, id_snapshot)
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Snapshot no encontrado")
+        
+    config = session.exec(select(ConfiguracionIA)).first()
+    if not config or not config.activo:
+        raise HTTPException(status_code=400, detail="Módulo de Inteligencia deshabilitado")
+        
+    # Verificar si ya existe
+    existente = session.exec(select(ReporteLLM).where(ReporteLLM.id_snapshot == id_snapshot)).first()
+    if existente:
+        return {"message": "Ya existe un reporte para este horario", "reporte": json.loads(existente.reporte_estructurado)}
+        
+    payload = construir_payload(snapshot, config)
+    sys_prompt = get_system_prompt(llm_settings.PROMPT_BASE)
+    
+    try:
+        resultado, proveedor, modelo_usado, usage = generar_reporte(sys_prompt, payload, llm_settings)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Error generando reporte: {str(e)}")
+        
+    reporte = ReporteLLM(
+        id_snapshot=id_snapshot,
+        provider=proveedor,
+        modelo=modelo_usado,
+        prompt_enviado=json.dumps(payload, ensure_ascii=False),
+        respuesta_llm=json.dumps(resultado, ensure_ascii=False),
+        reporte_estructurado=json.dumps(resultado, ensure_ascii=False),
+        tokens_usados=usage.get("tokens_usados"),
+        tiempo_respuesta_ms=usage.get("tiempo_respuesta_ms")
+    )
+    session.add(reporte)
+    session.commit()
+    session.refresh(reporte)
+    
+    return {"message": "Reporte generado con éxito", "reporte": resultado}
+
+@app.get("/api/reportes/{id_snapshot}")
+def get_reporte_snapshot(id_snapshot: int, session: Session = Depends(get_session)):
+    reporte = session.exec(select(ReporteLLM).where(ReporteLLM.id_snapshot == id_snapshot)).first()
+    if not reporte:
+        return JSONResponse(status_code=404, content={"error": "No hay reporte generado"})
+    return json.loads(reporte.reporte_estructurado)
+
+@app.get("/api/reportes")
+def list_reportes(session: Session = Depends(get_session)):
+    reportes = session.exec(select(ReporteLLM).order_by(ReporteLLM.created_at.desc())).all()
+    return [{
+        "id_reporte": r.id_reporte,
+        "id_snapshot": r.id_snapshot,
+        "provider": r.provider,
+        "modelo": r.modelo,
+        "created_at": r.created_at
+    } for r in reportes]
+
+@app.delete("/api/reportes/{id_reporte}")
+def delete_reporte(id_reporte: int, session: Session = Depends(get_session)):
+    reporte = session.get(ReporteLLM, id_reporte)
+    if not reporte:
+        raise HTTPException(status_code=404, detail="Reporte no encontrado")
+    session.delete(reporte)
+    session.commit()
+    return {"message": "Reporte eliminado"}
+
+class ConfigUpdate(BaseModel):
+    campos_habilitados: str = None
+    activo: bool = None
+
+@app.get("/api/config-ia")
+def get_config_ia(session: Session = Depends(get_session)):
+    config = session.exec(select(ConfiguracionIA)).first()
+    if not config:
+        raise HTTPException(status_code=404, detail="Configuración no encontrada")
+    return config
+
+@app.put("/api/config-ia")
+def update_config_ia(update: ConfigUpdate, session: Session = Depends(get_session)):
+    config = session.exec(select(ConfiguracionIA)).first()
+    if not config:
+        raise HTTPException(status_code=404, detail="Configuración no encontrada")
+        
+    for key, value in update.model_dump(exclude_unset=True).items():
+        setattr(config, key, value)
+        
+    session.add(config)
+    session.commit()
+    session.refresh(config)
+    return {"message": "Configuración actualizada", "config": config}
+
