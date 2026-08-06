@@ -53,6 +53,49 @@ def start_generation(db_engine) -> str:
     thread.start()
     return task_id
 
+def start_diagnostico(db_engine) -> str:
+    """Lanza el diagnóstico de infactibilidad en un thread aparte y devuelve task_id."""
+    task_id = str(uuid.uuid4())[:8]
+    progress_store[task_id] = {"status": "starting", "step": "init", "percent": 0, "message": "Iniciando diagnóstico..."}
+
+    def _run():
+        from sqlmodel import Session
+        from engine.diagnostico import ejecutar_diagnostico
+
+        with Session(db_engine) as session:
+            try:
+                _update_progress(task_id, "extracting", 10, "Leyendo base de datos...")
+                datos = build_json_from_db(session)
+
+                _update_progress(task_id, "validating", 20, "Validando integridad...")
+                errores = validar_todo(datos)
+                if errores:
+                    progress_store[task_id] = {"status": "error", "message": "Error de validación", "errors": errores}
+                    return
+
+                _update_progress(task_id, "preprocessing", 30, "Preprocesando estructuras...")
+                datos_procesados = preprocesar(datos)
+
+                def _on_progress(percent, message):
+                    _update_progress(task_id, "diagnosing", percent, message)
+
+                resultado = ejecutar_diagnostico(datos_procesados, datos, on_progress=_on_progress)
+
+                progress_store[task_id] = {
+                    "status": "done",
+                    "step": "done",
+                    "percent": 100,
+                    "message": "Diagnóstico completado",
+                    "resultado": resultado
+                }
+            except Exception as e:
+                logger.exception("Error durante el diagnóstico")
+                progress_store[task_id] = {"status": "error", "message": str(e)}
+
+    thread = threading.Thread(target=_run, daemon=True)
+    thread.start()
+    return task_id
+
 def build_json_from_db(session: Session) -> dict:
     """Extrae datos de SQLite y construye el formato EXACTO que el motor CP-SAT espera."""
     datos = {

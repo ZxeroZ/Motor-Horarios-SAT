@@ -1015,7 +1015,7 @@ def delete_profesor_preferencia(id_preferencia: int, session: Session = Depends(
     return {"message": "Preferencia borrada"}
 
 # --- Endpoints del Motor ---
-from backend.engine_connector import generar_horario_engine, start_generation, get_progress, validate_move, apply_move
+from backend.engine_connector import generar_horario_engine, start_generation, get_progress, validate_move, apply_move, start_diagnostico
 
 @app.post("/api/generar-horario")
 def desencadenar_motor(session: Session = Depends(get_session)):
@@ -1035,6 +1035,18 @@ def start_generar_horario():
 @app.get("/api/horario-progress/{task_id}")
 def horario_progress(task_id: str):
     """Devuelve el progreso actual de la generación."""
+    return get_progress(task_id)
+
+@app.post("/api/diagnostico/start")
+def start_diagnostico_endpoint():
+    """Lanza el análisis de cuellos de botella en background y devuelve task_id."""
+    from backend.database import engine
+    task_id = start_diagnostico(engine)
+    return {"task_id": task_id}
+
+@app.get("/api/diagnostico/{task_id}")
+def diagnostico_progress(task_id: str):
+    """Devuelve el progreso/resultado del diagnóstico."""
     return get_progress(task_id)
 
 @app.get("/api/cargar-horario")
