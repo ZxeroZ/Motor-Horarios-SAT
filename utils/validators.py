@@ -413,6 +413,51 @@ def validar_bloques_reservados(reservas: list[dict], sedes_validas: list[str], d
     return errores
 
 
+def validar_saturacion_categoria(
+    grados: list[dict],
+    cursos: list[dict],
+    categorias: list[dict],
+) -> list[str]:
+    """
+    Verifica que las horas requeridas por categoría en cada grado no excedan
+    la capacidad semanal determinada por: días_disponibles × max_horas_dia.
+    Esta es una restricción determinística que se puede validar antes del solver.
+    """
+    errores = []
+    mapa_cat = {c["id"]: c for c in categorias}
+    mapa_cursos = {c["id"]: c for c in cursos}
+
+    for grado in grados:
+        gid = grado.get("id", "")
+        plantilla = grado.get("horario_plantilla", {})
+        dias_disponibles = len(plantilla)
+
+        # Agrupar horas requeridas por categoría
+        horas_por_cat = {}
+        for req in grado.get("cursos_requeridos", []):
+            curso_id = req.get("curso_id", "")
+            curso = mapa_cursos.get(curso_id)
+            if not curso:
+                continue
+            cat_id = curso.get("categoria_id", "")
+            horas_por_cat[cat_id] = horas_por_cat.get(cat_id, 0) + req.get("horas_semanales", 0)
+
+        for cat_id, horas_requeridas in horas_por_cat.items():
+            cat = mapa_cat.get(cat_id)
+            if not cat:
+                continue
+            max_dia = cat.get("max_horas_dia", 99)
+            capacidad_semanal = dias_disponibles * max_dia
+            if horas_requeridas > capacidad_semanal:
+                errores.append(
+                    f"[saturacion_categoria][{gid}] La categoría '{cat.get('nombre', cat_id)}' "
+                    f"requiere {horas_requeridas}h semanales pero solo caben "
+                    f"{capacidad_semanal}h ({dias_disponibles} días × {max_dia}h/día)."
+                )
+
+    return errores
+
+
 def validar_cobertura(
     secciones: list[dict],
     profesores: list[dict],
@@ -623,6 +668,8 @@ def validar_todo(datos: dict) -> list[str]:
     errores += validar_horas_minimas(profesores, secciones, grados)
     
     errores += validar_bloques_reservados(bloques_reservados, sedes_validas, dias_validos, turnos_validos, ids_grados)
+    
+    errores += validar_saturacion_categoria(grados, cursos, categorias)
     
     errores += validar_cobertura(secciones, profesores, cursos, grados, tutorias, bloques_reservados)
  
