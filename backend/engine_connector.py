@@ -68,10 +68,6 @@ def start_diagnostico(db_engine) -> str:
                 datos = build_json_from_db(session)
 
                 _update_progress(task_id, "validating", 20, "Validando integridad...")
-                # errores = validar_todo(datos)
-                # if errores:
-                #     progress_store[task_id] = {"status": "error", "message": "Error de validación", "errors": errores}
-                #     return
 
                 _update_progress(task_id, "preprocessing", 30, "Preprocesando estructuras...")
                 datos_procesados = preprocesar(datos)
@@ -397,11 +393,6 @@ def generar_horario_engine(session: Session, task_id: str = None) -> dict:
     datos = build_json_from_db(session)
 
     _update_progress(task_id, "validating", 20, "Validando integridad...")
-    # errores = validar_todo(datos)
-    # if errores:
-    #     if task_id:
-    #         progress_store[task_id] = {"status": "error", "message": "Error de validación", "errors": errores}
-    #     raise ValidationError(errors=errores)
 
     try:
         _update_progress(task_id, "preprocessing", 35, "Construyendo estructuras...")
